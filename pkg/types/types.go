@@ -66,19 +66,19 @@ type User struct {
 
 // This object represents a chat.
 type Chat struct {
-	ID        int64    `json:"id"`         // Unique identifier for this chat. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a signed 64-bit integer or double-precision float type are safe for storing this identifier.
-	Type      ChatType `json:"type"`       // Type of the chat, can be either "private", "group", "supergroup" or "channel"
-	Title     string   `json:"title"`      // Optional. Title, for supergroups, channels and group chats
-	Username  string   `json:"username"`   // Optional. Username, for private chats, supergroups and channels if available
-	FirstName string   `json:"first_name"` // Optional. First name of the other party in a private chat
-	LastName  string   `json:"last_name"`  // Optional. Last name of the other party in a private chat
-	IsForum   bool     `json:"is_forum"`   // Optional. True, if the supergroup chat is a forum (has topics enabled)
+	ID        int64     `json:"id"`         // Unique identifier for this chat. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a signed 64-bit integer or double-precision float type are safe for storing this identifier.
+	Type      *ChatType `json:"type"`       // Type of the chat, can be either "private", "group", "supergroup" or "channel"
+	Title     string    `json:"title"`      // Optional. Title, for supergroups, channels and group chats
+	Username  string    `json:"username"`   // Optional. Username, for private chats, supergroups and channels if available
+	FirstName string    `json:"first_name"` // Optional. First name of the other party in a private chat
+	LastName  string    `json:"last_name"`  // Optional. Last name of the other party in a private chat
+	IsForum   bool      `json:"is_forum"`   // Optional. True, if the supergroup chat is a forum (has topics enabled)
 }
 
 // This object contains full information about a chat.
 type ChatFullInfo struct {
 	ID                                 int64                 `json:"id"`                                      // Unique identifier for this chat. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a signed 64-bit integer or double-precision float type are safe for storing this identifier.
-	Type                               ChatType              `json:"type"`                                    // Type of the chat, can be either "private", "group", "supergroup" or "channel"
+	Type                               *ChatType             `json:"type"`                                    // Type of the chat, can be either "private", "group", "supergroup" or "channel"
 	Title                              string                `json:"title"`                                   // Optional. Title, for supergroups, channels and group chats
 	Username                           string                `json:"username"`                                // Optional. Username, for private chats, supergroups and channels if available
 	FirstName                          string                `json:"first_name"`                              // Optional. First name of the other party in a private chat
@@ -120,7 +120,7 @@ type ChatFullInfo struct {
 	StickerSetName                     string                `json:"sticker_set_name"`                        // Optional. For supergroups, name of the group sticker set
 	CanSetStickerSet                   bool                  `json:"can_set_sticker_set"`                     // Optional. True, if the bot can change the group sticker set
 	CustomEmojiStickerSetName          string                `json:"custom_emoji_sticker_set_name"`           // Optional. For supergroups, the name of the group's custom emoji sticker set. Custom emoji from this set can be used by all users and bots in the group.
-	LinkedChatID                       ChatID                `json:"linked_chat_id"`                          // Optional. Unique identifier for the linked chat, i.e. the discussion group identifier for a channel and vice versa; for supergroups and channel chats. This identifier may be greater than 32 bits and some programming languages may have difficulty/silent defects in interpreting it. But it is smaller than 52 bits, so a signed 64 bit integer or double-precision float type are safe for storing this identifier.
+	LinkedChatID                       int64                 `json:"linked_chat_id"`                          // Optional. Unique identifier for the linked chat, i.e. the discussion group identifier for a channel and vice versa; for supergroups and channel chats. This identifier may be greater than 32 bits and some programming languages may have difficulty/silent defects in interpreting it. But it is smaller than 52 bits, so a signed 64 bit integer or double-precision float type are safe for storing this identifier.
 	Location                           *ChatLocation         `json:"location"`                                // Optional. For supergroups, the location to which the supergroup is connected
 }
 
@@ -181,8 +181,8 @@ type Message struct {
 	SupergroupChatCreated         bool                           `json:"supergroup_chat_created"`           // Optional. Service message: the supergroup has been created. This field can't be received in a message coming through updates, because bot can't be a member of a supergroup when it is created. It can only be found in reply_to_message if someone replies to a very first message in a directly created supergroup.
 	ChannelChatCreated            bool                           `json:"channel_chat_created"`              // Optional. Service message: the channel has been created. This field can't be received in a message coming through updates, because bot can't be a member of a channel when it is created. It can only be found in reply_to_message if someone replies to a very first message in a channel.
 	MessageAutoDeleteTimerChanged *MessageAutoDeleteTimerChanged `json:"message_auto_delete_timer_changed"` // Optional. Service message: auto-delete timer settings changed in the chat
-	MigrateToChatID               ChatID                         `json:"migrate_to_chat_id"`                // Optional. The group has been migrated to a supergroup with the specified identifier. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a signed 64-bit integer or double-precision float type are safe for storing this identifier.
-	MigrateFromChatID             ChatID                         `json:"migrate_from_chat_id"`              // Optional. The supergroup has been migrated from a group with the specified identifier. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a signed 64-bit integer or double-precision float type are safe for storing this identifier.
+	MigrateToChatID               int64                          `json:"migrate_to_chat_id"`                // Optional. The group has been migrated to a supergroup with the specified identifier. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a signed 64-bit integer or double-precision float type are safe for storing this identifier.
+	MigrateFromChatID             int64                          `json:"migrate_from_chat_id"`              // Optional. The supergroup has been migrated from a group with the specified identifier. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a signed 64-bit integer or double-precision float type are safe for storing this identifier.
 	PinnedMessage                 *MaybeInaccessibleMessage      `json:"pinned_message"`                    // Optional. Specified message was pinned. Note that the Message object in this field will not contain further reply_to_message fields even if it itself is a reply.
 	Invoice                       *Invoice                       `json:"invoice"`                           // Optional. Message is an invoice for a payment, information about the invoice. More about payments: https://core.telegram.org/bots/api#payments
 	SuccessfulPayment             *SuccessfulPayment             `json:"successful_payment"`                // Optional. Message is a service message about a successful payment, information about the payment. More about payments: https://core.telegram.org/bots/api#payments
@@ -232,13 +232,13 @@ type MaybeInaccessibleMessage interface{}
 
 // This object represents one special entity in a text message. For example, hashtags, usernames, URLs, etc.
 type MessageEntity struct {
-	Type          MessageEntityType `json:"type"`            // Type of the entity. Currently, can be "mention" (@username), "hashtag" (#hashtag or #hashtag@chatusername), "cashtag" ($USD or $USD@chatusername), "bot_command" (/start@jobs_bot), "url" (https://telegram.org), "email" (do-not-reply@telegram.org), "phone_number" (+1-212-555-0123), "bold" (bold text), "italic" (italic text), "underline" (underlined text), "strikethrough" (strikethrough text), "spoiler" (spoiler message), "blockquote" (block quotation), "expandable_blockquote" (collapsed-by-default block quotation), "code" (monowidth string), "pre" (monowidth block), "text_link" (for clickable text URLs), "text_mention" (for users without usernames), "custom_emoji" (for inline custom emoji stickers)
-	Offset        int64             `json:"offset"`          // Offset in UTF-16 code units to the start of the entity
-	Length        int64             `json:"length"`          // Length of the entity in UTF-16 code units
-	Url           string            `json:"url"`             // Optional. For "text_link" only, URL that will be opened after user taps on the text
-	User          *User             `json:"user"`            // Optional. For "text_mention" only, the mentioned user
-	Language      string            `json:"language"`        // Optional. For "pre" only, the programming language of the entity text
-	CustomEmojiID string            `json:"custom_emoji_id"` // Optional. For "custom_emoji" only, unique identifier of the custom emoji. Use getCustomEmojiStickers to get full information about the sticker
+	Type          *MessageEntityType `json:"type"`            // Type of the entity. Currently, can be "mention" (@username), "hashtag" (#hashtag or #hashtag@chatusername), "cashtag" ($USD or $USD@chatusername), "bot_command" (/start@jobs_bot), "url" (https://telegram.org), "email" (do-not-reply@telegram.org), "phone_number" (+1-212-555-0123), "bold" (bold text), "italic" (italic text), "underline" (underlined text), "strikethrough" (strikethrough text), "spoiler" (spoiler message), "blockquote" (block quotation), "expandable_blockquote" (collapsed-by-default block quotation), "code" (monowidth string), "pre" (monowidth block), "text_link" (for clickable text URLs), "text_mention" (for users without usernames), "custom_emoji" (for inline custom emoji stickers)
+	Offset        int64              `json:"offset"`          // Offset in UTF-16 code units to the start of the entity
+	Length        int64              `json:"length"`          // Length of the entity in UTF-16 code units
+	Url           string             `json:"url"`             // Optional. For "text_link" only, URL that will be opened after user taps on the text
+	User          *User              `json:"user"`            // Optional. For "text_mention" only, the mentioned user
+	Language      string             `json:"language"`        // Optional. For "pre" only, the programming language of the entity text
+	CustomEmojiID string             `json:"custom_emoji_id"` // Optional. For "custom_emoji" only, unique identifier of the custom emoji. Use getCustomEmojiStickers to get full information about the sticker
 }
 
 // This object contains information about the quoted part of a message that is replied to by the given message.
@@ -655,7 +655,7 @@ type UsersShared struct {
 // This object contains information about a chat that was shared with the bot using a KeyboardButtonRequestChat button.
 type ChatShared struct {
 	RequestID int64       `json:"request_id"` // Identifier of the request
-	ChatID    ChatID      `json:"chat_id"`    // Identifier of the shared chat. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a 64-bit integer or double-precision float type are safe for storing this identifier. The bot may not have access to the chat and could be unable to use this identifier, unless the chat is already known to the bot by some other means.
+	ChatID    int64       `json:"chat_id"`    // Identifier of the shared chat. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a 64-bit integer or double-precision float type are safe for storing this identifier. The bot may not have access to the chat and could be unable to use this identifier, unless the chat is already known to the bot by some other means.
 	Title     string      `json:"title"`      // Optional. Title of the chat, if the title was requested by the bot.
 	Username  string      `json:"username"`   // Optional. Username of the chat, if the username was requested by the bot and available.
 	Photo     []PhotoSize `json:"photo"`      // Optional. Available sizes of the chat photo, if the photo was requested by the bot
@@ -1016,7 +1016,7 @@ type ChatMemberBanned struct {
 type ChatJoinRequest struct {
 	Chat       *Chat           `json:"chat"`         // Chat to which the request was sent
 	From       *User           `json:"from"`         // User that sent the join request
-	UserChatID ChatID          `json:"user_chat_id"` // Identifier of a private chat with the user who sent the join request. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a 64-bit integer or double-precision float type are safe for storing this identifier. The bot can use this identifier for 5 minutes to send messages until the join request is processed, assuming no other administrator contacted the user.
+	UserChatID int64           `json:"user_chat_id"` // Identifier of a private chat with the user who sent the join request. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a 64-bit integer or double-precision float type are safe for storing this identifier. The bot can use this identifier for 5 minutes to send messages until the join request is processed, assuming no other administrator contacted the user.
 	Date       int64           `json:"date"`         // Date the request was sent in Unix time
 	Bio        string          `json:"bio"`          // Optional. Bio of the user.
 	InviteLink *ChatInviteLink `json:"invite_link"`  // Optional. Chat invite link that was used by the user to send the join request
@@ -1286,7 +1286,7 @@ type UserChatBoosts struct {
 type BusinessConnection struct {
 	ID         string `json:"id"`           // Unique identifier of the business connection
 	User       *User  `json:"user"`         // Business account user that created the business connection
-	UserChatID ChatID `json:"user_chat_id"` // Identifier of a private chat with the user who created the business connection. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a 64-bit integer or double-precision float type are safe for storing this identifier.
+	UserChatID int64  `json:"user_chat_id"` // Identifier of a private chat with the user who created the business connection. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a 64-bit integer or double-precision float type are safe for storing this identifier.
 	Date       int64  `json:"date"`         // Date the connection was established in Unix time
 	CanReply   bool   `json:"can_reply"`    // True, if the bot can act on behalf of the business account in chats that were active in the last 24 hours
 	IsEnabled  bool   `json:"is_enabled"`   // True, if the connection is active
@@ -1301,8 +1301,8 @@ type BusinessMessagesDeleted struct {
 
 // Describes why a request was unsuccessful.
 type ResponseParameters struct {
-	MigrateToChatID ChatID `json:"migrate_to_chat_id"` // Optional. The group has been migrated to a supergroup with the specified identifier. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a signed 64-bit integer or double-precision float type are safe for storing this identifier.
-	RetryAfter      int64  `json:"retry_after"`        // Optional. In case of exceeding flood control, the number of seconds left to wait before the request can be repeated
+	MigrateToChatID int64 `json:"migrate_to_chat_id"` // Optional. The group has been migrated to a supergroup with the specified identifier. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a signed 64-bit integer or double-precision float type are safe for storing this identifier.
+	RetryAfter      int64 `json:"retry_after"`        // Optional. In case of exceeding flood control, the number of seconds left to wait before the request can be repeated
 }
 
 // This object represents the content of a media message to be sent. It should be one of

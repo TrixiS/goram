@@ -48,13 +48,11 @@ func main() {
 		panic(err)
 	}
 
-	enumsNames := make([]string, len(spec.Enums))
+	noPtrTypes := make([]string, len(spec.Enums))
 
 	for i, e := range spec.Enums {
-		enumsNames[i] = e.Name
+		noPtrTypes[i] = e.Name
 	}
-
-	noPtrTypes := []string{}
 
 	for _, t := range spec.Types {
 		if len(t.Fields) == 0 {
@@ -63,14 +61,14 @@ func main() {
 	}
 
 	generateEnums(spec.Enums)
-	generateTypes(noPtrTypes, enumsNames, spec.Types)
+	generateTypes(noPtrTypes, spec.Types)
 	exec.Command("gofmt", "-s", "-w", "./pkg").Run()
 }
 
 const genFileMode = os.O_WRONLY | os.O_TRUNC | os.O_CREATE
 const genFilePerm = 0o660
 
-func generateTypes(nonPtrTypes []string, enumNames []string, types []Type) {
+func generateTypes(nonPtrTypes []string, types []Type) {
 	b, err := os.ReadFile("./cmd/gen/types/types.go")
 
 	if err != nil {
@@ -95,9 +93,7 @@ func generateTypes(nonPtrTypes []string, enumNames []string, types []Type) {
 			f.WriteString(comment)
 		}
 
-		isInterface := slices.Contains(nonPtrTypes, t.Name)
-
-		if isInterface {
+		if len(t.Fields) == 0 {
 			decl := fmt.Sprintf("type %s interface{}\n", t.Name)
 			f.WriteString(decl)
 			continue
@@ -112,9 +108,11 @@ func generateTypes(nonPtrTypes []string, enumNames []string, types []Type) {
 			}
 
 			fieldName := toPascalCase(field.Name)
-			isEnum := slices.Contains(enumNames, field.Types[0])
-			isPtr := !isEnum && !slices.Contains(nonPtrTypes, fieldName)
-			fieldType := getFieldTypeString(field.Name, field.Types, isPtr)
+			fieldType := getFieldTypeString(
+				field.Name,
+				field.Types,
+				!slices.Contains(nonPtrTypes, fieldName),
+			)
 
 			structField := fmt.Sprintf(
 				"%s %s `json:\"%s\"` // %s",
@@ -141,7 +139,7 @@ func getFieldTypeString(fieldName string, fieldTypes []string, isPtr bool) strin
 	t := fieldTypes[0]
 
 	if t == "Integer" {
-		if (fieldName == "id" && len(fieldTypes) == 2) || strings.Contains(fieldName, "chat_id") {
+		if (fieldName == "id" || fieldName == "chat_id") && len(fieldTypes) == 2 {
 			return "ChatID"
 		}
 
