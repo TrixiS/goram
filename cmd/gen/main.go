@@ -28,9 +28,15 @@ type Type struct {
 	Fields      []TypeField `json:"fields"`
 }
 
+type Method struct {
+	Type
+	Returns []string `json:"returns"`
+}
+
 type Spec struct {
-	Enums []Enum `json:"enums"`
-	Types []Type `json:"types"`
+	Enums   []Enum   `json:"enums"`
+	Types   []Type   `json:"types"`
+	Methods []Method `json:"methods"`
 }
 
 func main() {
@@ -48,27 +54,46 @@ func main() {
 		panic(err)
 	}
 
-	noPtrTypes := make([]string, len(spec.Enums))
+	nonPtrTypes := make([]string, len(spec.Enums))
 
 	for i, e := range spec.Enums {
-		noPtrTypes[i] = e.Name
+		nonPtrTypes[i] = e.Name
 	}
 
 	for _, t := range spec.Types {
 		if len(t.Fields) == 0 {
-			noPtrTypes = append(noPtrTypes, t.Name)
+			nonPtrTypes = append(nonPtrTypes, t.Name)
 		}
 	}
 
 	generateEnums(spec.Enums)
-	generateTypes(noPtrTypes, spec.Types)
+	generateTypes(spec.Types, nonPtrTypes)
+	generateRequests(spec.Methods, nonPtrTypes)
 	exec.Command("gofmt", "-s", "-w", "./pkg").Run()
 }
 
 const genFileMode = os.O_WRONLY | os.O_TRUNC | os.O_CREATE
 const genFilePerm = 0o660
 
-func generateTypes(nonPtrTypes []string, types []Type) {
+func generateRequests(methods []Method, nonPtrTypes []string) {
+	f, err := os.OpenFile("./pkg/types/requests.go", genFileMode, genFilePerm)
+
+	if err != nil {
+		panic(err)
+	}
+
+	f.WriteString("package types\n\n")
+
+	for _, m := range methods {
+		name := toPascalCase(m.Type.Name) + "Request"
+		typeString := generateTypeString(m.Type, name, nonPtrTypes)
+		f.WriteString(typeString)
+	}
+
+	f.Close()
+}
+
+func generateTypes(types []Type, nonPtrTypes []string) {
 	b, err := os.ReadFile("./cmd/gen/types/types.go")
 
 	if err != nil {
@@ -88,54 +113,65 @@ func generateTypes(nonPtrTypes []string, types []Type) {
 	}
 
 	for _, t := range types {
-		for _, d := range t.Description {
-			comment := fmt.Sprintf("// %s\n", d)
-			f.WriteString(comment)
-		}
-
-		if len(t.Fields) == 0 {
-			decl := fmt.Sprintf("type %s interface{}\n", t.Name)
-			f.WriteString(decl)
-			continue
-		}
-
-		decl := fmt.Sprintf("type %s struct {\n", t.Name)
-		f.WriteString(decl)
-
-		for i, field := range t.Fields {
-			if len(field.Types) > 1 {
-				fmt.Println(t.Name, field.Types)
-			}
-
-			fieldName := toPascalCase(field.Name)
-			fieldType := getFieldTypeString(
-				field.Name,
-				field.Types,
-				!slices.Contains(nonPtrTypes, fieldName),
-			)
-
-			structField := fmt.Sprintf(
-				"%s %s `json:\"%s\"` // %s",
-				fieldName,
-				fieldType,
-				field.Name,
-				field.Description,
-			)
-
-			f.WriteString(structField)
-
-			if i < len(t.Fields)-1 {
-				f.WriteString("\n")
-			}
-		}
-
-		f.WriteString("\n}\n")
+		typeString := generateTypeString(t, t.Name, nonPtrTypes)
+		f.WriteString(typeString)
 	}
 
 	f.Close()
 }
 
+func generateTypeString(t Type, name string, nonPtrTypes []string) string {
+	builder := strings.Builder{}
+
+	for _, d := range t.Description {
+		comment := fmt.Sprintf("// %s\n//\n", d)
+		builder.WriteString(comment)
+	}
+
+	builder.WriteString(fmt.Sprintf("// %s\n", t.Href))
+
+	if len(t.Fields) == 0 {
+		decl := fmt.Sprintf("type %s interface{}\n", name)
+		builder.WriteString(decl)
+		return builder.String()
+	}
+
+	decl := fmt.Sprintf("type %s struct {\n", name)
+	builder.WriteString(decl)
+
+	for i, field := range t.Fields {
+		fieldName := toPascalCase(field.Name)
+		fieldType := getFieldTypeString(
+			field.Name,
+			field.Types,
+			!slices.Contains(nonPtrTypes, field.Types[0]),
+		)
+
+		structField := fmt.Sprintf(
+			"%s %s `json:\"%s,omitempty\"` // %s",
+			fieldName,
+			fieldType,
+			field.Name,
+			field.Description,
+		)
+
+		builder.WriteString(structField)
+
+		if i < len(t.Fields)-1 {
+			builder.WriteString("\n")
+		}
+	}
+
+	builder.WriteString("\n}\n")
+
+	return builder.String()
+}
+
 func getFieldTypeString(fieldName string, fieldTypes []string, isPtr bool) string {
+	if fieldName == "message_id" {
+		return "int"
+	}
+
 	t := fieldTypes[0]
 
 	if t == "Integer" {
@@ -225,7 +261,9 @@ func toPascalCase(v string) string {
 		if upper {
 			upper = false
 			builder.WriteRune(unicode.ToUpper(r))
-		} else if (i < len(runes)-2 && r == 'i' && runes[i+1] == 'd') || (i > 0 && r == 'd' && runes[i-1] == 'i') { // detect id
+		} else if (i < len(runes)-2 && r == 'i' && runes[i+1] == 'd' && i+1 == len(runes)-1) ||
+			(i > 0 && i == len(runes)-1 && r == 'd' && runes[i-1] == 'i') { // detect id
+
 			builder.WriteRune(unicode.ToUpper(r))
 		} else {
 			builder.WriteRune(r)

@@ -19,6 +19,15 @@ type apiResponse[R any] struct {
 	Parameters  *types.ResponseParameters `json:"parameters"`
 }
 
+func (a apiResponse[R]) error(method string) *Error {
+	return &Error{
+		Method:      method,
+		Description: a.Description,
+		ErrorCode:   a.ErrorCode,
+		Parameters:  a.Parameters,
+	}
+}
+
 type Error struct {
 	Method      string
 	Description string

@@ -24,14 +24,14 @@ type ChatAction string
 const (
 	ChatActionTyping          ChatAction = "typing"
 	ChatActionUploadPhoto     ChatAction = "upload_photo"
-	ChatActionRecordVIDeo     ChatAction = "record_video"
-	ChatActionUploadVIDeo     ChatAction = "upload_video"
+	ChatActionRecordVideo     ChatAction = "record_video"
+	ChatActionUploadVideo     ChatAction = "upload_video"
 	ChatActionRecordVoice     ChatAction = "record_voice"
 	ChatActionUploadVoice     ChatAction = "upload_voice"
 	ChatActionUploadDocument  ChatAction = "upload_document"
 	ChatActionFindLocation    ChatAction = "find_location"
-	ChatActionRecordVIDeoNote ChatAction = "record_video_note"
-	ChatActionUploadVIDeoNote ChatAction = "upload_video_note"
+	ChatActionRecordVideoNote ChatAction = "record_video_note"
+	ChatActionUploadVideoNote ChatAction = "upload_video_note"
 )
 
 type MessageEntityType string

@@ -40,12 +40,24 @@ func (b *Bot) GetMe(ctx context.Context) (*types.User, error) {
 	}
 
 	if !res.OK {
-		return nil, &Error{
-			Method:      "getMe",
-			Description: res.Description,
-			ErrorCode:   res.ErrorCode,
-			Parameters:  res.Parameters,
-		}
+		return nil, res.error("getMe")
+	}
+
+	return res.Result, nil
+}
+
+func (b *Bot) SendMessage(
+	ctx context.Context,
+	request *types.SendMessageRequest,
+) (*types.Message, error) {
+	res, err := makeRequest[types.Message](ctx, b.options.Client, b.baseURL, "sendMessage", request)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if !res.OK {
+		return nil, res.error("sendMessage")
 	}
 
 	return res.Result, nil
