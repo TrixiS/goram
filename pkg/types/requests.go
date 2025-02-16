@@ -56,19 +56,19 @@ type CloseRequest interface{}
 //
 // https://core.telegram.org/bots/api#sendmessage
 type SendMessageRequest struct {
-	BusinessConnectionID string                `json:"business_connection_id,omitempty"` // Unique identifier of the business connection on behalf of which the message will be sent
-	ChatID               ChatID                `json:"chat_id,omitempty"`                // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-	MessageThreadID      int64                 `json:"message_thread_id,omitempty"`      // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
-	Text                 string                `json:"text,omitempty"`                   // Text of the message to be sent, 1-4096 characters after entities parsing
-	ParseMode            ParseMode             `json:"parse_mode,omitempty"`             // Mode for parsing entities in the message text. See formatting options for more details.
-	Entities             []MessageEntity       `json:"entities,omitempty"`               // A JSON-serialized list of special entities that appear in message text, which can be specified instead of parse_mode
-	LinkPreviewOptions   *LinkPreviewOptions   `json:"link_preview_options,omitempty"`   // Link preview generation options for the message
-	DisableNotification  bool                  `json:"disable_notification,omitempty"`   // Sends the message silently. Users will receive a notification with no sound.
-	ProtectContent       bool                  `json:"protect_content,omitempty"`        // Protects the contents of the sent message from forwarding and saving
-	AllowPaidBroadcast   bool                  `json:"allow_paid_broadcast,omitempty"`   // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
-	MessageEffectID      string                `json:"message_effect_id,omitempty"`      // Unique identifier of the message effect to be added to the message; for private chats only
-	ReplyParameters      *ReplyParameters      `json:"reply_parameters,omitempty"`       // Description of the message to reply to
-	ReplyMarkup          *InlineKeyboardMarkup `json:"reply_markup,omitempty"`           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	BusinessConnectionID string              `json:"business_connection_id,omitempty"` // Unique identifier of the business connection on behalf of which the message will be sent
+	ChatID               ChatID              `json:"chat_id,omitempty"`                // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+	MessageThreadID      int64               `json:"message_thread_id,omitempty"`      // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	Text                 string              `json:"text,omitempty"`                   // Text of the message to be sent, 1-4096 characters after entities parsing
+	ParseMode            ParseMode           `json:"parse_mode,omitempty"`             // Mode for parsing entities in the message text. See formatting options for more details.
+	Entities             []MessageEntity     `json:"entities,omitempty"`               // A JSON-serialized list of special entities that appear in message text, which can be specified instead of parse_mode
+	LinkPreviewOptions   *LinkPreviewOptions `json:"link_preview_options,omitempty"`   // Link preview generation options for the message
+	DisableNotification  bool                `json:"disable_notification,omitempty"`   // Sends the message silently. Users will receive a notification with no sound.
+	ProtectContent       bool                `json:"protect_content,omitempty"`        // Protects the contents of the sent message from forwarding and saving
+	AllowPaidBroadcast   bool                `json:"allow_paid_broadcast,omitempty"`   // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	MessageEffectID      string              `json:"message_effect_id,omitempty"`      // Unique identifier of the message effect to be added to the message; for private chats only
+	ReplyParameters      *ReplyParameters    `json:"reply_parameters,omitempty"`       // Description of the message to reply to
+	ReplyMarkup          Markup              `json:"reply_markup,omitempty"`           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
 // Use this method to forward messages of any kind. Service messages and messages with protected content can't be forwarded. On success, the sent Message is returned.
@@ -100,20 +100,20 @@ type ForwardMessagesRequest struct {
 //
 // https://core.telegram.org/bots/api#copymessage
 type CopyMessageRequest struct {
-	ChatID                ChatID                `json:"chat_id,omitempty"`                  // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-	MessageThreadID       int64                 `json:"message_thread_id,omitempty"`        // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
-	FromChatID            int64                 `json:"from_chat_id,omitempty"`             // Unique identifier for the chat where the original message was sent (or channel username in the format @channelusername)
-	MessageID             int                   `json:"message_id,omitempty"`               // Message identifier in the chat specified in from_chat_id
-	VideoStartTimestamp   int64                 `json:"video_start_timestamp,omitempty"`    // New start timestamp for the copied video in the message
-	Caption               string                `json:"caption,omitempty"`                  // New caption for media, 0-1024 characters after entities parsing. If not specified, the original caption is kept
-	ParseMode             string                `json:"parse_mode,omitempty"`               // Mode for parsing entities in the new caption. See formatting options for more details.
-	CaptionEntities       []MessageEntity       `json:"caption_entities,omitempty"`         // A JSON-serialized list of special entities that appear in the new caption, which can be specified instead of parse_mode
-	ShowCaptionAboveMedia bool                  `json:"show_caption_above_media,omitempty"` // Pass True, if the caption must be shown above the message media. Ignored if a new caption isn't specified.
-	DisableNotification   bool                  `json:"disable_notification,omitempty"`     // Sends the message silently. Users will receive a notification with no sound.
-	ProtectContent        bool                  `json:"protect_content,omitempty"`          // Protects the contents of the sent message from forwarding and saving
-	AllowPaidBroadcast    bool                  `json:"allow_paid_broadcast,omitempty"`     // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
-	ReplyParameters       *ReplyParameters      `json:"reply_parameters,omitempty"`         // Description of the message to reply to
-	ReplyMarkup           *InlineKeyboardMarkup `json:"reply_markup,omitempty"`             // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	ChatID                ChatID           `json:"chat_id,omitempty"`                  // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+	MessageThreadID       int64            `json:"message_thread_id,omitempty"`        // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	FromChatID            int64            `json:"from_chat_id,omitempty"`             // Unique identifier for the chat where the original message was sent (or channel username in the format @channelusername)
+	MessageID             int              `json:"message_id,omitempty"`               // Message identifier in the chat specified in from_chat_id
+	VideoStartTimestamp   int64            `json:"video_start_timestamp,omitempty"`    // New start timestamp for the copied video in the message
+	Caption               string           `json:"caption,omitempty"`                  // New caption for media, 0-1024 characters after entities parsing. If not specified, the original caption is kept
+	ParseMode             string           `json:"parse_mode,omitempty"`               // Mode for parsing entities in the new caption. See formatting options for more details.
+	CaptionEntities       []MessageEntity  `json:"caption_entities,omitempty"`         // A JSON-serialized list of special entities that appear in the new caption, which can be specified instead of parse_mode
+	ShowCaptionAboveMedia bool             `json:"show_caption_above_media,omitempty"` // Pass True, if the caption must be shown above the message media. Ignored if a new caption isn't specified.
+	DisableNotification   bool             `json:"disable_notification,omitempty"`     // Sends the message silently. Users will receive a notification with no sound.
+	ProtectContent        bool             `json:"protect_content,omitempty"`          // Protects the contents of the sent message from forwarding and saving
+	AllowPaidBroadcast    bool             `json:"allow_paid_broadcast,omitempty"`     // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	ReplyParameters       *ReplyParameters `json:"reply_parameters,omitempty"`         // Description of the message to reply to
+	ReplyMarkup           Markup           `json:"reply_markup,omitempty"`             // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
 // Use this method to copy messages of any kind. If some of the specified messages can't be found or copied, they are skipped. Service messages, paid media messages, giveaway messages, giveaway winners messages, and invoice messages can't be copied. A quiz poll can be copied only if the value of the field correct_option_id is known to the bot. The method is analogous to the method forwardMessages, but the copied messages don't have a link to the original message. Album grouping is kept for copied messages. On success, an array of MessageId of the sent messages is returned.
@@ -133,21 +133,21 @@ type CopyMessagesRequest struct {
 //
 // https://core.telegram.org/bots/api#sendphoto
 type SendPhotoRequest struct {
-	BusinessConnectionID  string                `json:"business_connection_id,omitempty"`   // Unique identifier of the business connection on behalf of which the message will be sent
-	ChatID                ChatID                `json:"chat_id,omitempty"`                  // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-	MessageThreadID       int64                 `json:"message_thread_id,omitempty"`        // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
-	Photo                 InputFile             `json:"photo,omitempty"`                    // Photo to send. Pass a file_id as String to send a photo that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a photo from the Internet, or upload a new photo using multipart/form-data. The photo must be at most 10 MB in size. The photo's width and height must not exceed 10000 in total. Width and height ratio must be at most 20. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	Caption               string                `json:"caption,omitempty"`                  // Photo caption (may also be used when resending photos by file_id), 0-1024 characters after entities parsing
-	ParseMode             string                `json:"parse_mode,omitempty"`               // Mode for parsing entities in the photo caption. See formatting options for more details.
-	CaptionEntities       []MessageEntity       `json:"caption_entities,omitempty"`         // A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
-	ShowCaptionAboveMedia bool                  `json:"show_caption_above_media,omitempty"` // Pass True, if the caption must be shown above the message media
-	HasSpoiler            bool                  `json:"has_spoiler,omitempty"`              // Pass True if the photo needs to be covered with a spoiler animation
-	DisableNotification   bool                  `json:"disable_notification,omitempty"`     // Sends the message silently. Users will receive a notification with no sound.
-	ProtectContent        bool                  `json:"protect_content,omitempty"`          // Protects the contents of the sent message from forwarding and saving
-	AllowPaidBroadcast    bool                  `json:"allow_paid_broadcast,omitempty"`     // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
-	MessageEffectID       string                `json:"message_effect_id,omitempty"`        // Unique identifier of the message effect to be added to the message; for private chats only
-	ReplyParameters       *ReplyParameters      `json:"reply_parameters,omitempty"`         // Description of the message to reply to
-	ReplyMarkup           *InlineKeyboardMarkup `json:"reply_markup,omitempty"`             // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	BusinessConnectionID  string           `json:"business_connection_id,omitempty"`   // Unique identifier of the business connection on behalf of which the message will be sent
+	ChatID                ChatID           `json:"chat_id,omitempty"`                  // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+	MessageThreadID       int64            `json:"message_thread_id,omitempty"`        // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	Photo                 InputFile        `json:"photo,omitempty"`                    // Photo to send. Pass a file_id as String to send a photo that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a photo from the Internet, or upload a new photo using multipart/form-data. The photo must be at most 10 MB in size. The photo's width and height must not exceed 10000 in total. Width and height ratio must be at most 20. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+	Caption               string           `json:"caption,omitempty"`                  // Photo caption (may also be used when resending photos by file_id), 0-1024 characters after entities parsing
+	ParseMode             string           `json:"parse_mode,omitempty"`               // Mode for parsing entities in the photo caption. See formatting options for more details.
+	CaptionEntities       []MessageEntity  `json:"caption_entities,omitempty"`         // A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
+	ShowCaptionAboveMedia bool             `json:"show_caption_above_media,omitempty"` // Pass True, if the caption must be shown above the message media
+	HasSpoiler            bool             `json:"has_spoiler,omitempty"`              // Pass True if the photo needs to be covered with a spoiler animation
+	DisableNotification   bool             `json:"disable_notification,omitempty"`     // Sends the message silently. Users will receive a notification with no sound.
+	ProtectContent        bool             `json:"protect_content,omitempty"`          // Protects the contents of the sent message from forwarding and saving
+	AllowPaidBroadcast    bool             `json:"allow_paid_broadcast,omitempty"`     // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	MessageEffectID       string           `json:"message_effect_id,omitempty"`        // Unique identifier of the message effect to be added to the message; for private chats only
+	ReplyParameters       *ReplyParameters `json:"reply_parameters,omitempty"`         // Description of the message to reply to
+	ReplyMarkup           Markup           `json:"reply_markup,omitempty"`             // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
 // Use this method to send audio files, if you want Telegram clients to display them in the music player. Your audio must be in the .MP3 or .M4A format. On success, the sent Message is returned. Bots can currently send audio files of up to 50 MB in size, this limit may be changed in the future.
@@ -156,279 +156,279 @@ type SendPhotoRequest struct {
 //
 // https://core.telegram.org/bots/api#sendaudio
 type SendAudioRequest struct {
-	BusinessConnectionID string                `json:"business_connection_id,omitempty"` // Unique identifier of the business connection on behalf of which the message will be sent
-	ChatID               ChatID                `json:"chat_id,omitempty"`                // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-	MessageThreadID      int64                 `json:"message_thread_id,omitempty"`      // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
-	Audio                InputFile             `json:"audio,omitempty"`                  // Audio file to send. Pass a file_id as String to send an audio file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get an audio file from the Internet, or upload a new one using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	Caption              string                `json:"caption,omitempty"`                // Audio caption, 0-1024 characters after entities parsing
-	ParseMode            string                `json:"parse_mode,omitempty"`             // Mode for parsing entities in the audio caption. See formatting options for more details.
-	CaptionEntities      []MessageEntity       `json:"caption_entities,omitempty"`       // A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
-	Duration             int64                 `json:"duration,omitempty"`               // Duration of the audio in seconds
-	Performer            string                `json:"performer,omitempty"`              // Performer
-	Title                string                `json:"title,omitempty"`                  // Track name
-	Thumbnail            InputFile             `json:"thumbnail,omitempty"`              // Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	DisableNotification  bool                  `json:"disable_notification,omitempty"`   // Sends the message silently. Users will receive a notification with no sound.
-	ProtectContent       bool                  `json:"protect_content,omitempty"`        // Protects the contents of the sent message from forwarding and saving
-	AllowPaidBroadcast   bool                  `json:"allow_paid_broadcast,omitempty"`   // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
-	MessageEffectID      string                `json:"message_effect_id,omitempty"`      // Unique identifier of the message effect to be added to the message; for private chats only
-	ReplyParameters      *ReplyParameters      `json:"reply_parameters,omitempty"`       // Description of the message to reply to
-	ReplyMarkup          *InlineKeyboardMarkup `json:"reply_markup,omitempty"`           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	BusinessConnectionID string           `json:"business_connection_id,omitempty"` // Unique identifier of the business connection on behalf of which the message will be sent
+	ChatID               ChatID           `json:"chat_id,omitempty"`                // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+	MessageThreadID      int64            `json:"message_thread_id,omitempty"`      // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	Audio                InputFile        `json:"audio,omitempty"`                  // Audio file to send. Pass a file_id as String to send an audio file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get an audio file from the Internet, or upload a new one using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+	Caption              string           `json:"caption,omitempty"`                // Audio caption, 0-1024 characters after entities parsing
+	ParseMode            string           `json:"parse_mode,omitempty"`             // Mode for parsing entities in the audio caption. See formatting options for more details.
+	CaptionEntities      []MessageEntity  `json:"caption_entities,omitempty"`       // A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
+	Duration             int64            `json:"duration,omitempty"`               // Duration of the audio in seconds
+	Performer            string           `json:"performer,omitempty"`              // Performer
+	Title                string           `json:"title,omitempty"`                  // Track name
+	Thumbnail            InputFile        `json:"thumbnail,omitempty"`              // Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+	DisableNotification  bool             `json:"disable_notification,omitempty"`   // Sends the message silently. Users will receive a notification with no sound.
+	ProtectContent       bool             `json:"protect_content,omitempty"`        // Protects the contents of the sent message from forwarding and saving
+	AllowPaidBroadcast   bool             `json:"allow_paid_broadcast,omitempty"`   // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	MessageEffectID      string           `json:"message_effect_id,omitempty"`      // Unique identifier of the message effect to be added to the message; for private chats only
+	ReplyParameters      *ReplyParameters `json:"reply_parameters,omitempty"`       // Description of the message to reply to
+	ReplyMarkup          Markup           `json:"reply_markup,omitempty"`           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
 // Use this method to send general files. On success, the sent Message is returned. Bots can currently send files of any type of up to 50 MB in size, this limit may be changed in the future.
 //
 // https://core.telegram.org/bots/api#senddocument
 type SendDocumentRequest struct {
-	BusinessConnectionID        string                `json:"business_connection_id,omitempty"`         // Unique identifier of the business connection on behalf of which the message will be sent
-	ChatID                      ChatID                `json:"chat_id,omitempty"`                        // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-	MessageThreadID             int64                 `json:"message_thread_id,omitempty"`              // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
-	Document                    InputFile             `json:"document,omitempty"`                       // File to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	Thumbnail                   InputFile             `json:"thumbnail,omitempty"`                      // Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	Caption                     string                `json:"caption,omitempty"`                        // Document caption (may also be used when resending documents by file_id), 0-1024 characters after entities parsing
-	ParseMode                   string                `json:"parse_mode,omitempty"`                     // Mode for parsing entities in the document caption. See formatting options for more details.
-	CaptionEntities             []MessageEntity       `json:"caption_entities,omitempty"`               // A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
-	DisableContentTypeDetection bool                  `json:"disable_content_type_detection,omitempty"` // Disables automatic server-side content type detection for files uploaded using multipart/form-data
-	DisableNotification         bool                  `json:"disable_notification,omitempty"`           // Sends the message silently. Users will receive a notification with no sound.
-	ProtectContent              bool                  `json:"protect_content,omitempty"`                // Protects the contents of the sent message from forwarding and saving
-	AllowPaidBroadcast          bool                  `json:"allow_paid_broadcast,omitempty"`           // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
-	MessageEffectID             string                `json:"message_effect_id,omitempty"`              // Unique identifier of the message effect to be added to the message; for private chats only
-	ReplyParameters             *ReplyParameters      `json:"reply_parameters,omitempty"`               // Description of the message to reply to
-	ReplyMarkup                 *InlineKeyboardMarkup `json:"reply_markup,omitempty"`                   // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	BusinessConnectionID        string           `json:"business_connection_id,omitempty"`         // Unique identifier of the business connection on behalf of which the message will be sent
+	ChatID                      ChatID           `json:"chat_id,omitempty"`                        // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+	MessageThreadID             int64            `json:"message_thread_id,omitempty"`              // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	Document                    InputFile        `json:"document,omitempty"`                       // File to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+	Thumbnail                   InputFile        `json:"thumbnail,omitempty"`                      // Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+	Caption                     string           `json:"caption,omitempty"`                        // Document caption (may also be used when resending documents by file_id), 0-1024 characters after entities parsing
+	ParseMode                   string           `json:"parse_mode,omitempty"`                     // Mode for parsing entities in the document caption. See formatting options for more details.
+	CaptionEntities             []MessageEntity  `json:"caption_entities,omitempty"`               // A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
+	DisableContentTypeDetection bool             `json:"disable_content_type_detection,omitempty"` // Disables automatic server-side content type detection for files uploaded using multipart/form-data
+	DisableNotification         bool             `json:"disable_notification,omitempty"`           // Sends the message silently. Users will receive a notification with no sound.
+	ProtectContent              bool             `json:"protect_content,omitempty"`                // Protects the contents of the sent message from forwarding and saving
+	AllowPaidBroadcast          bool             `json:"allow_paid_broadcast,omitempty"`           // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	MessageEffectID             string           `json:"message_effect_id,omitempty"`              // Unique identifier of the message effect to be added to the message; for private chats only
+	ReplyParameters             *ReplyParameters `json:"reply_parameters,omitempty"`               // Description of the message to reply to
+	ReplyMarkup                 Markup           `json:"reply_markup,omitempty"`                   // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
 // Use this method to send video files, Telegram clients support MPEG4 videos (other formats may be sent as Document). On success, the sent Message is returned. Bots can currently send video files of up to 50 MB in size, this limit may be changed in the future.
 //
 // https://core.telegram.org/bots/api#sendvideo
 type SendVideoRequest struct {
-	BusinessConnectionID  string                `json:"business_connection_id,omitempty"`   // Unique identifier of the business connection on behalf of which the message will be sent
-	ChatID                ChatID                `json:"chat_id,omitempty"`                  // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-	MessageThreadID       int64                 `json:"message_thread_id,omitempty"`        // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
-	Video                 InputFile             `json:"video,omitempty"`                    // Video to send. Pass a file_id as String to send a video that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a video from the Internet, or upload a new video using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	Duration              int64                 `json:"duration,omitempty"`                 // Duration of sent video in seconds
-	Width                 int64                 `json:"width,omitempty"`                    // Video width
-	Height                int64                 `json:"height,omitempty"`                   // Video height
-	Thumbnail             InputFile             `json:"thumbnail,omitempty"`                // Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	Cover                 InputFile             `json:"cover,omitempty"`                    // Cover for the video in the message. Pass a file_id to send a file that exists on the Telegram servers (recommended), pass an HTTP URL for Telegram to get a file from the Internet, or pass "attach://<file_attach_name>" to upload a new one using multipart/form-data under <file_attach_name> name. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	StartTimestamp        int64                 `json:"start_timestamp,omitempty"`          // Start timestamp for the video in the message
-	Caption               string                `json:"caption,omitempty"`                  // Video caption (may also be used when resending videos by file_id), 0-1024 characters after entities parsing
-	ParseMode             string                `json:"parse_mode,omitempty"`               // Mode for parsing entities in the video caption. See formatting options for more details.
-	CaptionEntities       []MessageEntity       `json:"caption_entities,omitempty"`         // A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
-	ShowCaptionAboveMedia bool                  `json:"show_caption_above_media,omitempty"` // Pass True, if the caption must be shown above the message media
-	HasSpoiler            bool                  `json:"has_spoiler,omitempty"`              // Pass True if the video needs to be covered with a spoiler animation
-	SupportsStreaming     bool                  `json:"supports_streaming,omitempty"`       // Pass True if the uploaded video is suitable for streaming
-	DisableNotification   bool                  `json:"disable_notification,omitempty"`     // Sends the message silently. Users will receive a notification with no sound.
-	ProtectContent        bool                  `json:"protect_content,omitempty"`          // Protects the contents of the sent message from forwarding and saving
-	AllowPaidBroadcast    bool                  `json:"allow_paid_broadcast,omitempty"`     // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
-	MessageEffectID       string                `json:"message_effect_id,omitempty"`        // Unique identifier of the message effect to be added to the message; for private chats only
-	ReplyParameters       *ReplyParameters      `json:"reply_parameters,omitempty"`         // Description of the message to reply to
-	ReplyMarkup           *InlineKeyboardMarkup `json:"reply_markup,omitempty"`             // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	BusinessConnectionID  string           `json:"business_connection_id,omitempty"`   // Unique identifier of the business connection on behalf of which the message will be sent
+	ChatID                ChatID           `json:"chat_id,omitempty"`                  // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+	MessageThreadID       int64            `json:"message_thread_id,omitempty"`        // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	Video                 InputFile        `json:"video,omitempty"`                    // Video to send. Pass a file_id as String to send a video that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a video from the Internet, or upload a new video using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+	Duration              int64            `json:"duration,omitempty"`                 // Duration of sent video in seconds
+	Width                 int64            `json:"width,omitempty"`                    // Video width
+	Height                int64            `json:"height,omitempty"`                   // Video height
+	Thumbnail             InputFile        `json:"thumbnail,omitempty"`                // Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+	Cover                 InputFile        `json:"cover,omitempty"`                    // Cover for the video in the message. Pass a file_id to send a file that exists on the Telegram servers (recommended), pass an HTTP URL for Telegram to get a file from the Internet, or pass "attach://<file_attach_name>" to upload a new one using multipart/form-data under <file_attach_name> name. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+	StartTimestamp        int64            `json:"start_timestamp,omitempty"`          // Start timestamp for the video in the message
+	Caption               string           `json:"caption,omitempty"`                  // Video caption (may also be used when resending videos by file_id), 0-1024 characters after entities parsing
+	ParseMode             string           `json:"parse_mode,omitempty"`               // Mode for parsing entities in the video caption. See formatting options for more details.
+	CaptionEntities       []MessageEntity  `json:"caption_entities,omitempty"`         // A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
+	ShowCaptionAboveMedia bool             `json:"show_caption_above_media,omitempty"` // Pass True, if the caption must be shown above the message media
+	HasSpoiler            bool             `json:"has_spoiler,omitempty"`              // Pass True if the video needs to be covered with a spoiler animation
+	SupportsStreaming     bool             `json:"supports_streaming,omitempty"`       // Pass True if the uploaded video is suitable for streaming
+	DisableNotification   bool             `json:"disable_notification,omitempty"`     // Sends the message silently. Users will receive a notification with no sound.
+	ProtectContent        bool             `json:"protect_content,omitempty"`          // Protects the contents of the sent message from forwarding and saving
+	AllowPaidBroadcast    bool             `json:"allow_paid_broadcast,omitempty"`     // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	MessageEffectID       string           `json:"message_effect_id,omitempty"`        // Unique identifier of the message effect to be added to the message; for private chats only
+	ReplyParameters       *ReplyParameters `json:"reply_parameters,omitempty"`         // Description of the message to reply to
+	ReplyMarkup           Markup           `json:"reply_markup,omitempty"`             // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
 // Use this method to send animation files (GIF or H.264/MPEG-4 AVC video without sound). On success, the sent Message is returned. Bots can currently send animation files of up to 50 MB in size, this limit may be changed in the future.
 //
 // https://core.telegram.org/bots/api#sendanimation
 type SendAnimationRequest struct {
-	BusinessConnectionID  string                `json:"business_connection_id,omitempty"`   // Unique identifier of the business connection on behalf of which the message will be sent
-	ChatID                ChatID                `json:"chat_id,omitempty"`                  // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-	MessageThreadID       int64                 `json:"message_thread_id,omitempty"`        // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
-	Animation             InputFile             `json:"animation,omitempty"`                // Animation to send. Pass a file_id as String to send an animation that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get an animation from the Internet, or upload a new animation using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	Duration              int64                 `json:"duration,omitempty"`                 // Duration of sent animation in seconds
-	Width                 int64                 `json:"width,omitempty"`                    // Animation width
-	Height                int64                 `json:"height,omitempty"`                   // Animation height
-	Thumbnail             InputFile             `json:"thumbnail,omitempty"`                // Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	Caption               string                `json:"caption,omitempty"`                  // Animation caption (may also be used when resending animation by file_id), 0-1024 characters after entities parsing
-	ParseMode             string                `json:"parse_mode,omitempty"`               // Mode for parsing entities in the animation caption. See formatting options for more details.
-	CaptionEntities       []MessageEntity       `json:"caption_entities,omitempty"`         // A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
-	ShowCaptionAboveMedia bool                  `json:"show_caption_above_media,omitempty"` // Pass True, if the caption must be shown above the message media
-	HasSpoiler            bool                  `json:"has_spoiler,omitempty"`              // Pass True if the animation needs to be covered with a spoiler animation
-	DisableNotification   bool                  `json:"disable_notification,omitempty"`     // Sends the message silently. Users will receive a notification with no sound.
-	ProtectContent        bool                  `json:"protect_content,omitempty"`          // Protects the contents of the sent message from forwarding and saving
-	AllowPaidBroadcast    bool                  `json:"allow_paid_broadcast,omitempty"`     // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
-	MessageEffectID       string                `json:"message_effect_id,omitempty"`        // Unique identifier of the message effect to be added to the message; for private chats only
-	ReplyParameters       *ReplyParameters      `json:"reply_parameters,omitempty"`         // Description of the message to reply to
-	ReplyMarkup           *InlineKeyboardMarkup `json:"reply_markup,omitempty"`             // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	BusinessConnectionID  string           `json:"business_connection_id,omitempty"`   // Unique identifier of the business connection on behalf of which the message will be sent
+	ChatID                ChatID           `json:"chat_id,omitempty"`                  // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+	MessageThreadID       int64            `json:"message_thread_id,omitempty"`        // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	Animation             InputFile        `json:"animation,omitempty"`                // Animation to send. Pass a file_id as String to send an animation that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get an animation from the Internet, or upload a new animation using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+	Duration              int64            `json:"duration,omitempty"`                 // Duration of sent animation in seconds
+	Width                 int64            `json:"width,omitempty"`                    // Animation width
+	Height                int64            `json:"height,omitempty"`                   // Animation height
+	Thumbnail             InputFile        `json:"thumbnail,omitempty"`                // Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+	Caption               string           `json:"caption,omitempty"`                  // Animation caption (may also be used when resending animation by file_id), 0-1024 characters after entities parsing
+	ParseMode             string           `json:"parse_mode,omitempty"`               // Mode for parsing entities in the animation caption. See formatting options for more details.
+	CaptionEntities       []MessageEntity  `json:"caption_entities,omitempty"`         // A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
+	ShowCaptionAboveMedia bool             `json:"show_caption_above_media,omitempty"` // Pass True, if the caption must be shown above the message media
+	HasSpoiler            bool             `json:"has_spoiler,omitempty"`              // Pass True if the animation needs to be covered with a spoiler animation
+	DisableNotification   bool             `json:"disable_notification,omitempty"`     // Sends the message silently. Users will receive a notification with no sound.
+	ProtectContent        bool             `json:"protect_content,omitempty"`          // Protects the contents of the sent message from forwarding and saving
+	AllowPaidBroadcast    bool             `json:"allow_paid_broadcast,omitempty"`     // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	MessageEffectID       string           `json:"message_effect_id,omitempty"`        // Unique identifier of the message effect to be added to the message; for private chats only
+	ReplyParameters       *ReplyParameters `json:"reply_parameters,omitempty"`         // Description of the message to reply to
+	ReplyMarkup           Markup           `json:"reply_markup,omitempty"`             // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
 // Use this method to send audio files, if you want Telegram clients to display the file as a playable voice message. For this to work, your audio must be in an .OGG file encoded with OPUS, or in .MP3 format, or in .M4A format (other formats may be sent as Audio or Document). On success, the sent Message is returned. Bots can currently send voice messages of up to 50 MB in size, this limit may be changed in the future.
 //
 // https://core.telegram.org/bots/api#sendvoice
 type SendVoiceRequest struct {
-	BusinessConnectionID string                `json:"business_connection_id,omitempty"` // Unique identifier of the business connection on behalf of which the message will be sent
-	ChatID               ChatID                `json:"chat_id,omitempty"`                // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-	MessageThreadID      int64                 `json:"message_thread_id,omitempty"`      // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
-	Voice                InputFile             `json:"voice,omitempty"`                  // Audio file to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	Caption              string                `json:"caption,omitempty"`                // Voice message caption, 0-1024 characters after entities parsing
-	ParseMode            string                `json:"parse_mode,omitempty"`             // Mode for parsing entities in the voice message caption. See formatting options for more details.
-	CaptionEntities      []MessageEntity       `json:"caption_entities,omitempty"`       // A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
-	Duration             int64                 `json:"duration,omitempty"`               // Duration of the voice message in seconds
-	DisableNotification  bool                  `json:"disable_notification,omitempty"`   // Sends the message silently. Users will receive a notification with no sound.
-	ProtectContent       bool                  `json:"protect_content,omitempty"`        // Protects the contents of the sent message from forwarding and saving
-	AllowPaidBroadcast   bool                  `json:"allow_paid_broadcast,omitempty"`   // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
-	MessageEffectID      string                `json:"message_effect_id,omitempty"`      // Unique identifier of the message effect to be added to the message; for private chats only
-	ReplyParameters      *ReplyParameters      `json:"reply_parameters,omitempty"`       // Description of the message to reply to
-	ReplyMarkup          *InlineKeyboardMarkup `json:"reply_markup,omitempty"`           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	BusinessConnectionID string           `json:"business_connection_id,omitempty"` // Unique identifier of the business connection on behalf of which the message will be sent
+	ChatID               ChatID           `json:"chat_id,omitempty"`                // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+	MessageThreadID      int64            `json:"message_thread_id,omitempty"`      // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	Voice                InputFile        `json:"voice,omitempty"`                  // Audio file to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+	Caption              string           `json:"caption,omitempty"`                // Voice message caption, 0-1024 characters after entities parsing
+	ParseMode            string           `json:"parse_mode,omitempty"`             // Mode for parsing entities in the voice message caption. See formatting options for more details.
+	CaptionEntities      []MessageEntity  `json:"caption_entities,omitempty"`       // A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
+	Duration             int64            `json:"duration,omitempty"`               // Duration of the voice message in seconds
+	DisableNotification  bool             `json:"disable_notification,omitempty"`   // Sends the message silently. Users will receive a notification with no sound.
+	ProtectContent       bool             `json:"protect_content,omitempty"`        // Protects the contents of the sent message from forwarding and saving
+	AllowPaidBroadcast   bool             `json:"allow_paid_broadcast,omitempty"`   // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	MessageEffectID      string           `json:"message_effect_id,omitempty"`      // Unique identifier of the message effect to be added to the message; for private chats only
+	ReplyParameters      *ReplyParameters `json:"reply_parameters,omitempty"`       // Description of the message to reply to
+	ReplyMarkup          Markup           `json:"reply_markup,omitempty"`           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
 // As of v.4.0, Telegram clients support rounded square MPEG4 videos of up to 1 minute long. Use this method to send video messages. On success, the sent Message is returned.
 //
 // https://core.telegram.org/bots/api#sendvideonote
 type SendVideoNoteRequest struct {
-	BusinessConnectionID string                `json:"business_connection_id,omitempty"` // Unique identifier of the business connection on behalf of which the message will be sent
-	ChatID               ChatID                `json:"chat_id,omitempty"`                // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-	MessageThreadID      int64                 `json:"message_thread_id,omitempty"`      // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
-	VideoNote            InputFile             `json:"video_note,omitempty"`             // Video note to send. Pass a file_id as String to send a video note that exists on the Telegram servers (recommended) or upload a new video using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files. Sending video notes by a URL is currently unsupported
-	Duration             int64                 `json:"duration,omitempty"`               // Duration of sent video in seconds
-	Length               int64                 `json:"length,omitempty"`                 // Video width and height, i.e. diameter of the video message
-	Thumbnail            InputFile             `json:"thumbnail,omitempty"`              // Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	DisableNotification  bool                  `json:"disable_notification,omitempty"`   // Sends the message silently. Users will receive a notification with no sound.
-	ProtectContent       bool                  `json:"protect_content,omitempty"`        // Protects the contents of the sent message from forwarding and saving
-	AllowPaidBroadcast   bool                  `json:"allow_paid_broadcast,omitempty"`   // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
-	MessageEffectID      string                `json:"message_effect_id,omitempty"`      // Unique identifier of the message effect to be added to the message; for private chats only
-	ReplyParameters      *ReplyParameters      `json:"reply_parameters,omitempty"`       // Description of the message to reply to
-	ReplyMarkup          *InlineKeyboardMarkup `json:"reply_markup,omitempty"`           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	BusinessConnectionID string           `json:"business_connection_id,omitempty"` // Unique identifier of the business connection on behalf of which the message will be sent
+	ChatID               ChatID           `json:"chat_id,omitempty"`                // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+	MessageThreadID      int64            `json:"message_thread_id,omitempty"`      // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	VideoNote            InputFile        `json:"video_note,omitempty"`             // Video note to send. Pass a file_id as String to send a video note that exists on the Telegram servers (recommended) or upload a new video using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files. Sending video notes by a URL is currently unsupported
+	Duration             int64            `json:"duration,omitempty"`               // Duration of sent video in seconds
+	Length               int64            `json:"length,omitempty"`                 // Video width and height, i.e. diameter of the video message
+	Thumbnail            InputFile        `json:"thumbnail,omitempty"`              // Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+	DisableNotification  bool             `json:"disable_notification,omitempty"`   // Sends the message silently. Users will receive a notification with no sound.
+	ProtectContent       bool             `json:"protect_content,omitempty"`        // Protects the contents of the sent message from forwarding and saving
+	AllowPaidBroadcast   bool             `json:"allow_paid_broadcast,omitempty"`   // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	MessageEffectID      string           `json:"message_effect_id,omitempty"`      // Unique identifier of the message effect to be added to the message; for private chats only
+	ReplyParameters      *ReplyParameters `json:"reply_parameters,omitempty"`       // Description of the message to reply to
+	ReplyMarkup          Markup           `json:"reply_markup,omitempty"`           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
 // Use this method to send paid media. On success, the sent Message is returned.
 //
 // https://core.telegram.org/bots/api#sendpaidmedia
 type SendPaidMediaRequest struct {
-	BusinessConnectionID  string                `json:"business_connection_id,omitempty"`   // Unique identifier of the business connection on behalf of which the message will be sent
-	ChatID                ChatID                `json:"chat_id,omitempty"`                  // Unique identifier for the target chat or username of the target channel (in the format @channelusername). If the chat is a channel, all Telegram Star proceeds from this media will be credited to the chat's balance. Otherwise, they will be credited to the bot's balance.
-	StarCount             int64                 `json:"star_count,omitempty"`               // The number of Telegram Stars that must be paid to buy access to the media; 1-2500
-	Media                 []InputPaidMedia      `json:"media,omitempty"`                    // A JSON-serialized array describing the media to be sent; up to 10 items
-	Payload               string                `json:"payload,omitempty"`                  // Bot-defined paid media payload, 0-128 bytes. This will not be displayed to the user, use it for your internal processes.
-	Caption               string                `json:"caption,omitempty"`                  // Media caption, 0-1024 characters after entities parsing
-	ParseMode             string                `json:"parse_mode,omitempty"`               // Mode for parsing entities in the media caption. See formatting options for more details.
-	CaptionEntities       []MessageEntity       `json:"caption_entities,omitempty"`         // A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
-	ShowCaptionAboveMedia bool                  `json:"show_caption_above_media,omitempty"` // Pass True, if the caption must be shown above the message media
-	DisableNotification   bool                  `json:"disable_notification,omitempty"`     // Sends the message silently. Users will receive a notification with no sound.
-	ProtectContent        bool                  `json:"protect_content,omitempty"`          // Protects the contents of the sent message from forwarding and saving
-	AllowPaidBroadcast    bool                  `json:"allow_paid_broadcast,omitempty"`     // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
-	ReplyParameters       *ReplyParameters      `json:"reply_parameters,omitempty"`         // Description of the message to reply to
-	ReplyMarkup           *InlineKeyboardMarkup `json:"reply_markup,omitempty"`             // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	BusinessConnectionID  string           `json:"business_connection_id,omitempty"`   // Unique identifier of the business connection on behalf of which the message will be sent
+	ChatID                ChatID           `json:"chat_id,omitempty"`                  // Unique identifier for the target chat or username of the target channel (in the format @channelusername). If the chat is a channel, all Telegram Star proceeds from this media will be credited to the chat's balance. Otherwise, they will be credited to the bot's balance.
+	StarCount             int64            `json:"star_count,omitempty"`               // The number of Telegram Stars that must be paid to buy access to the media; 1-2500
+	Media                 []InputPaidMedia `json:"media,omitempty"`                    // A JSON-serialized array describing the media to be sent; up to 10 items
+	Payload               string           `json:"payload,omitempty"`                  // Bot-defined paid media payload, 0-128 bytes. This will not be displayed to the user, use it for your internal processes.
+	Caption               string           `json:"caption,omitempty"`                  // Media caption, 0-1024 characters after entities parsing
+	ParseMode             string           `json:"parse_mode,omitempty"`               // Mode for parsing entities in the media caption. See formatting options for more details.
+	CaptionEntities       []MessageEntity  `json:"caption_entities,omitempty"`         // A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
+	ShowCaptionAboveMedia bool             `json:"show_caption_above_media,omitempty"` // Pass True, if the caption must be shown above the message media
+	DisableNotification   bool             `json:"disable_notification,omitempty"`     // Sends the message silently. Users will receive a notification with no sound.
+	ProtectContent        bool             `json:"protect_content,omitempty"`          // Protects the contents of the sent message from forwarding and saving
+	AllowPaidBroadcast    bool             `json:"allow_paid_broadcast,omitempty"`     // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	ReplyParameters       *ReplyParameters `json:"reply_parameters,omitempty"`         // Description of the message to reply to
+	ReplyMarkup           Markup           `json:"reply_markup,omitempty"`             // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
 // Use this method to send a group of photos, videos, documents or audios as an album. Documents and audio files can be only grouped in an album with messages of the same type. On success, an array of Messages that were sent is returned.
 //
 // https://core.telegram.org/bots/api#sendmediagroup
 type SendMediaGroupRequest struct {
-	BusinessConnectionID string            `json:"business_connection_id,omitempty"` // Unique identifier of the business connection on behalf of which the message will be sent
-	ChatID               ChatID            `json:"chat_id,omitempty"`                // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-	MessageThreadID      int64             `json:"message_thread_id,omitempty"`      // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
-	Media                []InputMediaAudio `json:"media,omitempty"`                  // A JSON-serialized array describing messages to be sent, must include 2-10 items
-	DisableNotification  bool              `json:"disable_notification,omitempty"`   // Sends messages silently. Users will receive a notification with no sound.
-	ProtectContent       bool              `json:"protect_content,omitempty"`        // Protects the contents of the sent messages from forwarding and saving
-	AllowPaidBroadcast   bool              `json:"allow_paid_broadcast,omitempty"`   // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
-	MessageEffectID      string            `json:"message_effect_id,omitempty"`      // Unique identifier of the message effect to be added to the message; for private chats only
-	ReplyParameters      *ReplyParameters  `json:"reply_parameters,omitempty"`       // Description of the message to reply to
+	BusinessConnectionID string                 `json:"business_connection_id,omitempty"` // Unique identifier of the business connection on behalf of which the message will be sent
+	ChatID               ChatID                 `json:"chat_id,omitempty"`                // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+	MessageThreadID      int64                  `json:"message_thread_id,omitempty"`      // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	Media                []MediaGroupInputMedia `json:"media,omitempty"`                  // A JSON-serialized array describing messages to be sent, must include 2-10 items
+	DisableNotification  bool                   `json:"disable_notification,omitempty"`   // Sends messages silently. Users will receive a notification with no sound.
+	ProtectContent       bool                   `json:"protect_content,omitempty"`        // Protects the contents of the sent messages from forwarding and saving
+	AllowPaidBroadcast   bool                   `json:"allow_paid_broadcast,omitempty"`   // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	MessageEffectID      string                 `json:"message_effect_id,omitempty"`      // Unique identifier of the message effect to be added to the message; for private chats only
+	ReplyParameters      *ReplyParameters       `json:"reply_parameters,omitempty"`       // Description of the message to reply to
 }
 
 // Use this method to send point on the map. On success, the sent Message is returned.
 //
 // https://core.telegram.org/bots/api#sendlocation
 type SendLocationRequest struct {
-	BusinessConnectionID string                `json:"business_connection_id,omitempty"` // Unique identifier of the business connection on behalf of which the message will be sent
-	ChatID               ChatID                `json:"chat_id,omitempty"`                // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-	MessageThreadID      int64                 `json:"message_thread_id,omitempty"`      // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
-	Latitude             float64               `json:"latitude,omitempty"`               // Latitude of the location
-	Longitude            float64               `json:"longitude,omitempty"`              // Longitude of the location
-	HorizontalAccuracy   float64               `json:"horizontal_accuracy,omitempty"`    // The radius of uncertainty for the location, measured in meters; 0-1500
-	LivePeriod           int64                 `json:"live_period,omitempty"`            // Period in seconds during which the location will be updated (see Live Locations, should be between 60 and 86400, or 0x7FFFFFFF for live locations that can be edited indefinitely.
-	Heading              int64                 `json:"heading,omitempty"`                // For live locations, a direction in which the user is moving, in degrees. Must be between 1 and 360 if specified.
-	ProximityAlertRadius int64                 `json:"proximity_alert_radius,omitempty"` // For live locations, a maximum distance for proximity alerts about approaching another chat member, in meters. Must be between 1 and 100000 if specified.
-	DisableNotification  bool                  `json:"disable_notification,omitempty"`   // Sends the message silently. Users will receive a notification with no sound.
-	ProtectContent       bool                  `json:"protect_content,omitempty"`        // Protects the contents of the sent message from forwarding and saving
-	AllowPaidBroadcast   bool                  `json:"allow_paid_broadcast,omitempty"`   // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
-	MessageEffectID      string                `json:"message_effect_id,omitempty"`      // Unique identifier of the message effect to be added to the message; for private chats only
-	ReplyParameters      *ReplyParameters      `json:"reply_parameters,omitempty"`       // Description of the message to reply to
-	ReplyMarkup          *InlineKeyboardMarkup `json:"reply_markup,omitempty"`           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	BusinessConnectionID string           `json:"business_connection_id,omitempty"` // Unique identifier of the business connection on behalf of which the message will be sent
+	ChatID               ChatID           `json:"chat_id,omitempty"`                // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+	MessageThreadID      int64            `json:"message_thread_id,omitempty"`      // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	Latitude             float64          `json:"latitude,omitempty"`               // Latitude of the location
+	Longitude            float64          `json:"longitude,omitempty"`              // Longitude of the location
+	HorizontalAccuracy   float64          `json:"horizontal_accuracy,omitempty"`    // The radius of uncertainty for the location, measured in meters; 0-1500
+	LivePeriod           int64            `json:"live_period,omitempty"`            // Period in seconds during which the location will be updated (see Live Locations, should be between 60 and 86400, or 0x7FFFFFFF for live locations that can be edited indefinitely.
+	Heading              int64            `json:"heading,omitempty"`                // For live locations, a direction in which the user is moving, in degrees. Must be between 1 and 360 if specified.
+	ProximityAlertRadius int64            `json:"proximity_alert_radius,omitempty"` // For live locations, a maximum distance for proximity alerts about approaching another chat member, in meters. Must be between 1 and 100000 if specified.
+	DisableNotification  bool             `json:"disable_notification,omitempty"`   // Sends the message silently. Users will receive a notification with no sound.
+	ProtectContent       bool             `json:"protect_content,omitempty"`        // Protects the contents of the sent message from forwarding and saving
+	AllowPaidBroadcast   bool             `json:"allow_paid_broadcast,omitempty"`   // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	MessageEffectID      string           `json:"message_effect_id,omitempty"`      // Unique identifier of the message effect to be added to the message; for private chats only
+	ReplyParameters      *ReplyParameters `json:"reply_parameters,omitempty"`       // Description of the message to reply to
+	ReplyMarkup          Markup           `json:"reply_markup,omitempty"`           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
 // Use this method to send information about a venue. On success, the sent Message is returned.
 //
 // https://core.telegram.org/bots/api#sendvenue
 type SendVenueRequest struct {
-	BusinessConnectionID string                `json:"business_connection_id,omitempty"` // Unique identifier of the business connection on behalf of which the message will be sent
-	ChatID               ChatID                `json:"chat_id,omitempty"`                // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-	MessageThreadID      int64                 `json:"message_thread_id,omitempty"`      // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
-	Latitude             float64               `json:"latitude,omitempty"`               // Latitude of the venue
-	Longitude            float64               `json:"longitude,omitempty"`              // Longitude of the venue
-	Title                string                `json:"title,omitempty"`                  // Name of the venue
-	Address              string                `json:"address,omitempty"`                // Address of the venue
-	FoursquareID         string                `json:"foursquare_id,omitempty"`          // Foursquare identifier of the venue
-	FoursquareType       string                `json:"foursquare_type,omitempty"`        // Foursquare type of the venue, if known. (For example, "arts_entertainment/default", "arts_entertainment/aquarium" or "food/icecream".)
-	GooglePlaceID        string                `json:"google_place_id,omitempty"`        // Google Places identifier of the venue
-	GooglePlaceType      string                `json:"google_place_type,omitempty"`      // Google Places type of the venue. (See supported types.)
-	DisableNotification  bool                  `json:"disable_notification,omitempty"`   // Sends the message silently. Users will receive a notification with no sound.
-	ProtectContent       bool                  `json:"protect_content,omitempty"`        // Protects the contents of the sent message from forwarding and saving
-	AllowPaidBroadcast   bool                  `json:"allow_paid_broadcast,omitempty"`   // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
-	MessageEffectID      string                `json:"message_effect_id,omitempty"`      // Unique identifier of the message effect to be added to the message; for private chats only
-	ReplyParameters      *ReplyParameters      `json:"reply_parameters,omitempty"`       // Description of the message to reply to
-	ReplyMarkup          *InlineKeyboardMarkup `json:"reply_markup,omitempty"`           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	BusinessConnectionID string           `json:"business_connection_id,omitempty"` // Unique identifier of the business connection on behalf of which the message will be sent
+	ChatID               ChatID           `json:"chat_id,omitempty"`                // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+	MessageThreadID      int64            `json:"message_thread_id,omitempty"`      // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	Latitude             float64          `json:"latitude,omitempty"`               // Latitude of the venue
+	Longitude            float64          `json:"longitude,omitempty"`              // Longitude of the venue
+	Title                string           `json:"title,omitempty"`                  // Name of the venue
+	Address              string           `json:"address,omitempty"`                // Address of the venue
+	FoursquareID         string           `json:"foursquare_id,omitempty"`          // Foursquare identifier of the venue
+	FoursquareType       string           `json:"foursquare_type,omitempty"`        // Foursquare type of the venue, if known. (For example, "arts_entertainment/default", "arts_entertainment/aquarium" or "food/icecream".)
+	GooglePlaceID        string           `json:"google_place_id,omitempty"`        // Google Places identifier of the venue
+	GooglePlaceType      string           `json:"google_place_type,omitempty"`      // Google Places type of the venue. (See supported types.)
+	DisableNotification  bool             `json:"disable_notification,omitempty"`   // Sends the message silently. Users will receive a notification with no sound.
+	ProtectContent       bool             `json:"protect_content,omitempty"`        // Protects the contents of the sent message from forwarding and saving
+	AllowPaidBroadcast   bool             `json:"allow_paid_broadcast,omitempty"`   // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	MessageEffectID      string           `json:"message_effect_id,omitempty"`      // Unique identifier of the message effect to be added to the message; for private chats only
+	ReplyParameters      *ReplyParameters `json:"reply_parameters,omitempty"`       // Description of the message to reply to
+	ReplyMarkup          Markup           `json:"reply_markup,omitempty"`           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
 // Use this method to send phone contacts. On success, the sent Message is returned.
 //
 // https://core.telegram.org/bots/api#sendcontact
 type SendContactRequest struct {
-	BusinessConnectionID string                `json:"business_connection_id,omitempty"` // Unique identifier of the business connection on behalf of which the message will be sent
-	ChatID               ChatID                `json:"chat_id,omitempty"`                // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-	MessageThreadID      int64                 `json:"message_thread_id,omitempty"`      // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
-	PhoneNumber          string                `json:"phone_number,omitempty"`           // Contact's phone number
-	FirstName            string                `json:"first_name,omitempty"`             // Contact's first name
-	LastName             string                `json:"last_name,omitempty"`              // Contact's last name
-	Vcard                string                `json:"vcard,omitempty"`                  // Additional data about the contact in the form of a vCard, 0-2048 bytes
-	DisableNotification  bool                  `json:"disable_notification,omitempty"`   // Sends the message silently. Users will receive a notification with no sound.
-	ProtectContent       bool                  `json:"protect_content,omitempty"`        // Protects the contents of the sent message from forwarding and saving
-	AllowPaidBroadcast   bool                  `json:"allow_paid_broadcast,omitempty"`   // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
-	MessageEffectID      string                `json:"message_effect_id,omitempty"`      // Unique identifier of the message effect to be added to the message; for private chats only
-	ReplyParameters      *ReplyParameters      `json:"reply_parameters,omitempty"`       // Description of the message to reply to
-	ReplyMarkup          *InlineKeyboardMarkup `json:"reply_markup,omitempty"`           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	BusinessConnectionID string           `json:"business_connection_id,omitempty"` // Unique identifier of the business connection on behalf of which the message will be sent
+	ChatID               ChatID           `json:"chat_id,omitempty"`                // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+	MessageThreadID      int64            `json:"message_thread_id,omitempty"`      // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	PhoneNumber          string           `json:"phone_number,omitempty"`           // Contact's phone number
+	FirstName            string           `json:"first_name,omitempty"`             // Contact's first name
+	LastName             string           `json:"last_name,omitempty"`              // Contact's last name
+	Vcard                string           `json:"vcard,omitempty"`                  // Additional data about the contact in the form of a vCard, 0-2048 bytes
+	DisableNotification  bool             `json:"disable_notification,omitempty"`   // Sends the message silently. Users will receive a notification with no sound.
+	ProtectContent       bool             `json:"protect_content,omitempty"`        // Protects the contents of the sent message from forwarding and saving
+	AllowPaidBroadcast   bool             `json:"allow_paid_broadcast,omitempty"`   // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	MessageEffectID      string           `json:"message_effect_id,omitempty"`      // Unique identifier of the message effect to be added to the message; for private chats only
+	ReplyParameters      *ReplyParameters `json:"reply_parameters,omitempty"`       // Description of the message to reply to
+	ReplyMarkup          Markup           `json:"reply_markup,omitempty"`           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
 // Use this method to send a native poll. On success, the sent Message is returned.
 //
 // https://core.telegram.org/bots/api#sendpoll
 type SendPollRequest struct {
-	BusinessConnectionID  string                `json:"business_connection_id,omitempty"`  // Unique identifier of the business connection on behalf of which the message will be sent
-	ChatID                ChatID                `json:"chat_id,omitempty"`                 // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-	MessageThreadID       int64                 `json:"message_thread_id,omitempty"`       // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
-	Question              string                `json:"question,omitempty"`                // Poll question, 1-300 characters
-	QuestionParseMode     string                `json:"question_parse_mode,omitempty"`     // Mode for parsing entities in the question. See formatting options for more details. Currently, only custom emoji entities are allowed
-	QuestionEntities      []MessageEntity       `json:"question_entities,omitempty"`       // A JSON-serialized list of special entities that appear in the poll question. It can be specified instead of question_parse_mode
-	Options               []InputPollOption     `json:"options,omitempty"`                 // A JSON-serialized list of 2-10 answer options
-	IsAnonymous           bool                  `json:"is_anonymous,omitempty"`            // True, if the poll needs to be anonymous, defaults to True
-	Type                  string                `json:"type,omitempty"`                    // Poll type, "quiz" or "regular", defaults to "regular"
-	AllowsMultipleAnswers bool                  `json:"allows_multiple_answers,omitempty"` // True, if the poll allows multiple answers, ignored for polls in quiz mode, defaults to False
-	CorrectOptionID       int64                 `json:"correct_option_id,omitempty"`       // 0-based identifier of the correct answer option, required for polls in quiz mode
-	Explanation           string                `json:"explanation,omitempty"`             // Text that is shown when a user chooses an incorrect answer or taps on the lamp icon in a quiz-style poll, 0-200 characters with at most 2 line feeds after entities parsing
-	ExplanationParseMode  string                `json:"explanation_parse_mode,omitempty"`  // Mode for parsing entities in the explanation. See formatting options for more details.
-	ExplanationEntities   []MessageEntity       `json:"explanation_entities,omitempty"`    // A JSON-serialized list of special entities that appear in the poll explanation. It can be specified instead of explanation_parse_mode
-	OpenPeriod            int64                 `json:"open_period,omitempty"`             // Amount of time in seconds the poll will be active after creation, 5-600. Can't be used together with close_date.
-	CloseDate             int64                 `json:"close_date,omitempty"`              // Point in time (Unix timestamp) when the poll will be automatically closed. Must be at least 5 and no more than 600 seconds in the future. Can't be used together with open_period.
-	IsClosed              bool                  `json:"is_closed,omitempty"`               // Pass True if the poll needs to be immediately closed. This can be useful for poll preview.
-	DisableNotification   bool                  `json:"disable_notification,omitempty"`    // Sends the message silently. Users will receive a notification with no sound.
-	ProtectContent        bool                  `json:"protect_content,omitempty"`         // Protects the contents of the sent message from forwarding and saving
-	AllowPaidBroadcast    bool                  `json:"allow_paid_broadcast,omitempty"`    // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
-	MessageEffectID       string                `json:"message_effect_id,omitempty"`       // Unique identifier of the message effect to be added to the message; for private chats only
-	ReplyParameters       *ReplyParameters      `json:"reply_parameters,omitempty"`        // Description of the message to reply to
-	ReplyMarkup           *InlineKeyboardMarkup `json:"reply_markup,omitempty"`            // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	BusinessConnectionID  string            `json:"business_connection_id,omitempty"`  // Unique identifier of the business connection on behalf of which the message will be sent
+	ChatID                ChatID            `json:"chat_id,omitempty"`                 // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+	MessageThreadID       int64             `json:"message_thread_id,omitempty"`       // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	Question              string            `json:"question,omitempty"`                // Poll question, 1-300 characters
+	QuestionParseMode     string            `json:"question_parse_mode,omitempty"`     // Mode for parsing entities in the question. See formatting options for more details. Currently, only custom emoji entities are allowed
+	QuestionEntities      []MessageEntity   `json:"question_entities,omitempty"`       // A JSON-serialized list of special entities that appear in the poll question. It can be specified instead of question_parse_mode
+	Options               []InputPollOption `json:"options,omitempty"`                 // A JSON-serialized list of 2-10 answer options
+	IsAnonymous           bool              `json:"is_anonymous,omitempty"`            // True, if the poll needs to be anonymous, defaults to True
+	Type                  string            `json:"type,omitempty"`                    // Poll type, "quiz" or "regular", defaults to "regular"
+	AllowsMultipleAnswers bool              `json:"allows_multiple_answers,omitempty"` // True, if the poll allows multiple answers, ignored for polls in quiz mode, defaults to False
+	CorrectOptionID       int64             `json:"correct_option_id,omitempty"`       // 0-based identifier of the correct answer option, required for polls in quiz mode
+	Explanation           string            `json:"explanation,omitempty"`             // Text that is shown when a user chooses an incorrect answer or taps on the lamp icon in a quiz-style poll, 0-200 characters with at most 2 line feeds after entities parsing
+	ExplanationParseMode  string            `json:"explanation_parse_mode,omitempty"`  // Mode for parsing entities in the explanation. See formatting options for more details.
+	ExplanationEntities   []MessageEntity   `json:"explanation_entities,omitempty"`    // A JSON-serialized list of special entities that appear in the poll explanation. It can be specified instead of explanation_parse_mode
+	OpenPeriod            int64             `json:"open_period,omitempty"`             // Amount of time in seconds the poll will be active after creation, 5-600. Can't be used together with close_date.
+	CloseDate             int64             `json:"close_date,omitempty"`              // Point in time (Unix timestamp) when the poll will be automatically closed. Must be at least 5 and no more than 600 seconds in the future. Can't be used together with open_period.
+	IsClosed              bool              `json:"is_closed,omitempty"`               // Pass True if the poll needs to be immediately closed. This can be useful for poll preview.
+	DisableNotification   bool              `json:"disable_notification,omitempty"`    // Sends the message silently. Users will receive a notification with no sound.
+	ProtectContent        bool              `json:"protect_content,omitempty"`         // Protects the contents of the sent message from forwarding and saving
+	AllowPaidBroadcast    bool              `json:"allow_paid_broadcast,omitempty"`    // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	MessageEffectID       string            `json:"message_effect_id,omitempty"`       // Unique identifier of the message effect to be added to the message; for private chats only
+	ReplyParameters       *ReplyParameters  `json:"reply_parameters,omitempty"`        // Description of the message to reply to
+	ReplyMarkup           Markup            `json:"reply_markup,omitempty"`            // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
 // Use this method to send an animated emoji that will display a random value. On success, the sent Message is returned.
 //
 // https://core.telegram.org/bots/api#senddice
 type SendDiceRequest struct {
-	BusinessConnectionID string                `json:"business_connection_id,omitempty"` // Unique identifier of the business connection on behalf of which the message will be sent
-	ChatID               ChatID                `json:"chat_id,omitempty"`                // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-	MessageThreadID      int64                 `json:"message_thread_id,omitempty"`      // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
-	Emoji                string                `json:"emoji,omitempty"`                  // Emoji on which the dice throw animation is based. Currently, must be one of "🎲", "🎯", "🏀", "⚽", "🎳", or "🎰". Dice can have values 1-6 for "🎲", "🎯" and "🎳", values 1-5 for "🏀" and "⚽", and values 1-64 for "🎰". Defaults to "🎲"
-	DisableNotification  bool                  `json:"disable_notification,omitempty"`   // Sends the message silently. Users will receive a notification with no sound.
-	ProtectContent       bool                  `json:"protect_content,omitempty"`        // Protects the contents of the sent message from forwarding
-	AllowPaidBroadcast   bool                  `json:"allow_paid_broadcast,omitempty"`   // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
-	MessageEffectID      string                `json:"message_effect_id,omitempty"`      // Unique identifier of the message effect to be added to the message; for private chats only
-	ReplyParameters      *ReplyParameters      `json:"reply_parameters,omitempty"`       // Description of the message to reply to
-	ReplyMarkup          *InlineKeyboardMarkup `json:"reply_markup,omitempty"`           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	BusinessConnectionID string           `json:"business_connection_id,omitempty"` // Unique identifier of the business connection on behalf of which the message will be sent
+	ChatID               ChatID           `json:"chat_id,omitempty"`                // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+	MessageThreadID      int64            `json:"message_thread_id,omitempty"`      // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	Emoji                string           `json:"emoji,omitempty"`                  // Emoji on which the dice throw animation is based. Currently, must be one of "🎲", "🎯", "🏀", "⚽", "🎳", or "🎰". Dice can have values 1-6 for "🎲", "🎯" and "🎳", values 1-5 for "🏀" and "⚽", and values 1-64 for "🎰". Defaults to "🎲"
+	DisableNotification  bool             `json:"disable_notification,omitempty"`   // Sends the message silently. Users will receive a notification with no sound.
+	ProtectContent       bool             `json:"protect_content,omitempty"`        // Protects the contents of the sent message from forwarding
+	AllowPaidBroadcast   bool             `json:"allow_paid_broadcast,omitempty"`   // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	MessageEffectID      string           `json:"message_effect_id,omitempty"`      // Unique identifier of the message effect to be added to the message; for private chats only
+	ReplyParameters      *ReplyParameters `json:"reply_parameters,omitempty"`       // Description of the message to reply to
+	ReplyMarkup          Markup           `json:"reply_markup,omitempty"`           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
 // Use this method when you need to tell the user that something is happening on the bot's side. The status is set for 5 seconds or less (when a message arrives from your bot, Telegram clients clear its typing status). Returns True on success.
@@ -1103,17 +1103,17 @@ type DeleteMessagesRequest struct {
 //
 // https://core.telegram.org/bots/api#sendsticker
 type SendStickerRequest struct {
-	BusinessConnectionID string                `json:"business_connection_id,omitempty"` // Unique identifier of the business connection on behalf of which the message will be sent
-	ChatID               ChatID                `json:"chat_id,omitempty"`                // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-	MessageThreadID      int64                 `json:"message_thread_id,omitempty"`      // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
-	Sticker              InputFile             `json:"sticker,omitempty"`                // Sticker to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a .WEBP sticker from the Internet, or upload a new .WEBP, .TGS, or .WEBM sticker using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files. Video and animated stickers can't be sent via an HTTP URL.
-	Emoji                string                `json:"emoji,omitempty"`                  // Emoji associated with the sticker; only for just uploaded stickers
-	DisableNotification  bool                  `json:"disable_notification,omitempty"`   // Sends the message silently. Users will receive a notification with no sound.
-	ProtectContent       bool                  `json:"protect_content,omitempty"`        // Protects the contents of the sent message from forwarding and saving
-	AllowPaidBroadcast   bool                  `json:"allow_paid_broadcast,omitempty"`   // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
-	MessageEffectID      string                `json:"message_effect_id,omitempty"`      // Unique identifier of the message effect to be added to the message; for private chats only
-	ReplyParameters      *ReplyParameters      `json:"reply_parameters,omitempty"`       // Description of the message to reply to
-	ReplyMarkup          *InlineKeyboardMarkup `json:"reply_markup,omitempty"`           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	BusinessConnectionID string           `json:"business_connection_id,omitempty"` // Unique identifier of the business connection on behalf of which the message will be sent
+	ChatID               ChatID           `json:"chat_id,omitempty"`                // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+	MessageThreadID      int64            `json:"message_thread_id,omitempty"`      // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	Sticker              InputFile        `json:"sticker,omitempty"`                // Sticker to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a .WEBP sticker from the Internet, or upload a new .WEBP, .TGS, or .WEBM sticker using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files. Video and animated stickers can't be sent via an HTTP URL.
+	Emoji                string           `json:"emoji,omitempty"`                  // Emoji associated with the sticker; only for just uploaded stickers
+	DisableNotification  bool             `json:"disable_notification,omitempty"`   // Sends the message silently. Users will receive a notification with no sound.
+	ProtectContent       bool             `json:"protect_content,omitempty"`        // Protects the contents of the sent message from forwarding and saving
+	AllowPaidBroadcast   bool             `json:"allow_paid_broadcast,omitempty"`   // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	MessageEffectID      string           `json:"message_effect_id,omitempty"`      // Unique identifier of the message effect to be added to the message; for private chats only
+	ReplyParameters      *ReplyParameters `json:"reply_parameters,omitempty"`       // Description of the message to reply to
+	ReplyMarkup          Markup           `json:"reply_markup,omitempty"`           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
 // Use this method to get a sticker set. On success, a StickerSet object is returned.

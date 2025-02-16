@@ -94,23 +94,13 @@ func generateRequests(methods []Method, nonPtrTypes []string) {
 }
 
 func generateTypes(types []Type, nonPtrTypes []string) {
-	b, err := os.ReadFile("./cmd/gen/types/types.go")
-
-	if err != nil {
-		panic(err)
-	}
-
 	f, err := os.OpenFile("./pkg/types/types.go", genFileMode, genFilePerm)
 
 	if err != nil {
 		panic(err)
 	}
 
-	_, err = f.Write(b)
-
-	if err != nil {
-		panic(err)
-	}
+	f.WriteString("package types\n\n")
 
 	for _, t := range types {
 		typeString := generateTypeString(t, t.Name, nonPtrTypes)
@@ -140,16 +130,6 @@ func generateTypeString(t Type, name string, nonPtrTypes []string) string {
 	builder.WriteString(decl)
 
 	for i, field := range t.Fields {
-		/* TOOD: types for
-		sendMessage reply_markup [InlineKeyboardMarkup ReplyKeyboardMarkup ReplyKeyboardRemove ForceReply]
-		sendMediaGroup media [Array of InputMediaAudio Array of InputMediaDocument Array of InputMediaPhoto Array of InputMediaVideo]
-		*/
-
-		if len(field.Types) > 1 && !slices.Contains(field.Types, "InputFile") &&
-			!strings.HasSuffix(field.Name, "id") {
-			fmt.Println(t.Name, field.Name, field.Types)
-		}
-
 		fieldName := toPascalCase(field.Name)
 		fieldType := getFieldTypeString(
 			field.Name,
@@ -178,6 +158,14 @@ func generateTypeString(t Type, name string, nonPtrTypes []string) string {
 }
 
 func getFieldTypeString(fieldName string, fieldTypes []string, isPtr bool) string {
+	if fieldName == "reply_markup" && len(fieldTypes) == 4 {
+		return "Markup"
+	}
+
+	if fieldName == "media" && len(fieldTypes) == 4 {
+		return "[]MediaGroupInputMedia"
+	}
+
 	if fieldName == "message_id" {
 		return "int"
 	}

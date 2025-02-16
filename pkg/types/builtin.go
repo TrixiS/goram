@@ -21,3 +21,9 @@ func (c ChatID) MarshalJSON() ([]byte, error) {
 
 	panic("invalid id")
 }
+
+// InlineKeyboardMarkup | ReplyKeyboardMarkup | ReplyKeyboardRemove | ForceReply
+type Markup interface{}
+
+// InputMediaAudio | InputMediaDocument | InputMediaPhoto | InputMediaVideo
+type MediaGroupInputMedia interface{}
