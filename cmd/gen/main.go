@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"slices"
 	"strings"
+	"unicode"
 )
 
 type Enum struct {
@@ -13,8 +15,22 @@ type Enum struct {
 	Values []string `json:"values"`
 }
 
+type TypeField struct {
+	Name        string   `json:"name"`
+	Types       []string `json:"types"`
+	Description string   `json:"description"`
+}
+
+type Type struct {
+	Name        string      `json:"name"`
+	Href        string      `json:"href"`
+	Description []string    `json:"description"`
+	Fields      []TypeField `json:"fields"`
+}
+
 type Spec struct {
 	Enums []Enum `json:"enums"`
+	Types []Type `json:"types"`
 }
 
 func main() {
@@ -32,18 +48,145 @@ func main() {
 		panic(err)
 	}
 
+	enumsNames := make([]string, len(spec.Enums))
+
+	for i, e := range spec.Enums {
+		enumsNames[i] = e.Name
+	}
+
+	noPtrTypes := []string{}
+
+	for _, t := range spec.Types {
+		if len(t.Fields) == 0 {
+			noPtrTypes = append(noPtrTypes, t.Name)
+		}
+	}
+
 	generateEnums(spec.Enums)
+	generateTypes(noPtrTypes, enumsNames, spec.Types)
 	exec.Command("gofmt", "-s", "-w", "./pkg").Run()
 }
 
-func generateEnums(enums []Enum) {
-	f, err := os.OpenFile("./pkg/types/enums.go", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0o660)
+const genFileMode = os.O_WRONLY | os.O_TRUNC | os.O_CREATE
+const genFilePerm = 0o660
+
+func generateTypes(nonPtrTypes []string, enumNames []string, types []Type) {
+	b, err := os.ReadFile("./cmd/gen/types/types.go")
 
 	if err != nil {
 		panic(err)
 	}
 
-	defer f.Close()
+	f, err := os.OpenFile("./pkg/types/types.go", genFileMode, genFilePerm)
+
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = f.Write(b)
+
+	if err != nil {
+		panic(err)
+	}
+
+	for _, t := range types {
+		for _, d := range t.Description {
+			comment := fmt.Sprintf("// %s\n", d)
+			f.WriteString(comment)
+		}
+
+		isInterface := slices.Contains(nonPtrTypes, t.Name)
+
+		if isInterface {
+			decl := fmt.Sprintf("type %s interface{}\n", t.Name)
+			f.WriteString(decl)
+			continue
+		}
+
+		decl := fmt.Sprintf("type %s struct {\n", t.Name)
+		f.WriteString(decl)
+
+		for i, field := range t.Fields {
+			if len(field.Types) > 1 {
+				fmt.Println(t.Name, field.Types)
+			}
+
+			fieldName := toPascalCase(field.Name)
+			isEnum := slices.Contains(enumNames, field.Types[0])
+			isPtr := !isEnum && !slices.Contains(nonPtrTypes, fieldName)
+			fieldType := getFieldTypeString(field.Name, field.Types, isPtr)
+
+			structField := fmt.Sprintf(
+				"%s %s `json:\"%s\"` // %s",
+				fieldName,
+				fieldType,
+				field.Name,
+				field.Description,
+			)
+
+			f.WriteString(structField)
+
+			if i < len(t.Fields)-1 {
+				f.WriteString("\n")
+			}
+		}
+
+		f.WriteString("\n}\n")
+	}
+
+	f.Close()
+}
+
+func getFieldTypeString(fieldName string, fieldTypes []string, isPtr bool) string {
+	t := fieldTypes[0]
+
+	if t == "Integer" {
+		if (fieldName == "id" && len(fieldTypes) == 2) || strings.Contains(fieldName, "chat_id") {
+			return "ChatID"
+		}
+
+		return "int64"
+	}
+
+	return convertFieldTypeString(t, isPtr)
+}
+
+func convertFieldTypeString(fieldType string, isPtr bool) string {
+	if fieldType == "Integer" {
+		return "int64"
+	}
+
+	if fieldType == "String" {
+		return "string"
+	}
+
+	if fieldType == "Boolean" {
+		return "bool"
+	}
+
+	if fieldType == "Float" {
+		return "float64"
+	}
+
+	const arrayPrefix = "Array of "
+
+	if strings.HasPrefix(fieldType, arrayPrefix) {
+		return "[]" + convertFieldTypeString(fieldType[len(arrayPrefix):], false) // no []*T
+	}
+
+	if isPtr {
+		return "*" + fieldType
+	}
+
+	return fieldType
+}
+
+func generateEnums(enums []Enum) {
+	f, err := os.OpenFile("./pkg/types/enums.go", genFileMode, genFilePerm)
+
+	if err != nil {
+		panic(err)
+	}
 
 	f.WriteString("package types\n\n")
 
@@ -54,37 +197,40 @@ func generateEnums(enums []Enum) {
 		f.WriteString("const (\n")
 
 		for _, v := range e.Values {
-			name := makeEnumValueName(e.Name, v)
+			name := e.Name + toPascalCase(v)
 			assig := fmt.Sprintf("%s %s = \"%s\"\n", name, e.Name, v)
 			f.WriteString(assig)
 		}
 
 		f.WriteString("\n)\n")
 	}
+
+	f.Close()
 }
 
-func makeEnumValueName(enumName string, v string) string {
+func toPascalCase(v string) string {
 	runes := []rune(v)
 
 	builder := &strings.Builder{}
-	builder.Grow(len(enumName) + len(runes))
-
-	builder.WriteString(enumName)
-	builder.WriteString(strings.ToUpper(string(runes[0])))
+	builder.WriteRune(unicode.ToUpper(runes[0]))
 
 	upper := false
 
-	for _, r := range runes[1:] {
+	for i, r := range runes[1:] {
 		if r == '_' {
 			upper = true
 			continue
 		}
 
+		i++
+
 		if upper {
 			upper = false
-			builder.WriteString(strings.ToUpper(string(r)))
+			builder.WriteRune(unicode.ToUpper(r))
+		} else if (i < len(runes)-2 && r == 'i' && runes[i+1] == 'd') || (i > 0 && r == 'd' && runes[i-1] == 'i') { // detect id
+			builder.WriteRune(unicode.ToUpper(r))
 		} else {
-			builder.WriteString(string(r))
+			builder.WriteRune(r)
 		}
 	}
 
