@@ -1,8 +1,6 @@
 package types
 
-// Use this method to receive incoming updates using long polling (wiki). Returns an Array of Update objects.
-//
-// https://core.telegram.org/bots/api#getupdates
+// use Bot.GetUpdates(ctx, &GetUpdatesRequest{})
 type GetUpdatesRequest struct {
 	Offset         int64    `json:"offset,omitempty"`          // Identifier of the first update to be returned. Must be greater by one than the highest among the identifiers of previously received updates. By default, updates starting with the earliest unconfirmed update are returned. An update is considered confirmed as soon as getUpdates is called with an offset higher than its update_id. The negative offset can be specified to retrieve updates starting from -offset update from the end of the updates queue. All previous updates will be forgotten.
 	Limit          int64    `json:"limit,omitempty"`           // Limits the number of updates to be retrieved. Values between 1-100 are accepted. Defaults to 100.
@@ -10,11 +8,7 @@ type GetUpdatesRequest struct {
 	AllowedUpdates []string `json:"allowed_updates,omitempty"` // A JSON-serialized list of the update types you want your bot to receive. For example, specify ["message", "edited_channel_post", "callback_query"] to only receive updates of these types. See Update for a complete list of available update types. Specify an empty list to receive all update types except chat_member, message_reaction, and message_reaction_count (default). If not specified, the previous setting will be used. Please note that this parameter doesn't affect updates created before the call to getUpdates, so unwanted updates may be received for a short period of time.
 }
 
-// Use this method to specify a URL and receive incoming updates via an outgoing webhook. Whenever there is an update for the bot, we will send an HTTPS POST request to the specified URL, containing a JSON-serialized Update. In case of an unsuccessful request (a request with response HTTP status code different from 2XY), we will repeat the request and give up after a reasonable amount of attempts. Returns True on success.
-//
-// If you'd like to make sure that the webhook was set by you, you can specify secret data in the parameter secret_token. If specified, the request will contain a header "X-Telegram-Bot-Api-Secret-Token" with the secret token as content.
-//
-// https://core.telegram.org/bots/api#setwebhook
+// use Bot.SetWebhook(ctx, &SetWebhookRequest{})
 type SetWebhookRequest struct {
 	Url                string    `json:"url,omitempty"`                  // HTTPS URL to send updates to. Use an empty string to remove webhook integration
 	Certificate        InputFile `json:"certificate,omitempty"`          // Upload your public key certificate so that the root certificate in use can be checked. See our self-signed guide for details.
@@ -25,36 +19,12 @@ type SetWebhookRequest struct {
 	SecretToken        string    `json:"secret_token,omitempty"`         // A secret token to be sent in a header "X-Telegram-Bot-Api-Secret-Token" in every webhook request, 1-256 characters. Only characters A-Z, a-z, 0-9, _ and - are allowed. The header is useful to ensure that the request comes from a webhook set by you.
 }
 
-// Use this method to remove webhook integration if you decide to switch back to getUpdates. Returns True on success.
-//
-// https://core.telegram.org/bots/api#deletewebhook
+// use Bot.DeleteWebhook(ctx, &DeleteWebhookRequest{})
 type DeleteWebhookRequest struct {
 	DropPendingUpdates bool `json:"drop_pending_updates,omitempty"` // Pass True to drop all pending updates
 }
 
-// Use this method to get current webhook status. Requires no parameters. On success, returns a WebhookInfo object. If the bot is using getUpdates, will return an object with the url field empty.
-//
-// https://core.telegram.org/bots/api#getwebhookinfo
-type GetWebhookInfoRequest interface{}
-
-// A simple method for testing your bot's authentication token. Requires no parameters. Returns basic information about the bot in form of a User object.
-//
-// https://core.telegram.org/bots/api#getme
-type GetMeRequest interface{}
-
-// Use this method to log out from the cloud Bot API server before launching the bot locally. You must log out the bot before running it locally, otherwise there is no guarantee that the bot will receive updates. After a successful call, you can immediately log in on a local server, but will not be able to log in back to the cloud Bot API server for 10 minutes. Returns True on success. Requires no parameters.
-//
-// https://core.telegram.org/bots/api#logout
-type LogOutRequest interface{}
-
-// Use this method to close the bot instance before moving it from one local server to another. You need to delete the webhook before calling this method to ensure that the bot isn't launched again after server restart. The method will return error 429 in the first 10 minutes after the bot is launched. Returns True on success. Requires no parameters.
-//
-// https://core.telegram.org/bots/api#close
-type CloseRequest interface{}
-
-// Use this method to send text messages. On success, the sent Message is returned.
-//
-// https://core.telegram.org/bots/api#sendmessage
+// use Bot.SendMessage(ctx, &SendMessageRequest{})
 type SendMessageRequest struct {
 	BusinessConnectionID string              `json:"business_connection_id,omitempty"` // Unique identifier of the business connection on behalf of which the message will be sent
 	ChatID               ChatID              `json:"chat_id,omitempty"`                // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
@@ -71,9 +41,7 @@ type SendMessageRequest struct {
 	ReplyMarkup          Markup              `json:"reply_markup,omitempty"`           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
-// Use this method to forward messages of any kind. Service messages and messages with protected content can't be forwarded. On success, the sent Message is returned.
-//
-// https://core.telegram.org/bots/api#forwardmessage
+// use Bot.ForwardMessage(ctx, &ForwardMessageRequest{})
 type ForwardMessageRequest struct {
 	ChatID              ChatID `json:"chat_id,omitempty"`               // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 	MessageThreadID     int64  `json:"message_thread_id,omitempty"`     // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
@@ -84,9 +52,7 @@ type ForwardMessageRequest struct {
 	MessageID           int    `json:"message_id,omitempty"`            // Message identifier in the chat specified in from_chat_id
 }
 
-// Use this method to forward multiple messages of any kind. If some of the specified messages can't be found or forwarded, they are skipped. Service messages and messages with protected content can't be forwarded. Album grouping is kept for forwarded messages. On success, an array of MessageId of the sent messages is returned.
-//
-// https://core.telegram.org/bots/api#forwardmessages
+// use Bot.ForwardMessages(ctx, &ForwardMessagesRequest{})
 type ForwardMessagesRequest struct {
 	ChatID              ChatID  `json:"chat_id,omitempty"`              // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 	MessageThreadID     int64   `json:"message_thread_id,omitempty"`    // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
@@ -96,9 +62,7 @@ type ForwardMessagesRequest struct {
 	ProtectContent      bool    `json:"protect_content,omitempty"`      // Protects the contents of the forwarded messages from forwarding and saving
 }
 
-// Use this method to copy messages of any kind. Service messages, paid media messages, giveaway messages, giveaway winners messages, and invoice messages can't be copied. A quiz poll can be copied only if the value of the field correct_option_id is known to the bot. The method is analogous to the method forwardMessage, but the copied message doesn't have a link to the original message. Returns the MessageId of the sent message on success.
-//
-// https://core.telegram.org/bots/api#copymessage
+// use Bot.CopyMessage(ctx, &CopyMessageRequest{})
 type CopyMessageRequest struct {
 	ChatID                ChatID           `json:"chat_id,omitempty"`                  // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 	MessageThreadID       int64            `json:"message_thread_id,omitempty"`        // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
@@ -116,9 +80,7 @@ type CopyMessageRequest struct {
 	ReplyMarkup           Markup           `json:"reply_markup,omitempty"`             // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
-// Use this method to copy messages of any kind. If some of the specified messages can't be found or copied, they are skipped. Service messages, paid media messages, giveaway messages, giveaway winners messages, and invoice messages can't be copied. A quiz poll can be copied only if the value of the field correct_option_id is known to the bot. The method is analogous to the method forwardMessages, but the copied messages don't have a link to the original message. Album grouping is kept for copied messages. On success, an array of MessageId of the sent messages is returned.
-//
-// https://core.telegram.org/bots/api#copymessages
+// use Bot.CopyMessages(ctx, &CopyMessagesRequest{})
 type CopyMessagesRequest struct {
 	ChatID              ChatID  `json:"chat_id,omitempty"`              // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 	MessageThreadID     int64   `json:"message_thread_id,omitempty"`    // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
@@ -129,9 +91,7 @@ type CopyMessagesRequest struct {
 	RemoveCaption       bool    `json:"remove_caption,omitempty"`       // Pass True to copy the messages without their captions
 }
 
-// Use this method to send photos. On success, the sent Message is returned.
-//
-// https://core.telegram.org/bots/api#sendphoto
+// use Bot.SendPhoto(ctx, &SendPhotoRequest{})
 type SendPhotoRequest struct {
 	BusinessConnectionID  string           `json:"business_connection_id,omitempty"`   // Unique identifier of the business connection on behalf of which the message will be sent
 	ChatID                ChatID           `json:"chat_id,omitempty"`                  // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
@@ -150,11 +110,7 @@ type SendPhotoRequest struct {
 	ReplyMarkup           Markup           `json:"reply_markup,omitempty"`             // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
-// Use this method to send audio files, if you want Telegram clients to display them in the music player. Your audio must be in the .MP3 or .M4A format. On success, the sent Message is returned. Bots can currently send audio files of up to 50 MB in size, this limit may be changed in the future.
-//
-// For sending voice messages, use the sendVoice method instead.
-//
-// https://core.telegram.org/bots/api#sendaudio
+// use Bot.SendAudio(ctx, &SendAudioRequest{})
 type SendAudioRequest struct {
 	BusinessConnectionID string           `json:"business_connection_id,omitempty"` // Unique identifier of the business connection on behalf of which the message will be sent
 	ChatID               ChatID           `json:"chat_id,omitempty"`                // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
@@ -175,9 +131,7 @@ type SendAudioRequest struct {
 	ReplyMarkup          Markup           `json:"reply_markup,omitempty"`           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
-// Use this method to send general files. On success, the sent Message is returned. Bots can currently send files of any type of up to 50 MB in size, this limit may be changed in the future.
-//
-// https://core.telegram.org/bots/api#senddocument
+// use Bot.SendDocument(ctx, &SendDocumentRequest{})
 type SendDocumentRequest struct {
 	BusinessConnectionID        string           `json:"business_connection_id,omitempty"`         // Unique identifier of the business connection on behalf of which the message will be sent
 	ChatID                      ChatID           `json:"chat_id,omitempty"`                        // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
@@ -196,9 +150,7 @@ type SendDocumentRequest struct {
 	ReplyMarkup                 Markup           `json:"reply_markup,omitempty"`                   // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
-// Use this method to send video files, Telegram clients support MPEG4 videos (other formats may be sent as Document). On success, the sent Message is returned. Bots can currently send video files of up to 50 MB in size, this limit may be changed in the future.
-//
-// https://core.telegram.org/bots/api#sendvideo
+// use Bot.SendVideo(ctx, &SendVideoRequest{})
 type SendVideoRequest struct {
 	BusinessConnectionID  string           `json:"business_connection_id,omitempty"`   // Unique identifier of the business connection on behalf of which the message will be sent
 	ChatID                ChatID           `json:"chat_id,omitempty"`                  // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
@@ -224,9 +176,7 @@ type SendVideoRequest struct {
 	ReplyMarkup           Markup           `json:"reply_markup,omitempty"`             // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
-// Use this method to send animation files (GIF or H.264/MPEG-4 AVC video without sound). On success, the sent Message is returned. Bots can currently send animation files of up to 50 MB in size, this limit may be changed in the future.
-//
-// https://core.telegram.org/bots/api#sendanimation
+// use Bot.SendAnimation(ctx, &SendAnimationRequest{})
 type SendAnimationRequest struct {
 	BusinessConnectionID  string           `json:"business_connection_id,omitempty"`   // Unique identifier of the business connection on behalf of which the message will be sent
 	ChatID                ChatID           `json:"chat_id,omitempty"`                  // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
@@ -249,9 +199,7 @@ type SendAnimationRequest struct {
 	ReplyMarkup           Markup           `json:"reply_markup,omitempty"`             // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
-// Use this method to send audio files, if you want Telegram clients to display the file as a playable voice message. For this to work, your audio must be in an .OGG file encoded with OPUS, or in .MP3 format, or in .M4A format (other formats may be sent as Audio or Document). On success, the sent Message is returned. Bots can currently send voice messages of up to 50 MB in size, this limit may be changed in the future.
-//
-// https://core.telegram.org/bots/api#sendvoice
+// use Bot.SendVoice(ctx, &SendVoiceRequest{})
 type SendVoiceRequest struct {
 	BusinessConnectionID string           `json:"business_connection_id,omitempty"` // Unique identifier of the business connection on behalf of which the message will be sent
 	ChatID               ChatID           `json:"chat_id,omitempty"`                // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
@@ -269,9 +217,7 @@ type SendVoiceRequest struct {
 	ReplyMarkup          Markup           `json:"reply_markup,omitempty"`           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
-// As of v.4.0, Telegram clients support rounded square MPEG4 videos of up to 1 minute long. Use this method to send video messages. On success, the sent Message is returned.
-//
-// https://core.telegram.org/bots/api#sendvideonote
+// use Bot.SendVideoNote(ctx, &SendVideoNoteRequest{})
 type SendVideoNoteRequest struct {
 	BusinessConnectionID string           `json:"business_connection_id,omitempty"` // Unique identifier of the business connection on behalf of which the message will be sent
 	ChatID               ChatID           `json:"chat_id,omitempty"`                // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
@@ -288,9 +234,7 @@ type SendVideoNoteRequest struct {
 	ReplyMarkup          Markup           `json:"reply_markup,omitempty"`           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
-// Use this method to send paid media. On success, the sent Message is returned.
-//
-// https://core.telegram.org/bots/api#sendpaidmedia
+// use Bot.SendPaidMedia(ctx, &SendPaidMediaRequest{})
 type SendPaidMediaRequest struct {
 	BusinessConnectionID  string           `json:"business_connection_id,omitempty"`   // Unique identifier of the business connection on behalf of which the message will be sent
 	ChatID                ChatID           `json:"chat_id,omitempty"`                  // Unique identifier for the target chat or username of the target channel (in the format @channelusername). If the chat is a channel, all Telegram Star proceeds from this media will be credited to the chat's balance. Otherwise, they will be credited to the bot's balance.
@@ -308,9 +252,7 @@ type SendPaidMediaRequest struct {
 	ReplyMarkup           Markup           `json:"reply_markup,omitempty"`             // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
-// Use this method to send a group of photos, videos, documents or audios as an album. Documents and audio files can be only grouped in an album with messages of the same type. On success, an array of Messages that were sent is returned.
-//
-// https://core.telegram.org/bots/api#sendmediagroup
+// use Bot.SendMediaGroup(ctx, &SendMediaGroupRequest{})
 type SendMediaGroupRequest struct {
 	BusinessConnectionID string                 `json:"business_connection_id,omitempty"` // Unique identifier of the business connection on behalf of which the message will be sent
 	ChatID               ChatID                 `json:"chat_id,omitempty"`                // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
@@ -323,9 +265,7 @@ type SendMediaGroupRequest struct {
 	ReplyParameters      *ReplyParameters       `json:"reply_parameters,omitempty"`       // Description of the message to reply to
 }
 
-// Use this method to send point on the map. On success, the sent Message is returned.
-//
-// https://core.telegram.org/bots/api#sendlocation
+// use Bot.SendLocation(ctx, &SendLocationRequest{})
 type SendLocationRequest struct {
 	BusinessConnectionID string           `json:"business_connection_id,omitempty"` // Unique identifier of the business connection on behalf of which the message will be sent
 	ChatID               ChatID           `json:"chat_id,omitempty"`                // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
@@ -344,9 +284,7 @@ type SendLocationRequest struct {
 	ReplyMarkup          Markup           `json:"reply_markup,omitempty"`           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
-// Use this method to send information about a venue. On success, the sent Message is returned.
-//
-// https://core.telegram.org/bots/api#sendvenue
+// use Bot.SendVenue(ctx, &SendVenueRequest{})
 type SendVenueRequest struct {
 	BusinessConnectionID string           `json:"business_connection_id,omitempty"` // Unique identifier of the business connection on behalf of which the message will be sent
 	ChatID               ChatID           `json:"chat_id,omitempty"`                // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
@@ -367,9 +305,7 @@ type SendVenueRequest struct {
 	ReplyMarkup          Markup           `json:"reply_markup,omitempty"`           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
-// Use this method to send phone contacts. On success, the sent Message is returned.
-//
-// https://core.telegram.org/bots/api#sendcontact
+// use Bot.SendContact(ctx, &SendContactRequest{})
 type SendContactRequest struct {
 	BusinessConnectionID string           `json:"business_connection_id,omitempty"` // Unique identifier of the business connection on behalf of which the message will be sent
 	ChatID               ChatID           `json:"chat_id,omitempty"`                // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
@@ -386,9 +322,7 @@ type SendContactRequest struct {
 	ReplyMarkup          Markup           `json:"reply_markup,omitempty"`           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
-// Use this method to send a native poll. On success, the sent Message is returned.
-//
-// https://core.telegram.org/bots/api#sendpoll
+// use Bot.SendPoll(ctx, &SendPollRequest{})
 type SendPollRequest struct {
 	BusinessConnectionID  string            `json:"business_connection_id,omitempty"`  // Unique identifier of the business connection on behalf of which the message will be sent
 	ChatID                ChatID            `json:"chat_id,omitempty"`                 // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
@@ -415,9 +349,7 @@ type SendPollRequest struct {
 	ReplyMarkup           Markup            `json:"reply_markup,omitempty"`            // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
-// Use this method to send an animated emoji that will display a random value. On success, the sent Message is returned.
-//
-// https://core.telegram.org/bots/api#senddice
+// use Bot.SendDice(ctx, &SendDiceRequest{})
 type SendDiceRequest struct {
 	BusinessConnectionID string           `json:"business_connection_id,omitempty"` // Unique identifier of the business connection on behalf of which the message will be sent
 	ChatID               ChatID           `json:"chat_id,omitempty"`                // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
@@ -431,11 +363,7 @@ type SendDiceRequest struct {
 	ReplyMarkup          Markup           `json:"reply_markup,omitempty"`           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
-// Use this method when you need to tell the user that something is happening on the bot's side. The status is set for 5 seconds or less (when a message arrives from your bot, Telegram clients clear its typing status). Returns True on success.
-//
-// We only recommend using this method when a response from the bot will take a noticeable amount of time to arrive.
-//
-// https://core.telegram.org/bots/api#sendchataction
+// use Bot.SendChatAction(ctx, &SendChatActionRequest{})
 type SendChatActionRequest struct {
 	BusinessConnectionID string     `json:"business_connection_id,omitempty"` // Unique identifier of the business connection on behalf of which the action will be sent
 	ChatID               ChatID     `json:"chat_id,omitempty"`                // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
@@ -443,9 +371,7 @@ type SendChatActionRequest struct {
 	Action               ChatAction `json:"action,omitempty"`                 // Type of action to broadcast. Choose one, depending on what the user is about to receive: typing for text messages, upload_photo for photos, record_video or upload_video for videos, record_voice or upload_voice for voice notes, upload_document for general files, choose_sticker for stickers, find_location for location data, record_video_note or upload_video_note for video notes.
 }
 
-// Use this method to change the chosen reactions on a message. Service messages of some types can't be reacted to. Automatically forwarded messages from a channel to its discussion group have the same available reactions as messages in the channel. Bots can't use paid reactions. Returns True on success.
-//
-// https://core.telegram.org/bots/api#setmessagereaction
+// use Bot.SetMessageReaction(ctx, &SetMessageReactionRequest{})
 type SetMessageReactionRequest struct {
 	ChatID    ChatID         `json:"chat_id,omitempty"`    // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 	MessageID int            `json:"message_id,omitempty"` // Identifier of the target message. If the message belongs to a media group, the reaction is set to the first non-deleted message in the group instead.
@@ -453,36 +379,26 @@ type SetMessageReactionRequest struct {
 	IsBig     bool           `json:"is_big,omitempty"`     // Pass True to set the reaction with a big animation
 }
 
-// Use this method to get a list of profile pictures for a user. Returns a UserProfilePhotos object.
-//
-// https://core.telegram.org/bots/api#getuserprofilephotos
+// use Bot.GetUserProfilePhotos(ctx, &GetUserProfilePhotosRequest{})
 type GetUserProfilePhotosRequest struct {
 	UserID int64 `json:"user_id,omitempty"` // Unique identifier of the target user
 	Offset int64 `json:"offset,omitempty"`  // Sequential number of the first photo to be returned. By default, all photos are returned.
 	Limit  int64 `json:"limit,omitempty"`   // Limits the number of photos to be retrieved. Values between 1-100 are accepted. Defaults to 100.
 }
 
-// Changes the emoji status for a given user that previously allowed the bot to manage their emoji status via the Mini App method requestEmojiStatusAccess. Returns True on success.
-//
-// https://core.telegram.org/bots/api#setuseremojistatus
+// use Bot.SetUserEmojiStatus(ctx, &SetUserEmojiStatusRequest{})
 type SetUserEmojiStatusRequest struct {
 	UserID                    int64  `json:"user_id,omitempty"`                      // Unique identifier of the target user
 	EmojiStatusCustomEmojiID  string `json:"emoji_status_custom_emoji_id,omitempty"` // Custom emoji identifier of the emoji status to set. Pass an empty string to remove the status.
 	EmojiStatusExpirationDate int64  `json:"emoji_status_expiration_date,omitempty"` // Expiration date of the emoji status, if any
 }
 
-// Use this method to get basic information about a file and prepare it for downloading. For the moment, bots can download files of up to 20MB in size. On success, a File object is returned. The file can then be downloaded via the link https://api.telegram.org/file/bot<token>/<file_path>, where <file_path> is taken from the response. It is guaranteed that the link will be valid for at least 1 hour. When the link expires, a new one can be requested by calling getFile again.
-//
-// Note: This function may not preserve the original file name and MIME type. You should save the file's MIME type and name (if available) when the File object is received.
-//
-// https://core.telegram.org/bots/api#getfile
+// use Bot.GetFile(ctx, &GetFileRequest{})
 type GetFileRequest struct {
 	FileID string `json:"file_id,omitempty"` // File identifier to get information about
 }
 
-// Use this method to ban a user in a group, a supergroup or a channel. In the case of supergroups and channels, the user will not be able to return to the chat on their own using invite links, etc., unless unbanned first. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns True on success.
-//
-// https://core.telegram.org/bots/api#banchatmember
+// use Bot.BanChatMember(ctx, &BanChatMemberRequest{})
 type BanChatMemberRequest struct {
 	ChatID         ChatID `json:"chat_id,omitempty"`         // Unique identifier for the target group or username of the target supergroup or channel (in the format @channelusername)
 	UserID         int64  `json:"user_id,omitempty"`         // Unique identifier of the target user
@@ -490,18 +406,14 @@ type BanChatMemberRequest struct {
 	RevokeMessages bool   `json:"revoke_messages,omitempty"` // Pass True to delete all messages from the chat for the user that is being removed. If False, the user will be able to see messages in the group that were sent before the user was removed. Always True for supergroups and channels.
 }
 
-// Use this method to unban a previously banned user in a supergroup or channel. The user will not return to the group or channel automatically, but will be able to join via link, etc. The bot must be an administrator for this to work. By default, this method guarantees that after the call the user is not a member of the chat, but will be able to join it. So if the user is a member of the chat they will also be removed from the chat. If you don't want this, use the parameter only_if_banned. Returns True on success.
-//
-// https://core.telegram.org/bots/api#unbanchatmember
+// use Bot.UnbanChatMember(ctx, &UnbanChatMemberRequest{})
 type UnbanChatMemberRequest struct {
 	ChatID       ChatID `json:"chat_id,omitempty"`        // Unique identifier for the target group or username of the target supergroup or channel (in the format @channelusername)
 	UserID       int64  `json:"user_id,omitempty"`        // Unique identifier of the target user
 	OnlyIfBanned bool   `json:"only_if_banned,omitempty"` // Do nothing if the user is not banned
 }
 
-// Use this method to restrict a user in a supergroup. The bot must be an administrator in the supergroup for this to work and must have the appropriate administrator rights. Pass True for all permissions to lift restrictions from a user. Returns True on success.
-//
-// https://core.telegram.org/bots/api#restrictchatmember
+// use Bot.RestrictChatMember(ctx, &RestrictChatMemberRequest{})
 type RestrictChatMemberRequest struct {
 	ChatID                        ChatID           `json:"chat_id,omitempty"`                          // Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 	UserID                        int64            `json:"user_id,omitempty"`                          // Unique identifier of the target user
@@ -510,9 +422,7 @@ type RestrictChatMemberRequest struct {
 	UntilDate                     int64            `json:"until_date,omitempty"`                       // Date when restrictions will be lifted for the user; Unix time. If user is restricted for more than 366 days or less than 30 seconds from the current time, they are considered to be restricted forever
 }
 
-// Use this method to promote or demote a user in a supergroup or a channel. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Pass False for all boolean parameters to demote a user. Returns True on success.
-//
-// https://core.telegram.org/bots/api#promotechatmember
+// use Bot.PromoteChatMember(ctx, &PromoteChatMemberRequest{})
 type PromoteChatMemberRequest struct {
 	ChatID              ChatID `json:"chat_id,omitempty"`                // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 	UserID              int64  `json:"user_id,omitempty"`                // Unique identifier of the target user
@@ -533,50 +443,38 @@ type PromoteChatMemberRequest struct {
 	CanManageTopics     bool   `json:"can_manage_topics,omitempty"`      // Pass True if the user is allowed to create, rename, close, and reopen forum topics; for supergroups only
 }
 
-// Use this method to set a custom title for an administrator in a supergroup promoted by the bot. Returns True on success.
-//
-// https://core.telegram.org/bots/api#setchatadministratorcustomtitle
+// use Bot.SetChatAdministratorCustomTitle(ctx, &SetChatAdministratorCustomTitleRequest{})
 type SetChatAdministratorCustomTitleRequest struct {
 	ChatID      ChatID `json:"chat_id,omitempty"`      // Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 	UserID      int64  `json:"user_id,omitempty"`      // Unique identifier of the target user
 	CustomTitle string `json:"custom_title,omitempty"` // New custom title for the administrator; 0-16 characters, emoji are not allowed
 }
 
-// Use this method to ban a channel chat in a supergroup or a channel. Until the chat is unbanned, the owner of the banned chat won't be able to send messages on behalf of any of their channels. The bot must be an administrator in the supergroup or channel for this to work and must have the appropriate administrator rights. Returns True on success.
-//
-// https://core.telegram.org/bots/api#banchatsenderchat
+// use Bot.BanChatSenderChat(ctx, &BanChatSenderChatRequest{})
 type BanChatSenderChatRequest struct {
 	ChatID       ChatID `json:"chat_id,omitempty"`        // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 	SenderChatID int64  `json:"sender_chat_id,omitempty"` // Unique identifier of the target sender chat
 }
 
-// Use this method to unban a previously banned channel chat in a supergroup or channel. The bot must be an administrator for this to work and must have the appropriate administrator rights. Returns True on success.
-//
-// https://core.telegram.org/bots/api#unbanchatsenderchat
+// use Bot.UnbanChatSenderChat(ctx, &UnbanChatSenderChatRequest{})
 type UnbanChatSenderChatRequest struct {
 	ChatID       ChatID `json:"chat_id,omitempty"`        // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 	SenderChatID int64  `json:"sender_chat_id,omitempty"` // Unique identifier of the target sender chat
 }
 
-// Use this method to set default chat permissions for all members. The bot must be an administrator in the group or a supergroup for this to work and must have the can_restrict_members administrator rights. Returns True on success.
-//
-// https://core.telegram.org/bots/api#setchatpermissions
+// use Bot.SetChatPermissions(ctx, &SetChatPermissionsRequest{})
 type SetChatPermissionsRequest struct {
 	ChatID                        ChatID           `json:"chat_id,omitempty"`                          // Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 	Permissions                   *ChatPermissions `json:"permissions,omitempty"`                      // A JSON-serialized object for new default chat permissions
 	UseIndependentChatPermissions bool             `json:"use_independent_chat_permissions,omitempty"` // Pass True if chat permissions are set independently. Otherwise, the can_send_other_messages and can_add_web_page_previews permissions will imply the can_send_messages, can_send_audios, can_send_documents, can_send_photos, can_send_videos, can_send_video_notes, and can_send_voice_notes permissions; the can_send_polls permission will imply the can_send_messages permission.
 }
 
-// Use this method to generate a new primary invite link for a chat; any previously generated primary link is revoked. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns the new invite link as String on success.
-//
-// https://core.telegram.org/bots/api#exportchatinvitelink
+// use Bot.ExportChatInviteLink(ctx, &ExportChatInviteLinkRequest{})
 type ExportChatInviteLinkRequest struct {
 	ChatID ChatID `json:"chat_id,omitempty"` // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 }
 
-// Use this method to create an additional invite link for a chat. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. The link can be revoked using the method revokeChatInviteLink. Returns the new invite link as ChatInviteLink object.
-//
-// https://core.telegram.org/bots/api#createchatinvitelink
+// use Bot.CreateChatInviteLink(ctx, &CreateChatInviteLinkRequest{})
 type CreateChatInviteLinkRequest struct {
 	ChatID             ChatID `json:"chat_id,omitempty"`              // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 	Name               string `json:"name,omitempty"`                 // Invite link name; 0-32 characters
@@ -585,9 +483,7 @@ type CreateChatInviteLinkRequest struct {
 	CreatesJoinRequest bool   `json:"creates_join_request,omitempty"` // True, if users joining the chat via the link need to be approved by chat administrators. If True, member_limit can't be specified
 }
 
-// Use this method to edit a non-primary invite link created by the bot. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns the edited invite link as a ChatInviteLink object.
-//
-// https://core.telegram.org/bots/api#editchatinvitelink
+// use Bot.EditChatInviteLink(ctx, &EditChatInviteLinkRequest{})
 type EditChatInviteLinkRequest struct {
 	ChatID             ChatID `json:"chat_id,omitempty"`              // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 	InviteLink         string `json:"invite_link,omitempty"`          // The invite link to edit
@@ -597,9 +493,7 @@ type EditChatInviteLinkRequest struct {
 	CreatesJoinRequest bool   `json:"creates_join_request,omitempty"` // True, if users joining the chat via the link need to be approved by chat administrators. If True, member_limit can't be specified
 }
 
-// Use this method to create a subscription invite link for a channel chat. The bot must have the can_invite_users administrator rights. The link can be edited using the method editChatSubscriptionInviteLink or revoked using the method revokeChatInviteLink. Returns the new invite link as a ChatInviteLink object.
-//
-// https://core.telegram.org/bots/api#createchatsubscriptioninvitelink
+// use Bot.CreateChatSubscriptionInviteLink(ctx, &CreateChatSubscriptionInviteLinkRequest{})
 type CreateChatSubscriptionInviteLinkRequest struct {
 	ChatID             ChatID `json:"chat_id,omitempty"`             // Unique identifier for the target channel chat or username of the target channel (in the format @channelusername)
 	Name               string `json:"name,omitempty"`                // Invite link name; 0-32 characters
@@ -607,73 +501,55 @@ type CreateChatSubscriptionInviteLinkRequest struct {
 	SubscriptionPrice  int64  `json:"subscription_price,omitempty"`  // The amount of Telegram Stars a user must pay initially and after each subsequent subscription period to be a member of the chat; 1-2500
 }
 
-// Use this method to edit a subscription invite link created by the bot. The bot must have the can_invite_users administrator rights. Returns the edited invite link as a ChatInviteLink object.
-//
-// https://core.telegram.org/bots/api#editchatsubscriptioninvitelink
+// use Bot.EditChatSubscriptionInviteLink(ctx, &EditChatSubscriptionInviteLinkRequest{})
 type EditChatSubscriptionInviteLinkRequest struct {
 	ChatID     ChatID `json:"chat_id,omitempty"`     // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 	InviteLink string `json:"invite_link,omitempty"` // The invite link to edit
 	Name       string `json:"name,omitempty"`        // Invite link name; 0-32 characters
 }
 
-// Use this method to revoke an invite link created by the bot. If the primary link is revoked, a new link is automatically generated. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns the revoked invite link as ChatInviteLink object.
-//
-// https://core.telegram.org/bots/api#revokechatinvitelink
+// use Bot.RevokeChatInviteLink(ctx, &RevokeChatInviteLinkRequest{})
 type RevokeChatInviteLinkRequest struct {
 	ChatID     ChatID `json:"chat_id,omitempty"`     // Unique identifier of the target chat or username of the target channel (in the format @channelusername)
 	InviteLink string `json:"invite_link,omitempty"` // The invite link to revoke
 }
 
-// Use this method to approve a chat join request. The bot must be an administrator in the chat for this to work and must have the can_invite_users administrator right. Returns True on success.
-//
-// https://core.telegram.org/bots/api#approvechatjoinrequest
+// use Bot.ApproveChatJoinRequest(ctx, &ApproveChatJoinRequestRequest{})
 type ApproveChatJoinRequestRequest struct {
 	ChatID ChatID `json:"chat_id,omitempty"` // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 	UserID int64  `json:"user_id,omitempty"` // Unique identifier of the target user
 }
 
-// Use this method to decline a chat join request. The bot must be an administrator in the chat for this to work and must have the can_invite_users administrator right. Returns True on success.
-//
-// https://core.telegram.org/bots/api#declinechatjoinrequest
+// use Bot.DeclineChatJoinRequest(ctx, &DeclineChatJoinRequestRequest{})
 type DeclineChatJoinRequestRequest struct {
 	ChatID ChatID `json:"chat_id,omitempty"` // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 	UserID int64  `json:"user_id,omitempty"` // Unique identifier of the target user
 }
 
-// Use this method to set a new profile photo for the chat. Photos can't be changed for private chats. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns True on success.
-//
-// https://core.telegram.org/bots/api#setchatphoto
+// use Bot.SetChatPhoto(ctx, &SetChatPhotoRequest{})
 type SetChatPhotoRequest struct {
 	ChatID ChatID    `json:"chat_id,omitempty"` // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 	Photo  InputFile `json:"photo,omitempty"`   // New chat photo, uploaded using multipart/form-data
 }
 
-// Use this method to delete a chat photo. Photos can't be changed for private chats. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns True on success.
-//
-// https://core.telegram.org/bots/api#deletechatphoto
+// use Bot.DeleteChatPhoto(ctx, &DeleteChatPhotoRequest{})
 type DeleteChatPhotoRequest struct {
 	ChatID ChatID `json:"chat_id,omitempty"` // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 }
 
-// Use this method to change the title of a chat. Titles can't be changed for private chats. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns True on success.
-//
-// https://core.telegram.org/bots/api#setchattitle
+// use Bot.SetChatTitle(ctx, &SetChatTitleRequest{})
 type SetChatTitleRequest struct {
 	ChatID ChatID `json:"chat_id,omitempty"` // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 	Title  string `json:"title,omitempty"`   // New chat title, 1-128 characters
 }
 
-// Use this method to change the description of a group, a supergroup or a channel. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Returns True on success.
-//
-// https://core.telegram.org/bots/api#setchatdescription
+// use Bot.SetChatDescription(ctx, &SetChatDescriptionRequest{})
 type SetChatDescriptionRequest struct {
 	ChatID      ChatID `json:"chat_id,omitempty"`     // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 	Description string `json:"description,omitempty"` // New chat description, 0-255 characters
 }
 
-// Use this method to add a message to the list of pinned messages in a chat. If the chat is not a private chat, the bot must be an administrator in the chat for this to work and must have the 'can_pin_messages' administrator right in a supergroup or 'can_edit_messages' administrator right in a channel. Returns True on success.
-//
-// https://core.telegram.org/bots/api#pinchatmessage
+// use Bot.PinChatMessage(ctx, &PinChatMessageRequest{})
 type PinChatMessageRequest struct {
 	BusinessConnectionID string `json:"business_connection_id,omitempty"` // Unique identifier of the business connection on behalf of which the message will be pinned
 	ChatID               ChatID `json:"chat_id,omitempty"`                // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
@@ -681,81 +557,56 @@ type PinChatMessageRequest struct {
 	DisableNotification  bool   `json:"disable_notification,omitempty"`   // Pass True if it is not necessary to send a notification to all chat members about the new pinned message. Notifications are always disabled in channels and private chats.
 }
 
-// Use this method to remove a message from the list of pinned messages in a chat. If the chat is not a private chat, the bot must be an administrator in the chat for this to work and must have the 'can_pin_messages' administrator right in a supergroup or 'can_edit_messages' administrator right in a channel. Returns True on success.
-//
-// https://core.telegram.org/bots/api#unpinchatmessage
+// use Bot.UnpinChatMessage(ctx, &UnpinChatMessageRequest{})
 type UnpinChatMessageRequest struct {
 	BusinessConnectionID string `json:"business_connection_id,omitempty"` // Unique identifier of the business connection on behalf of which the message will be unpinned
 	ChatID               ChatID `json:"chat_id,omitempty"`                // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 	MessageID            int    `json:"message_id,omitempty"`             // Identifier of the message to unpin. Required if business_connection_id is specified. If not specified, the most recent pinned message (by sending date) will be unpinned.
 }
 
-// Use this method to clear the list of pinned messages in a chat. If the chat is not a private chat, the bot must be an administrator in the chat for this to work and must have the 'can_pin_messages' administrator right in a supergroup or 'can_edit_messages' administrator right in a channel. Returns True on success.
-//
-// https://core.telegram.org/bots/api#unpinallchatmessages
+// use Bot.UnpinAllChatMessages(ctx, &UnpinAllChatMessagesRequest{})
 type UnpinAllChatMessagesRequest struct {
 	ChatID ChatID `json:"chat_id,omitempty"` // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 }
 
-// Use this method for your bot to leave a group, supergroup or channel. Returns True on success.
-//
-// https://core.telegram.org/bots/api#leavechat
+// use Bot.LeaveChat(ctx, &LeaveChatRequest{})
 type LeaveChatRequest struct {
 	ChatID ChatID `json:"chat_id,omitempty"` // Unique identifier for the target chat or username of the target supergroup or channel (in the format @channelusername)
 }
 
-// Use this method to get up-to-date information about the chat. Returns a ChatFullInfo object on success.
-//
-// https://core.telegram.org/bots/api#getchat
+// use Bot.GetChat(ctx, &GetChatRequest{})
 type GetChatRequest struct {
 	ChatID ChatID `json:"chat_id,omitempty"` // Unique identifier for the target chat or username of the target supergroup or channel (in the format @channelusername)
 }
 
-// Use this method to get a list of administrators in a chat, which aren't bots. Returns an Array of ChatMember objects.
-//
-// https://core.telegram.org/bots/api#getchatadministrators
+// use Bot.GetChatAdministrators(ctx, &GetChatAdministratorsRequest{})
 type GetChatAdministratorsRequest struct {
 	ChatID ChatID `json:"chat_id,omitempty"` // Unique identifier for the target chat or username of the target supergroup or channel (in the format @channelusername)
 }
 
-// Use this method to get the number of members in a chat. Returns Int on success.
-//
-// https://core.telegram.org/bots/api#getchatmembercount
+// use Bot.GetChatMemberCount(ctx, &GetChatMemberCountRequest{})
 type GetChatMemberCountRequest struct {
 	ChatID ChatID `json:"chat_id,omitempty"` // Unique identifier for the target chat or username of the target supergroup or channel (in the format @channelusername)
 }
 
-// Use this method to get information about a member of a chat. The method is only guaranteed to work for other users if the bot is an administrator in the chat. Returns a ChatMember object on success.
-//
-// https://core.telegram.org/bots/api#getchatmember
+// use Bot.GetChatMember(ctx, &GetChatMemberRequest{})
 type GetChatMemberRequest struct {
 	ChatID ChatID `json:"chat_id,omitempty"` // Unique identifier for the target chat or username of the target supergroup or channel (in the format @channelusername)
 	UserID int64  `json:"user_id,omitempty"` // Unique identifier of the target user
 }
 
-// Use this method to set a new group sticker set for a supergroup. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Use the field can_set_sticker_set optionally returned in getChat requests to check if the bot can use this method. Returns True on success.
-//
-// https://core.telegram.org/bots/api#setchatstickerset
+// use Bot.SetChatStickerSet(ctx, &SetChatStickerSetRequest{})
 type SetChatStickerSetRequest struct {
 	ChatID         ChatID `json:"chat_id,omitempty"`          // Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 	StickerSetName string `json:"sticker_set_name,omitempty"` // Name of the sticker set to be set as the group sticker set
 }
 
-// Use this method to delete a group sticker set from a supergroup. The bot must be an administrator in the chat for this to work and must have the appropriate administrator rights. Use the field can_set_sticker_set optionally returned in getChat requests to check if the bot can use this method. Returns True on success.
-//
-// https://core.telegram.org/bots/api#deletechatstickerset
+// use Bot.DeleteChatStickerSet(ctx, &DeleteChatStickerSetRequest{})
 type DeleteChatStickerSetRequest struct {
 	ChatID ChatID `json:"chat_id,omitempty"` // Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 }
 
-// Use this method to get custom emoji stickers, which can be used as a forum topic icon by any user. Requires no parameters. Returns an Array of Sticker objects.
-//
-// https://core.telegram.org/bots/api#getforumtopiciconstickers
-type GetForumTopicIconStickersRequest interface{}
-
-// Use this method to create a topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator rights. Returns information about the created topic as a ForumTopic object.
-//
-// https://core.telegram.org/bots/api#createforumtopic
+// use Bot.CreateForumTopic(ctx, &CreateForumTopicRequest{})
 type CreateForumTopicRequest struct {
 	ChatID            ChatID `json:"chat_id,omitempty"`              // Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 	Name              string `json:"name,omitempty"`                 // Topic name, 1-128 characters
@@ -763,9 +614,7 @@ type CreateForumTopicRequest struct {
 	IconCustomEmojiID string `json:"icon_custom_emoji_id,omitempty"` // Unique identifier of the custom emoji shown as the topic icon. Use getForumTopicIconStickers to get all allowed custom emoji identifiers.
 }
 
-// Use this method to edit name and icon of a topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator rights, unless it is the creator of the topic. Returns True on success.
-//
-// https://core.telegram.org/bots/api#editforumtopic
+// use Bot.EditForumTopic(ctx, &EditForumTopicRequest{})
 type EditForumTopicRequest struct {
 	ChatID            ChatID `json:"chat_id,omitempty"`              // Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 	MessageThreadID   int64  `json:"message_thread_id,omitempty"`    // Unique identifier for the target message thread of the forum topic
@@ -773,84 +622,62 @@ type EditForumTopicRequest struct {
 	IconCustomEmojiID string `json:"icon_custom_emoji_id,omitempty"` // New unique identifier of the custom emoji shown as the topic icon. Use getForumTopicIconStickers to get all allowed custom emoji identifiers. Pass an empty string to remove the icon. If not specified, the current icon will be kept
 }
 
-// Use this method to close an open topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator rights, unless it is the creator of the topic. Returns True on success.
-//
-// https://core.telegram.org/bots/api#closeforumtopic
+// use Bot.CloseForumTopic(ctx, &CloseForumTopicRequest{})
 type CloseForumTopicRequest struct {
 	ChatID          ChatID `json:"chat_id,omitempty"`           // Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 	MessageThreadID int64  `json:"message_thread_id,omitempty"` // Unique identifier for the target message thread of the forum topic
 }
 
-// Use this method to reopen a closed topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator rights, unless it is the creator of the topic. Returns True on success.
-//
-// https://core.telegram.org/bots/api#reopenforumtopic
+// use Bot.ReopenForumTopic(ctx, &ReopenForumTopicRequest{})
 type ReopenForumTopicRequest struct {
 	ChatID          ChatID `json:"chat_id,omitempty"`           // Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 	MessageThreadID int64  `json:"message_thread_id,omitempty"` // Unique identifier for the target message thread of the forum topic
 }
 
-// Use this method to delete a forum topic along with all its messages in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the can_delete_messages administrator rights. Returns True on success.
-//
-// https://core.telegram.org/bots/api#deleteforumtopic
+// use Bot.DeleteForumTopic(ctx, &DeleteForumTopicRequest{})
 type DeleteForumTopicRequest struct {
 	ChatID          ChatID `json:"chat_id,omitempty"`           // Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 	MessageThreadID int64  `json:"message_thread_id,omitempty"` // Unique identifier for the target message thread of the forum topic
 }
 
-// Use this method to clear the list of pinned messages in a forum topic. The bot must be an administrator in the chat for this to work and must have the can_pin_messages administrator right in the supergroup. Returns True on success.
-//
-// https://core.telegram.org/bots/api#unpinallforumtopicmessages
+// use Bot.UnpinAllForumTopicMessages(ctx, &UnpinAllForumTopicMessagesRequest{})
 type UnpinAllForumTopicMessagesRequest struct {
 	ChatID          ChatID `json:"chat_id,omitempty"`           // Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 	MessageThreadID int64  `json:"message_thread_id,omitempty"` // Unique identifier for the target message thread of the forum topic
 }
 
-// Use this method to edit the name of the 'General' topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator rights. Returns True on success.
-//
-// https://core.telegram.org/bots/api#editgeneralforumtopic
+// use Bot.EditGeneralForumTopic(ctx, &EditGeneralForumTopicRequest{})
 type EditGeneralForumTopicRequest struct {
 	ChatID ChatID `json:"chat_id,omitempty"` // Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 	Name   string `json:"name,omitempty"`    // New topic name, 1-128 characters
 }
 
-// Use this method to close an open 'General' topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator rights. Returns True on success.
-//
-// https://core.telegram.org/bots/api#closegeneralforumtopic
+// use Bot.CloseGeneralForumTopic(ctx, &CloseGeneralForumTopicRequest{})
 type CloseGeneralForumTopicRequest struct {
 	ChatID ChatID `json:"chat_id,omitempty"` // Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 }
 
-// Use this method to reopen a closed 'General' topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator rights. The topic will be automatically unhidden if it was hidden. Returns True on success.
-//
-// https://core.telegram.org/bots/api#reopengeneralforumtopic
+// use Bot.ReopenGeneralForumTopic(ctx, &ReopenGeneralForumTopicRequest{})
 type ReopenGeneralForumTopicRequest struct {
 	ChatID ChatID `json:"chat_id,omitempty"` // Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 }
 
-// Use this method to hide the 'General' topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator rights. The topic will be automatically closed if it was open. Returns True on success.
-//
-// https://core.telegram.org/bots/api#hidegeneralforumtopic
+// use Bot.HideGeneralForumTopic(ctx, &HideGeneralForumTopicRequest{})
 type HideGeneralForumTopicRequest struct {
 	ChatID ChatID `json:"chat_id,omitempty"` // Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 }
 
-// Use this method to unhide the 'General' topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator rights. Returns True on success.
-//
-// https://core.telegram.org/bots/api#unhidegeneralforumtopic
+// use Bot.UnhideGeneralForumTopic(ctx, &UnhideGeneralForumTopicRequest{})
 type UnhideGeneralForumTopicRequest struct {
 	ChatID ChatID `json:"chat_id,omitempty"` // Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 }
 
-// Use this method to clear the list of pinned messages in a General forum topic. The bot must be an administrator in the chat for this to work and must have the can_pin_messages administrator right in the supergroup. Returns True on success.
-//
-// https://core.telegram.org/bots/api#unpinallgeneralforumtopicmessages
+// use Bot.UnpinAllGeneralForumTopicMessages(ctx, &UnpinAllGeneralForumTopicMessagesRequest{})
 type UnpinAllGeneralForumTopicMessagesRequest struct {
 	ChatID ChatID `json:"chat_id,omitempty"` // Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 }
 
-// Use this method to send answers to callback queries sent from inline keyboards. The answer will be displayed to the user as a notification at the top of the chat screen or as an alert. On success, True is returned.
-//
-// https://core.telegram.org/bots/api#answercallbackquery
+// use Bot.AnswerCallbackQuery(ctx, &AnswerCallbackQueryRequest{})
 type AnswerCallbackQueryRequest struct {
 	CallbackQueryID string `json:"callback_query_id,omitempty"` // Unique identifier for the query to be answered
 	Text            string `json:"text,omitempty"`              // Text of the notification. If not specified, nothing will be shown to the user, 0-200 characters
@@ -859,124 +686,92 @@ type AnswerCallbackQueryRequest struct {
 	CacheTime       int64  `json:"cache_time,omitempty"`        // The maximum amount of time in seconds that the result of the callback query may be cached client-side. Telegram apps will support caching starting in version 3.14. Defaults to 0.
 }
 
-// Use this method to get the list of boosts added to a chat by a user. Requires administrator rights in the chat. Returns a UserChatBoosts object.
-//
-// https://core.telegram.org/bots/api#getuserchatboosts
+// use Bot.GetUserChatBoosts(ctx, &GetUserChatBoostsRequest{})
 type GetUserChatBoostsRequest struct {
 	ChatID ChatID `json:"chat_id,omitempty"` // Unique identifier for the chat or username of the channel (in the format @channelusername)
 	UserID int64  `json:"user_id,omitempty"` // Unique identifier of the target user
 }
 
-// Use this method to get information about the connection of the bot with a business account. Returns a BusinessConnection object on success.
-//
-// https://core.telegram.org/bots/api#getbusinessconnection
+// use Bot.GetBusinessConnection(ctx, &GetBusinessConnectionRequest{})
 type GetBusinessConnectionRequest struct {
 	BusinessConnectionID string `json:"business_connection_id,omitempty"` // Unique identifier of the business connection
 }
 
-// Use this method to change the list of the bot's commands. See this manual for more details about bot commands. Returns True on success.
-//
-// https://core.telegram.org/bots/api#setmycommands
+// use Bot.SetMyCommands(ctx, &SetMyCommandsRequest{})
 type SetMyCommandsRequest struct {
 	Commands     []BotCommand    `json:"commands,omitempty"`      // A JSON-serialized list of bot commands to be set as the list of the bot's commands. At most 100 commands can be specified.
 	Scope        BotCommandScope `json:"scope,omitempty"`         // A JSON-serialized object, describing scope of users for which the commands are relevant. Defaults to BotCommandScopeDefault.
 	LanguageCode string          `json:"language_code,omitempty"` // A two-letter ISO 639-1 language code. If empty, commands will be applied to all users from the given scope, for whose language there are no dedicated commands
 }
 
-// Use this method to delete the list of the bot's commands for the given scope and user language. After deletion, higher level commands will be shown to affected users. Returns True on success.
-//
-// https://core.telegram.org/bots/api#deletemycommands
+// use Bot.DeleteMyCommands(ctx, &DeleteMyCommandsRequest{})
 type DeleteMyCommandsRequest struct {
 	Scope        BotCommandScope `json:"scope,omitempty"`         // A JSON-serialized object, describing scope of users for which the commands are relevant. Defaults to BotCommandScopeDefault.
 	LanguageCode string          `json:"language_code,omitempty"` // A two-letter ISO 639-1 language code. If empty, commands will be applied to all users from the given scope, for whose language there are no dedicated commands
 }
 
-// Use this method to get the current list of the bot's commands for the given scope and user language. Returns an Array of BotCommand objects. If commands aren't set, an empty list is returned.
-//
-// https://core.telegram.org/bots/api#getmycommands
+// use Bot.GetMyCommands(ctx, &GetMyCommandsRequest{})
 type GetMyCommandsRequest struct {
 	Scope        BotCommandScope `json:"scope,omitempty"`         // A JSON-serialized object, describing scope of users. Defaults to BotCommandScopeDefault.
 	LanguageCode string          `json:"language_code,omitempty"` // A two-letter ISO 639-1 language code or an empty string
 }
 
-// Use this method to change the bot's name. Returns True on success.
-//
-// https://core.telegram.org/bots/api#setmyname
+// use Bot.SetMyName(ctx, &SetMyNameRequest{})
 type SetMyNameRequest struct {
 	Name         string `json:"name,omitempty"`          // New bot name; 0-64 characters. Pass an empty string to remove the dedicated name for the given language.
 	LanguageCode string `json:"language_code,omitempty"` // A two-letter ISO 639-1 language code. If empty, the name will be shown to all users for whose language there is no dedicated name.
 }
 
-// Use this method to get the current bot name for the given user language. Returns BotName on success.
-//
-// https://core.telegram.org/bots/api#getmyname
+// use Bot.GetMyName(ctx, &GetMyNameRequest{})
 type GetMyNameRequest struct {
 	LanguageCode string `json:"language_code,omitempty"` // A two-letter ISO 639-1 language code or an empty string
 }
 
-// Use this method to change the bot's description, which is shown in the chat with the bot if the chat is empty. Returns True on success.
-//
-// https://core.telegram.org/bots/api#setmydescription
+// use Bot.SetMyDescription(ctx, &SetMyDescriptionRequest{})
 type SetMyDescriptionRequest struct {
 	Description  string `json:"description,omitempty"`   // New bot description; 0-512 characters. Pass an empty string to remove the dedicated description for the given language.
 	LanguageCode string `json:"language_code,omitempty"` // A two-letter ISO 639-1 language code. If empty, the description will be applied to all users for whose language there is no dedicated description.
 }
 
-// Use this method to get the current bot description for the given user language. Returns BotDescription on success.
-//
-// https://core.telegram.org/bots/api#getmydescription
+// use Bot.GetMyDescription(ctx, &GetMyDescriptionRequest{})
 type GetMyDescriptionRequest struct {
 	LanguageCode string `json:"language_code,omitempty"` // A two-letter ISO 639-1 language code or an empty string
 }
 
-// Use this method to change the bot's short description, which is shown on the bot's profile page and is sent together with the link when users share the bot. Returns True on success.
-//
-// https://core.telegram.org/bots/api#setmyshortdescription
+// use Bot.SetMyShortDescription(ctx, &SetMyShortDescriptionRequest{})
 type SetMyShortDescriptionRequest struct {
 	ShortDescription string `json:"short_description,omitempty"` // New short description for the bot; 0-120 characters. Pass an empty string to remove the dedicated short description for the given language.
 	LanguageCode     string `json:"language_code,omitempty"`     // A two-letter ISO 639-1 language code. If empty, the short description will be applied to all users for whose language there is no dedicated short description.
 }
 
-// Use this method to get the current bot short description for the given user language. Returns BotShortDescription on success.
-//
-// https://core.telegram.org/bots/api#getmyshortdescription
+// use Bot.GetMyShortDescription(ctx, &GetMyShortDescriptionRequest{})
 type GetMyShortDescriptionRequest struct {
 	LanguageCode string `json:"language_code,omitempty"` // A two-letter ISO 639-1 language code or an empty string
 }
 
-// Use this method to change the bot's menu button in a private chat, or the default menu button. Returns True on success.
-//
-// https://core.telegram.org/bots/api#setchatmenubutton
+// use Bot.SetChatMenuButton(ctx, &SetChatMenuButtonRequest{})
 type SetChatMenuButtonRequest struct {
 	ChatID     int64      `json:"chat_id,omitempty"`     // Unique identifier for the target private chat. If not specified, default bot's menu button will be changed
 	MenuButton MenuButton `json:"menu_button,omitempty"` // A JSON-serialized object for the bot's new menu button. Defaults to MenuButtonDefault
 }
 
-// Use this method to get the current value of the bot's menu button in a private chat, or the default menu button. Returns MenuButton on success.
-//
-// https://core.telegram.org/bots/api#getchatmenubutton
+// use Bot.GetChatMenuButton(ctx, &GetChatMenuButtonRequest{})
 type GetChatMenuButtonRequest struct {
 	ChatID int64 `json:"chat_id,omitempty"` // Unique identifier for the target private chat. If not specified, default bot's menu button will be returned
 }
 
-// Use this method to change the default administrator rights requested by the bot when it's added as an administrator to groups or channels. These rights will be suggested to users, but they are free to modify the list before adding the bot. Returns True on success.
-//
-// https://core.telegram.org/bots/api#setmydefaultadministratorrights
+// use Bot.SetMyDefaultAdministratorRights(ctx, &SetMyDefaultAdministratorRightsRequest{})
 type SetMyDefaultAdministratorRightsRequest struct {
 	Rights      *ChatAdministratorRights `json:"rights,omitempty"`       // A JSON-serialized object describing new default administrator rights. If not specified, the default administrator rights will be cleared.
 	ForChannels bool                     `json:"for_channels,omitempty"` // Pass True to change the default administrator rights of the bot in channels. Otherwise, the default administrator rights of the bot for groups and supergroups will be changed.
 }
 
-// Use this method to get the current default administrator rights of the bot. Returns ChatAdministratorRights on success.
-//
-// https://core.telegram.org/bots/api#getmydefaultadministratorrights
+// use Bot.GetMyDefaultAdministratorRights(ctx, &GetMyDefaultAdministratorRightsRequest{})
 type GetMyDefaultAdministratorRightsRequest struct {
 	ForChannels bool `json:"for_channels,omitempty"` // Pass True to get default administrator rights of the bot in channels. Otherwise, default administrator rights of the bot for groups and supergroups will be returned.
 }
 
-// Use this method to edit text and game messages. On success, if the edited message is not an inline message, the edited Message is returned, otherwise True is returned. Note that business messages that were not sent by the bot and do not contain an inline keyboard can only be edited within 48 hours from the time they were sent.
-//
-// https://core.telegram.org/bots/api#editmessagetext
+// use Bot.EditMessageText(ctx, &EditMessageTextRequest{})
 type EditMessageTextRequest struct {
 	BusinessConnectionID string                `json:"business_connection_id,omitempty"` // Unique identifier of the business connection on behalf of which the message to be edited was sent
 	ChatID               ChatID                `json:"chat_id,omitempty"`                // Required if inline_message_id is not specified. Unique identifier for the target chat or username of the target channel (in the format @channelusername)
@@ -989,9 +784,7 @@ type EditMessageTextRequest struct {
 	ReplyMarkup          *InlineKeyboardMarkup `json:"reply_markup,omitempty"`           // A JSON-serialized object for an inline keyboard.
 }
 
-// Use this method to edit captions of messages. On success, if the edited message is not an inline message, the edited Message is returned, otherwise True is returned. Note that business messages that were not sent by the bot and do not contain an inline keyboard can only be edited within 48 hours from the time they were sent.
-//
-// https://core.telegram.org/bots/api#editmessagecaption
+// use Bot.EditMessageCaption(ctx, &EditMessageCaptionRequest{})
 type EditMessageCaptionRequest struct {
 	BusinessConnectionID  string                `json:"business_connection_id,omitempty"`   // Unique identifier of the business connection on behalf of which the message to be edited was sent
 	ChatID                ChatID                `json:"chat_id,omitempty"`                  // Required if inline_message_id is not specified. Unique identifier for the target chat or username of the target channel (in the format @channelusername)
@@ -1004,9 +797,7 @@ type EditMessageCaptionRequest struct {
 	ReplyMarkup           *InlineKeyboardMarkup `json:"reply_markup,omitempty"`             // A JSON-serialized object for an inline keyboard.
 }
 
-// Use this method to edit animation, audio, document, photo, or video messages, or to add media to text messages. If a message is part of a message album, then it can be edited only to an audio for audio albums, only to a document for document albums and to a photo or a video otherwise. When an inline message is edited, a new file can't be uploaded; use a previously uploaded file via its file_id or specify a URL. On success, if the edited message is not an inline message, the edited Message is returned, otherwise True is returned. Note that business messages that were not sent by the bot and do not contain an inline keyboard can only be edited within 48 hours from the time they were sent.
-//
-// https://core.telegram.org/bots/api#editmessagemedia
+// use Bot.EditMessageMedia(ctx, &EditMessageMediaRequest{})
 type EditMessageMediaRequest struct {
 	BusinessConnectionID string                `json:"business_connection_id,omitempty"` // Unique identifier of the business connection on behalf of which the message to be edited was sent
 	ChatID               ChatID                `json:"chat_id,omitempty"`                // Required if inline_message_id is not specified. Unique identifier for the target chat or username of the target channel (in the format @channelusername)
@@ -1016,9 +807,7 @@ type EditMessageMediaRequest struct {
 	ReplyMarkup          *InlineKeyboardMarkup `json:"reply_markup,omitempty"`           // A JSON-serialized object for a new inline keyboard.
 }
 
-// Use this method to edit live location messages. A location can be edited until its live_period expires or editing is explicitly disabled by a call to stopMessageLiveLocation. On success, if the edited message is not an inline message, the edited Message is returned, otherwise True is returned.
-//
-// https://core.telegram.org/bots/api#editmessagelivelocation
+// use Bot.EditMessageLiveLocation(ctx, &EditMessageLiveLocationRequest{})
 type EditMessageLiveLocationRequest struct {
 	BusinessConnectionID string                `json:"business_connection_id,omitempty"` // Unique identifier of the business connection on behalf of which the message to be edited was sent
 	ChatID               ChatID                `json:"chat_id,omitempty"`                // Required if inline_message_id is not specified. Unique identifier for the target chat or username of the target channel (in the format @channelusername)
@@ -1033,9 +822,7 @@ type EditMessageLiveLocationRequest struct {
 	ReplyMarkup          *InlineKeyboardMarkup `json:"reply_markup,omitempty"`           // A JSON-serialized object for a new inline keyboard.
 }
 
-// Use this method to stop updating a live location message before live_period expires. On success, if the message is not an inline message, the edited Message is returned, otherwise True is returned.
-//
-// https://core.telegram.org/bots/api#stopmessagelivelocation
+// use Bot.StopMessageLiveLocation(ctx, &StopMessageLiveLocationRequest{})
 type StopMessageLiveLocationRequest struct {
 	BusinessConnectionID string                `json:"business_connection_id,omitempty"` // Unique identifier of the business connection on behalf of which the message to be edited was sent
 	ChatID               ChatID                `json:"chat_id,omitempty"`                // Required if inline_message_id is not specified. Unique identifier for the target chat or username of the target channel (in the format @channelusername)
@@ -1044,9 +831,7 @@ type StopMessageLiveLocationRequest struct {
 	ReplyMarkup          *InlineKeyboardMarkup `json:"reply_markup,omitempty"`           // A JSON-serialized object for a new inline keyboard.
 }
 
-// Use this method to edit only the reply markup of messages. On success, if the edited message is not an inline message, the edited Message is returned, otherwise True is returned. Note that business messages that were not sent by the bot and do not contain an inline keyboard can only be edited within 48 hours from the time they were sent.
-//
-// https://core.telegram.org/bots/api#editmessagereplymarkup
+// use Bot.EditMessageReplyMarkup(ctx, &EditMessageReplyMarkupRequest{})
 type EditMessageReplyMarkupRequest struct {
 	BusinessConnectionID string                `json:"business_connection_id,omitempty"` // Unique identifier of the business connection on behalf of which the message to be edited was sent
 	ChatID               ChatID                `json:"chat_id,omitempty"`                // Required if inline_message_id is not specified. Unique identifier for the target chat or username of the target channel (in the format @channelusername)
@@ -1055,9 +840,7 @@ type EditMessageReplyMarkupRequest struct {
 	ReplyMarkup          *InlineKeyboardMarkup `json:"reply_markup,omitempty"`           // A JSON-serialized object for an inline keyboard.
 }
 
-// Use this method to stop a poll which was sent by the bot. On success, the stopped Poll is returned.
-//
-// https://core.telegram.org/bots/api#stoppoll
+// use Bot.StopPoll(ctx, &StopPollRequest{})
 type StopPollRequest struct {
 	BusinessConnectionID string                `json:"business_connection_id,omitempty"` // Unique identifier of the business connection on behalf of which the message to be edited was sent
 	ChatID               ChatID                `json:"chat_id,omitempty"`                // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
@@ -1065,43 +848,19 @@ type StopPollRequest struct {
 	ReplyMarkup          *InlineKeyboardMarkup `json:"reply_markup,omitempty"`           // A JSON-serialized object for a new message inline keyboard.
 }
 
-// Use this method to delete a message, including service messages, with the following limitations:
-//
-// - A message can only be deleted if it was sent less than 48 hours ago.
-//
-// - Service messages about a supergroup, channel, or forum topic creation can't be deleted.
-//
-// - A dice message in a private chat can only be deleted if it was sent more than 24 hours ago.
-//
-// - Bots can delete outgoing messages in private chats, groups, and supergroups.
-//
-// - Bots can delete incoming messages in private chats.
-//
-// - Bots granted can_post_messages permissions can delete outgoing messages in channels.
-//
-// - If the bot is an administrator of a group, it can delete any message there.
-//
-// - If the bot has can_delete_messages permission in a supergroup or a channel, it can delete any message there.
-//
-// Returns True on success.
-//
-// https://core.telegram.org/bots/api#deletemessage
+// use Bot.DeleteMessage(ctx, &DeleteMessageRequest{})
 type DeleteMessageRequest struct {
 	ChatID    ChatID `json:"chat_id,omitempty"`    // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 	MessageID int    `json:"message_id,omitempty"` // Identifier of the message to delete
 }
 
-// Use this method to delete multiple messages simultaneously. If some of the specified messages can't be found, they are skipped. Returns True on success.
-//
-// https://core.telegram.org/bots/api#deletemessages
+// use Bot.DeleteMessages(ctx, &DeleteMessagesRequest{})
 type DeleteMessagesRequest struct {
 	ChatID     ChatID  `json:"chat_id,omitempty"`     // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 	MessageIds []int64 `json:"message_ids,omitempty"` // A JSON-serialized list of 1-100 identifiers of messages to delete. See deleteMessage for limitations on which messages can be deleted
 }
 
-// Use this method to send static .WEBP, animated .TGS, or video .WEBM stickers. On success, the sent Message is returned.
-//
-// https://core.telegram.org/bots/api#sendsticker
+// use Bot.SendSticker(ctx, &SendStickerRequest{})
 type SendStickerRequest struct {
 	BusinessConnectionID string           `json:"business_connection_id,omitempty"` // Unique identifier of the business connection on behalf of which the message will be sent
 	ChatID               ChatID           `json:"chat_id,omitempty"`                // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
@@ -1116,32 +875,24 @@ type SendStickerRequest struct {
 	ReplyMarkup          Markup           `json:"reply_markup,omitempty"`           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
-// Use this method to get a sticker set. On success, a StickerSet object is returned.
-//
-// https://core.telegram.org/bots/api#getstickerset
+// use Bot.GetStickerSet(ctx, &GetStickerSetRequest{})
 type GetStickerSetRequest struct {
 	Name string `json:"name,omitempty"` // Name of the sticker set
 }
 
-// Use this method to get information about custom emoji stickers by their identifiers. Returns an Array of Sticker objects.
-//
-// https://core.telegram.org/bots/api#getcustomemojistickers
+// use Bot.GetCustomEmojiStickers(ctx, &GetCustomEmojiStickersRequest{})
 type GetCustomEmojiStickersRequest struct {
 	CustomEmojiIds []string `json:"custom_emoji_ids,omitempty"` // A JSON-serialized list of custom emoji identifiers. At most 200 custom emoji identifiers can be specified.
 }
 
-// Use this method to upload a file with a sticker for later use in the createNewStickerSet, addStickerToSet, or replaceStickerInSet methods (the file can be used multiple times). Returns the uploaded File on success.
-//
-// https://core.telegram.org/bots/api#uploadstickerfile
+// use Bot.UploadStickerFile(ctx, &UploadStickerFileRequest{})
 type UploadStickerFileRequest struct {
 	UserID        int64     `json:"user_id,omitempty"`        // User identifier of sticker file owner
 	Sticker       InputFile `json:"sticker,omitempty"`        // A file with the sticker in .WEBP, .PNG, .TGS, or .WEBM format. See https://core.telegram.org/stickers for technical requirements. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 	StickerFormat string    `json:"sticker_format,omitempty"` // Format of the sticker, must be one of "static", "animated", "video"
 }
 
-// Use this method to create a new sticker set owned by a user. The bot will be able to edit the sticker set thus created. Returns True on success.
-//
-// https://core.telegram.org/bots/api#createnewstickerset
+// use Bot.CreateNewStickerSet(ctx, &CreateNewStickerSetRequest{})
 type CreateNewStickerSetRequest struct {
 	UserID          int64          `json:"user_id,omitempty"`          // User identifier of created sticker set owner
 	Name            string         `json:"name,omitempty"`             // Short name of sticker set, to be used in t.me/addstickers/ URLs (e.g., animals). Can contain only English letters, digits and underscores. Must begin with a letter, can't contain consecutive underscores and must end in "_by_<bot_username>". <bot_username> is case insensitive. 1-64 characters.
@@ -1151,33 +902,25 @@ type CreateNewStickerSetRequest struct {
 	NeedsRepainting bool           `json:"needs_repainting,omitempty"` // Pass True if stickers in the sticker set must be repainted to the color of text when used in messages, the accent color if used as emoji status, white on chat photos, or another appropriate color based on context; for custom emoji sticker sets only
 }
 
-// Use this method to add a new sticker to a set created by the bot. Emoji sticker sets can have up to 200 stickers. Other sticker sets can have up to 120 stickers. Returns True on success.
-//
-// https://core.telegram.org/bots/api#addstickertoset
+// use Bot.AddStickerToSet(ctx, &AddStickerToSetRequest{})
 type AddStickerToSetRequest struct {
 	UserID  int64         `json:"user_id,omitempty"` // User identifier of sticker set owner
 	Name    string        `json:"name,omitempty"`    // Sticker set name
 	Sticker *InputSticker `json:"sticker,omitempty"` // A JSON-serialized object with information about the added sticker. If exactly the same sticker had already been added to the set, then the set isn't changed.
 }
 
-// Use this method to move a sticker in a set created by the bot to a specific position. Returns True on success.
-//
-// https://core.telegram.org/bots/api#setstickerpositioninset
+// use Bot.SetStickerPositionInSet(ctx, &SetStickerPositionInSetRequest{})
 type SetStickerPositionInSetRequest struct {
 	Sticker  string `json:"sticker,omitempty"`  // File identifier of the sticker
 	Position int64  `json:"position,omitempty"` // New sticker position in the set, zero-based
 }
 
-// Use this method to delete a sticker from a set created by the bot. Returns True on success.
-//
-// https://core.telegram.org/bots/api#deletestickerfromset
+// use Bot.DeleteStickerFromSet(ctx, &DeleteStickerFromSetRequest{})
 type DeleteStickerFromSetRequest struct {
 	Sticker string `json:"sticker,omitempty"` // File identifier of the sticker
 }
 
-// Use this method to replace an existing sticker in a sticker set with a new one. The method is equivalent to calling deleteStickerFromSet, then addStickerToSet, then setStickerPositionInSet. Returns True on success.
-//
-// https://core.telegram.org/bots/api#replacestickerinset
+// use Bot.ReplaceStickerInSet(ctx, &ReplaceStickerInSetRequest{})
 type ReplaceStickerInSetRequest struct {
 	UserID     int64         `json:"user_id,omitempty"`     // User identifier of the sticker set owner
 	Name       string        `json:"name,omitempty"`        // Sticker set name
@@ -1185,41 +928,31 @@ type ReplaceStickerInSetRequest struct {
 	Sticker    *InputSticker `json:"sticker,omitempty"`     // A JSON-serialized object with information about the added sticker. If exactly the same sticker had already been added to the set, then the set remains unchanged.
 }
 
-// Use this method to change the list of emoji assigned to a regular or custom emoji sticker. The sticker must belong to a sticker set created by the bot. Returns True on success.
-//
-// https://core.telegram.org/bots/api#setstickeremojilist
+// use Bot.SetStickerEmojiList(ctx, &SetStickerEmojiListRequest{})
 type SetStickerEmojiListRequest struct {
 	Sticker   string   `json:"sticker,omitempty"`    // File identifier of the sticker
 	EmojiList []string `json:"emoji_list,omitempty"` // A JSON-serialized list of 1-20 emoji associated with the sticker
 }
 
-// Use this method to change search keywords assigned to a regular or custom emoji sticker. The sticker must belong to a sticker set created by the bot. Returns True on success.
-//
-// https://core.telegram.org/bots/api#setstickerkeywords
+// use Bot.SetStickerKeywords(ctx, &SetStickerKeywordsRequest{})
 type SetStickerKeywordsRequest struct {
 	Sticker  string   `json:"sticker,omitempty"`  // File identifier of the sticker
 	Keywords []string `json:"keywords,omitempty"` // A JSON-serialized list of 0-20 search keywords for the sticker with total length of up to 64 characters
 }
 
-// Use this method to change the mask position of a mask sticker. The sticker must belong to a sticker set that was created by the bot. Returns True on success.
-//
-// https://core.telegram.org/bots/api#setstickermaskposition
+// use Bot.SetStickerMaskPosition(ctx, &SetStickerMaskPositionRequest{})
 type SetStickerMaskPositionRequest struct {
 	Sticker      string        `json:"sticker,omitempty"`       // File identifier of the sticker
 	MaskPosition *MaskPosition `json:"mask_position,omitempty"` // A JSON-serialized object with the position where the mask should be placed on faces. Omit the parameter to remove the mask position.
 }
 
-// Use this method to set the title of a created sticker set. Returns True on success.
-//
-// https://core.telegram.org/bots/api#setstickersettitle
+// use Bot.SetStickerSetTitle(ctx, &SetStickerSetTitleRequest{})
 type SetStickerSetTitleRequest struct {
 	Name  string `json:"name,omitempty"`  // Sticker set name
 	Title string `json:"title,omitempty"` // Sticker set title, 1-64 characters
 }
 
-// Use this method to set the thumbnail of a regular or mask sticker set. The format of the thumbnail file must match the format of the stickers in the set. Returns True on success.
-//
-// https://core.telegram.org/bots/api#setstickersetthumbnail
+// use Bot.SetStickerSetThumbnail(ctx, &SetStickerSetThumbnailRequest{})
 type SetStickerSetThumbnailRequest struct {
 	Name      string    `json:"name,omitempty"`      // Sticker set name
 	UserID    int64     `json:"user_id,omitempty"`   // User identifier of the sticker set owner
@@ -1227,29 +960,18 @@ type SetStickerSetThumbnailRequest struct {
 	Format    string    `json:"format,omitempty"`    // Format of the thumbnail, must be one of "static" for a .WEBP or .PNG image, "animated" for a .TGS animation, or "video" for a .WEBM video
 }
 
-// Use this method to set the thumbnail of a custom emoji sticker set. Returns True on success.
-//
-// https://core.telegram.org/bots/api#setcustomemojistickersetthumbnail
+// use Bot.SetCustomEmojiStickerSetThumbnail(ctx, &SetCustomEmojiStickerSetThumbnailRequest{})
 type SetCustomEmojiStickerSetThumbnailRequest struct {
 	Name          string `json:"name,omitempty"`            // Sticker set name
 	CustomEmojiID string `json:"custom_emoji_id,omitempty"` // Custom emoji identifier of a sticker from the sticker set; pass an empty string to drop the thumbnail and use the first sticker as the thumbnail.
 }
 
-// Use this method to delete a sticker set that was created by the bot. Returns True on success.
-//
-// https://core.telegram.org/bots/api#deletestickerset
+// use Bot.DeleteStickerSet(ctx, &DeleteStickerSetRequest{})
 type DeleteStickerSetRequest struct {
 	Name string `json:"name,omitempty"` // Sticker set name
 }
 
-// Returns the list of gifts that can be sent by the bot to users and channel chats. Requires no parameters. Returns a Gifts object.
-//
-// https://core.telegram.org/bots/api#getavailablegifts
-type GetAvailableGiftsRequest interface{}
-
-// Sends a gift to the given user or channel chat. The gift can't be converted to Telegram Stars by the receiver. Returns True on success.
-//
-// https://core.telegram.org/bots/api#sendgift
+// use Bot.SendGift(ctx, &SendGiftRequest{})
 type SendGiftRequest struct {
 	UserID        int64           `json:"user_id,omitempty"`         // Required if chat_id is not specified. Unique identifier of the target user who will receive the gift.
 	ChatID        ChatID          `json:"chat_id,omitempty"`         // Required if user_id is not specified. Unique identifier for the chat or username of the channel (in the format @channelusername) that will receive the gift.
@@ -1260,41 +982,29 @@ type SendGiftRequest struct {
 	TextEntities  []MessageEntity `json:"text_entities,omitempty"`   // A JSON-serialized list of special entities that appear in the gift text. It can be specified instead of text_parse_mode. Entities other than "bold", "italic", "underline", "strikethrough", "spoiler", and "custom_emoji" are ignored.
 }
 
-// Verifies a user on behalf of the organization which is represented by the bot. Returns True on success.
-//
-// https://core.telegram.org/bots/api#verifyuser
+// use Bot.VerifyUser(ctx, &VerifyUserRequest{})
 type VerifyUserRequest struct {
 	UserID            int64  `json:"user_id,omitempty"`            // Unique identifier of the target user
 	CustomDescription string `json:"custom_description,omitempty"` // Custom description for the verification; 0-70 characters. Must be empty if the organization isn't allowed to provide a custom verification description.
 }
 
-// Verifies a chat on behalf of the organization which is represented by the bot. Returns True on success.
-//
-// https://core.telegram.org/bots/api#verifychat
+// use Bot.VerifyChat(ctx, &VerifyChatRequest{})
 type VerifyChatRequest struct {
 	ChatID            ChatID `json:"chat_id,omitempty"`            // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 	CustomDescription string `json:"custom_description,omitempty"` // Custom description for the verification; 0-70 characters. Must be empty if the organization isn't allowed to provide a custom verification description.
 }
 
-// Removes verification from a user who is currently verified on behalf of the organization represented by the bot. Returns True on success.
-//
-// https://core.telegram.org/bots/api#removeuserverification
+// use Bot.RemoveUserVerification(ctx, &RemoveUserVerificationRequest{})
 type RemoveUserVerificationRequest struct {
 	UserID int64 `json:"user_id,omitempty"` // Unique identifier of the target user
 }
 
-// Removes verification from a chat that is currently verified on behalf of the organization represented by the bot. Returns True on success.
-//
-// https://core.telegram.org/bots/api#removechatverification
+// use Bot.RemoveChatVerification(ctx, &RemoveChatVerificationRequest{})
 type RemoveChatVerificationRequest struct {
 	ChatID ChatID `json:"chat_id,omitempty"` // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 }
 
-// Use this method to send answers to an inline query. On success, True is returned.
-//
-// No more than 50 results per query are allowed.
-//
-// https://core.telegram.org/bots/api#answerinlinequery
+// use Bot.AnswerInlineQuery(ctx, &AnswerInlineQueryRequest{})
 type AnswerInlineQueryRequest struct {
 	InlineQueryID string                    `json:"inline_query_id,omitempty"` // Unique identifier for the answered query
 	Results       []InlineQueryResult       `json:"results,omitempty"`         // A JSON-serialized array of results for the inline query
@@ -1304,17 +1014,13 @@ type AnswerInlineQueryRequest struct {
 	Button        *InlineQueryResultsButton `json:"button,omitempty"`          // A JSON-serialized object describing a button to be shown above inline query results
 }
 
-// Use this method to set the result of an interaction with a Web App and send a corresponding message on behalf of the user to the chat from which the query originated. On success, a SentWebAppMessage object is returned.
-//
-// https://core.telegram.org/bots/api#answerwebappquery
+// use Bot.AnswerWebAppQuery(ctx, &AnswerWebAppQueryRequest{})
 type AnswerWebAppQueryRequest struct {
 	WebAppQueryID string            `json:"web_app_query_id,omitempty"` // Unique identifier for the query to be answered
 	Result        InlineQueryResult `json:"result,omitempty"`           // A JSON-serialized object describing the message to be sent
 }
 
-// Stores a message that can be sent by a user of a Mini App. Returns a PreparedInlineMessage object.
-//
-// https://core.telegram.org/bots/api#savepreparedinlinemessage
+// use Bot.SavePreparedInlineMessage(ctx, &SavePreparedInlineMessageRequest{})
 type SavePreparedInlineMessageRequest struct {
 	UserID            int64             `json:"user_id,omitempty"`             // Unique identifier of the target user that can use the prepared message
 	Result            InlineQueryResult `json:"result,omitempty"`              // A JSON-serialized object describing the message to be sent
@@ -1324,9 +1030,7 @@ type SavePreparedInlineMessageRequest struct {
 	AllowChannelChats bool              `json:"allow_channel_chats,omitempty"` // Pass True if the message can be sent to channel chats
 }
 
-// Use this method to send invoices. On success, the sent Message is returned.
-//
-// https://core.telegram.org/bots/api#sendinvoice
+// use Bot.SendInvoice(ctx, &SendInvoiceRequest{})
 type SendInvoiceRequest struct {
 	ChatID                    ChatID                `json:"chat_id,omitempty"`                       // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 	MessageThreadID           int64                 `json:"message_thread_id,omitempty"`             // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
@@ -1359,9 +1063,7 @@ type SendInvoiceRequest struct {
 	ReplyMarkup               *InlineKeyboardMarkup `json:"reply_markup,omitempty"`                  // A JSON-serialized object for an inline keyboard. If empty, one 'Pay total price' button will be shown. If not empty, the first button must be a Pay button.
 }
 
-// Use this method to create a link for an invoice. Returns the created invoice link as String on success.
-//
-// https://core.telegram.org/bots/api#createinvoicelink
+// use Bot.CreateInvoiceLink(ctx, &CreateInvoiceLinkRequest{})
 type CreateInvoiceLinkRequest struct {
 	BusinessConnectionID      string         `json:"business_connection_id,omitempty"`        // Unique identifier of the business connection on behalf of which the link will be created. For payments in Telegram Stars only.
 	Title                     string         `json:"title,omitempty"`                         // Product name, 1-32 characters
@@ -1387,9 +1089,7 @@ type CreateInvoiceLinkRequest struct {
 	IsFlexible                bool           `json:"is_flexible,omitempty"`                   // Pass True if the final price depends on the shipping method. Ignored for payments in Telegram Stars.
 }
 
-// If you sent an invoice requesting a shipping address and the parameter is_flexible was specified, the Bot API will send an Update with a shipping_query field to the bot. Use this method to reply to shipping queries. On success, True is returned.
-//
-// https://core.telegram.org/bots/api#answershippingquery
+// use Bot.AnswerShippingQuery(ctx, &AnswerShippingQueryRequest{})
 type AnswerShippingQueryRequest struct {
 	ShippingQueryID string           `json:"shipping_query_id,omitempty"` // Unique identifier for the query to be answered
 	Ok              bool             `json:"ok,omitempty"`                // Pass True if delivery to the specified address is possible and False if there are any problems (for example, if delivery to the specified address is not possible)
@@ -1397,53 +1097,39 @@ type AnswerShippingQueryRequest struct {
 	ErrorMessage    string           `json:"error_message,omitempty"`     // Required if ok is False. Error message in human readable form that explains why it is impossible to complete the order (e.g. "Sorry, delivery to your desired address is unavailable"). Telegram will display this message to the user.
 }
 
-// Once the user has confirmed their payment and shipping details, the Bot API sends the final confirmation in the form of an Update with the field pre_checkout_query. Use this method to respond to such pre-checkout queries. On success, True is returned. Note: The Bot API must receive an answer within 10 seconds after the pre-checkout query was sent.
-//
-// https://core.telegram.org/bots/api#answerprecheckoutquery
+// use Bot.AnswerPreCheckoutQuery(ctx, &AnswerPreCheckoutQueryRequest{})
 type AnswerPreCheckoutQueryRequest struct {
 	PreCheckoutQueryID string `json:"pre_checkout_query_id,omitempty"` // Unique identifier for the query to be answered
 	Ok                 bool   `json:"ok,omitempty"`                    // Specify True if everything is alright (goods are available, etc.) and the bot is ready to proceed with the order. Use False if there are any problems.
 	ErrorMessage       string `json:"error_message,omitempty"`         // Required if ok is False. Error message in human readable form that explains the reason for failure to proceed with the checkout (e.g. "Sorry, somebody just bought the last of our amazing black T-shirts while you were busy filling out your payment details. Please choose a different color or garment!"). Telegram will display this message to the user.
 }
 
-// Returns the bot's Telegram Star transactions in chronological order. On success, returns a StarTransactions object.
-//
-// https://core.telegram.org/bots/api#getstartransactions
+// use Bot.GetStarTransactions(ctx, &GetStarTransactionsRequest{})
 type GetStarTransactionsRequest struct {
 	Offset int64 `json:"offset,omitempty"` // Number of transactions to skip in the response
 	Limit  int64 `json:"limit,omitempty"`  // The maximum number of transactions to be retrieved. Values between 1-100 are accepted. Defaults to 100.
 }
 
-// Refunds a successful payment in Telegram Stars. Returns True on success.
-//
-// https://core.telegram.org/bots/api#refundstarpayment
+// use Bot.RefundStarPayment(ctx, &RefundStarPaymentRequest{})
 type RefundStarPaymentRequest struct {
 	UserID                  int64  `json:"user_id,omitempty"`                    // Identifier of the user whose payment will be refunded
 	TelegramPaymentChargeID string `json:"telegram_payment_charge_id,omitempty"` // Telegram payment identifier
 }
 
-// Allows the bot to cancel or re-enable extension of a subscription paid in Telegram Stars. Returns True on success.
-//
-// https://core.telegram.org/bots/api#edituserstarsubscription
+// use Bot.EditUserStarSubscription(ctx, &EditUserStarSubscriptionRequest{})
 type EditUserStarSubscriptionRequest struct {
 	UserID                  int64  `json:"user_id,omitempty"`                    // Identifier of the user whose subscription will be edited
 	TelegramPaymentChargeID string `json:"telegram_payment_charge_id,omitempty"` // Telegram payment identifier for the subscription
 	IsCanceled              bool   `json:"is_canceled,omitempty"`                // Pass True to cancel extension of the user subscription; the subscription must be active up to the end of the current subscription period. Pass False to allow the user to re-enable a subscription that was previously canceled by the bot.
 }
 
-// Informs a user that some of the Telegram Passport elements they provided contains errors. The user will not be able to re-submit their Passport to you until the errors are fixed (the contents of the field for which you returned the error must change). Returns True on success.
-//
-// Use this if the data submitted by the user doesn't satisfy the standards your service requires for any reason. For example, if a birthday date seems invalid, a submitted document is blurry, a scan shows evidence of tampering, etc. Supply some details in the error message to make sure the user knows how to correct the issues.
-//
-// https://core.telegram.org/bots/api#setpassportdataerrors
+// use Bot.SetPassportDataErrors(ctx, &SetPassportDataErrorsRequest{})
 type SetPassportDataErrorsRequest struct {
 	UserID int64                  `json:"user_id,omitempty"` // User identifier
 	Errors []PassportElementError `json:"errors,omitempty"`  // A JSON-serialized array describing the errors
 }
 
-// Use this method to send a game. On success, the sent Message is returned.
-//
-// https://core.telegram.org/bots/api#sendgame
+// use Bot.SendGame(ctx, &SendGameRequest{})
 type SendGameRequest struct {
 	BusinessConnectionID string                `json:"business_connection_id,omitempty"` // Unique identifier of the business connection on behalf of which the message will be sent
 	ChatID               int64                 `json:"chat_id,omitempty"`                // Unique identifier for the target chat
@@ -1457,9 +1143,7 @@ type SendGameRequest struct {
 	ReplyMarkup          *InlineKeyboardMarkup `json:"reply_markup,omitempty"`           // A JSON-serialized object for an inline keyboard. If empty, one 'Play game_title' button will be shown. If not empty, the first button must launch the game.
 }
 
-// Use this method to set the score of the specified user in a game message. On success, if the message is not an inline message, the Message is returned, otherwise True is returned. Returns an error, if the new score is not greater than the user's current score in the chat and force is False.
-//
-// https://core.telegram.org/bots/api#setgamescore
+// use Bot.SetGameScore(ctx, &SetGameScoreRequest{})
 type SetGameScoreRequest struct {
 	UserID             int64  `json:"user_id,omitempty"`              // User identifier
 	Score              int64  `json:"score,omitempty"`                // New score, must be non-negative
@@ -1470,9 +1154,7 @@ type SetGameScoreRequest struct {
 	InlineMessageID    string `json:"inline_message_id,omitempty"`    // Required if chat_id and message_id are not specified. Identifier of the inline message
 }
 
-// Use this method to get data for high score tables. Will return the score of the specified user and several of their neighbors in a game. Returns an Array of GameHighScore objects.
-//
-// https://core.telegram.org/bots/api#getgamehighscores
+// use Bot.GetGameHighScores(ctx, &GetGameHighScoresRequest{})
 type GetGameHighScoresRequest struct {
 	UserID          int64  `json:"user_id,omitempty"`           // Target user id
 	ChatID          int64  `json:"chat_id,omitempty"`           // Required if inline_message_id is not specified. Unique identifier for the target chat

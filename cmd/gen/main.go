@@ -69,11 +69,79 @@ func main() {
 	generateEnums(spec.Enums)
 	generateTypes(spec.Types, nonPtrTypes)
 	generateRequests(spec.Methods, nonPtrTypes)
+	generateMethods(spec.Methods)
 	exec.Command("gofmt", "-s", "-w", "./pkg").Run()
 }
 
 const genFileMode = os.O_WRONLY | os.O_TRUNC | os.O_CREATE
 const genFilePerm = 0o660
+
+func generateMethods(methods []Method) {
+	f, err := os.OpenFile("./pkg/bot/methods.go", genFileMode, genFilePerm)
+
+	if err != nil {
+		panic(err)
+	}
+
+	f.WriteString("package bot\n\n")
+
+	f.WriteString(`import (
+		"context"
+		"github.com/TrixiS/goram/pkg/types"
+	)
+		`)
+
+	for _, m := range methods {
+		name := toPascalCase(m.Name)
+		t := getFieldTypeString("", m.Returns, true, "types.")
+		returnType := fmt.Sprintf("(r %s, err error)", t)
+		args := ""
+		data := "nil"
+
+		if len(m.Fields) == 0 {
+			args = "(ctx context.Context)"
+		} else {
+			args = fmt.Sprintf("(ctx context.Context, request *types.%sRequest)", name)
+			data = "request"
+		}
+
+		for _, d := range m.Description {
+			comment := fmt.Sprintf("// %s\n//\n", d)
+			f.WriteString(comment)
+		}
+
+		f.WriteString(fmt.Sprintf("// %s\n", m.Href))
+
+		f.WriteString(
+			fmt.Sprintf("func (b *Bot) %s%s %s {\n", name, args, returnType),
+		)
+
+		f.WriteString(
+			fmt.Sprintf(
+				`res, err := makeRequest[%s](ctx, b.options.Client, b.baseURL, "%s", %s)
+
+					if err != nil {
+						return r, err
+					}
+
+					if !res.OK {
+						return r, res.error("%s")
+					}
+
+					return res.Result, nil
+				}
+
+				`,
+				t,
+				m.Name,
+				data,
+				m.Name,
+			),
+		)
+	}
+
+	f.Close()
+}
 
 func generateRequests(methods []Method, nonPtrTypes []string) {
 	f, err := os.OpenFile("./pkg/types/requests.go", genFileMode, genFilePerm)
@@ -85,9 +153,16 @@ func generateRequests(methods []Method, nonPtrTypes []string) {
 	f.WriteString("package types\n\n")
 
 	for _, m := range methods {
-		name := toPascalCase(m.Type.Name) + "Request"
-		typeString := generateTypeString(m.Type, name, nonPtrTypes)
+		if len(m.Fields) == 0 {
+			continue
+		}
+
+		methodPascalName := toPascalCase(m.Type.Name)
+		structName := methodPascalName + "Request"
+		f.WriteString(fmt.Sprintf("// use Bot.%s(ctx, &%s{})\n", methodPascalName, structName))
+		typeString := generateTypeString(m.Type, structName, nonPtrTypes, false)
 		f.WriteString(typeString)
+		f.WriteString("\n")
 	}
 
 	f.Close()
@@ -103,30 +178,31 @@ func generateTypes(types []Type, nonPtrTypes []string) {
 	f.WriteString("package types\n\n")
 
 	for _, t := range types {
-		typeString := generateTypeString(t, t.Name, nonPtrTypes)
-		f.WriteString(typeString)
+		f.WriteString(generateTypeString(t, t.Name, nonPtrTypes, true))
 	}
 
 	f.Close()
 }
 
-func generateTypeString(t Type, name string, nonPtrTypes []string) string {
+func generateTypeString(t Type, typeName string, nonPtrTypes []string, doc bool) string {
 	builder := strings.Builder{}
 
-	for _, d := range t.Description {
-		comment := fmt.Sprintf("// %s\n//\n", d)
-		builder.WriteString(comment)
+	if doc {
+		for _, d := range t.Description {
+			comment := fmt.Sprintf("// %s\n//\n", d)
+			builder.WriteString(comment)
+		}
+
+		builder.WriteString(fmt.Sprintf("// %s\n", t.Href))
 	}
 
-	builder.WriteString(fmt.Sprintf("// %s\n", t.Href))
-
 	if len(t.Fields) == 0 {
-		decl := fmt.Sprintf("type %s interface{}\n", name)
+		decl := fmt.Sprintf("type %s interface{}\n", typeName)
 		builder.WriteString(decl)
 		return builder.String()
 	}
 
-	decl := fmt.Sprintf("type %s struct {\n", name)
+	decl := fmt.Sprintf("type %s struct {\n", typeName)
 	builder.WriteString(decl)
 
 	for i, field := range t.Fields {
@@ -135,6 +211,7 @@ func generateTypeString(t Type, name string, nonPtrTypes []string) string {
 			field.Name,
 			field.Types,
 			!slices.Contains(nonPtrTypes, field.Types[0]),
+			"",
 		)
 
 		structField := fmt.Sprintf(
@@ -157,13 +234,13 @@ func generateTypeString(t Type, name string, nonPtrTypes []string) string {
 	return builder.String()
 }
 
-func getFieldTypeString(fieldName string, fieldTypes []string, isPtr bool) string {
+func getFieldTypeString(fieldName string, fieldTypes []string, isPtr bool, prefix string) string {
 	if fieldName == "reply_markup" && len(fieldTypes) == 4 {
-		return "Markup"
+		return prefix + "Markup"
 	}
 
 	if fieldName == "media" && len(fieldTypes) == 4 {
-		return "[]MediaGroupInputMedia"
+		return "[]" + prefix + "MediaGroupInputMedia"
 	}
 
 	if fieldName == "message_id" {
@@ -174,16 +251,16 @@ func getFieldTypeString(fieldName string, fieldTypes []string, isPtr bool) strin
 
 	if t == "Integer" {
 		if (fieldName == "id" || fieldName == "chat_id") && len(fieldTypes) == 2 {
-			return "ChatID"
+			return prefix + "ChatID"
 		}
 
 		return "int64"
 	}
 
-	return convertFieldTypeString(t, isPtr)
+	return convertFieldTypeString(t, isPtr, prefix)
 }
 
-func convertFieldTypeString(fieldType string, isPtr bool) string {
+func convertFieldTypeString(fieldType string, isPtr bool, prefix string) string {
 	if fieldType == "Integer" {
 		return "int64"
 	}
@@ -203,14 +280,14 @@ func convertFieldTypeString(fieldType string, isPtr bool) string {
 	const arrayPrefix = "Array of "
 
 	if strings.HasPrefix(fieldType, arrayPrefix) {
-		return "[]" + convertFieldTypeString(fieldType[len(arrayPrefix):], false) // no []*T
+		return "[]" + convertFieldTypeString(fieldType[len(arrayPrefix):], false, prefix) // no []*T
 	}
 
 	if isPtr {
-		return "*" + fieldType
+		return "*" + prefix + fieldType
 	}
 
-	return fieldType
+	return prefix + fieldType
 }
 
 func generateEnums(enums []Enum) {

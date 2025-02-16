@@ -4,9 +4,10 @@ import (
 	"strconv"
 )
 
+// Use this struct to specify a chat id or username
 type ChatID struct {
 	ID       int64
-	Username string
+	Username string // In form of @username
 }
 
 func (c ChatID) MarshalJSON() ([]byte, error) {
@@ -16,7 +17,7 @@ func (c ChatID) MarshalJSON() ([]byte, error) {
 	}
 
 	if c.Username != "" {
-		return []byte(c.Username), nil
+		return []byte("\"" + c.Username + "\""), nil
 	}
 
 	panic("invalid id")

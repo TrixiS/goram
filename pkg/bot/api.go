@@ -11,10 +11,21 @@ import (
 	"github.com/TrixiS/goram/pkg/types"
 )
 
+type Error struct {
+	Method      string
+	Description string
+	ErrorCode   int
+	Parameters  *types.ResponseParameters
+}
+
+func (a *Error) Error() string {
+	return fmt.Sprintf("%s: %d %s", a.Method, a.ErrorCode, a.Description)
+}
+
 type apiResponse[R any] struct {
 	OK          bool                      `json:"ok"`
 	Description string                    `json:"description"`
-	Result      *R                        `json:"result"`
+	Result      R                         `json:"result"`
 	ErrorCode   int                       `json:"error_code"`
 	Parameters  *types.ResponseParameters `json:"parameters"`
 }
@@ -26,17 +37,6 @@ func (a apiResponse[R]) error(method string) *Error {
 		ErrorCode:   a.ErrorCode,
 		Parameters:  a.Parameters,
 	}
-}
-
-type Error struct {
-	Method      string
-	Description string
-	ErrorCode   int
-	Parameters  *types.ResponseParameters
-}
-
-func (a *Error) Error() string {
-	return fmt.Sprintf("%s: %d %s", a.Method, a.ErrorCode, a.Description)
 }
 
 func makeRequest[R any](
@@ -73,8 +73,9 @@ func makeRequest[R any](
 		return nil, err
 	}
 
-	defer res.Body.Close()
-
 	r := &apiResponse[R]{}
-	return r, json.NewDecoder(res.Body).Decode(r)
+	err = json.NewDecoder(res.Body).Decode(r)
+	res.Body.Close()
+
+	return r, err
 }
