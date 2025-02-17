@@ -11,6 +11,7 @@ type BotOptions struct {
 	Client *http.Client
 }
 
+// TODO: AfterRequest funcs
 type Bot struct {
 	options BotOptions
 	baseURL string
