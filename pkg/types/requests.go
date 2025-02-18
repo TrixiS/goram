@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"mime/multipart"
+	"strconv"
 )
 
 // see Bot.GetUpdates(ctx, &GetUpdatesRequest{})
@@ -54,17 +55,20 @@ type SetWebhookRequest struct {
 
 func (r *SetWebhookRequest) WriteMultipart(w *multipart.Writer) {
 	w.WriteField("url", r.Url)
-
-	switch v := r.Certificate.(type) {
-	case string:
-		w.WriteField("certificate", v)
-	case NamedReader:
-		fw, _ := w.CreateFormFile("certificate", v.Name())
-		io.Copy(fw, v)
-	default:
-		panic(v)
+	if r.Certificate != nil {
+		switch v := r.Certificate.(type) {
+		case string:
+			w.WriteField("certificate", v)
+		case NamedReader:
+			fw, _ := w.CreateFormFile("certificate", v.Name())
+			io.Copy(fw, v)
+		default:
+			panic(v)
+		}
 	}
-	w.WriteField("ip_address", r.IpAddress)
+	if r.IpAddress != "" {
+		w.WriteField("ip_address", r.IpAddress)
+	}
 
 	{
 		b, _ := json.Marshal(r.MaxConnections)
@@ -84,7 +88,9 @@ func (r *SetWebhookRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("drop_pending_updates")
 		fw.Write(b)
 	}
-	w.WriteField("secret_token", r.SecretToken)
+	if r.SecretToken != "" {
+		w.WriteField("secret_token", r.SecretToken)
+	}
 }
 
 // see Bot.DeleteWebhook(ctx, &DeleteWebhookRequest{})
@@ -118,7 +124,9 @@ type SendMessageRequest struct {
 }
 
 func (r *SendMessageRequest) WriteMultipart(w *multipart.Writer) {
-	w.WriteField("business_connection_id", r.BusinessConnectionId)
+	if r.BusinessConnectionId != "" {
+		w.WriteField("business_connection_id", r.BusinessConnectionId)
+	}
 	w.WriteField("chat_id", r.ChatId.String())
 
 	{
@@ -126,6 +134,7 @@ func (r *SendMessageRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("message_thread_id")
 		fw.Write(b)
 	}
+
 	w.WriteField("text", r.Text)
 	w.WriteField("parse_mode", string(r.ParseMode))
 	if r.Entities != nil {
@@ -160,7 +169,9 @@ func (r *SendMessageRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("allow_paid_broadcast")
 		fw.Write(b)
 	}
-	w.WriteField("message_effect_id", r.MessageEffectId)
+	if r.MessageEffectId != "" {
+		w.WriteField("message_effect_id", r.MessageEffectId)
+	}
 	if r.ReplyParameters != nil {
 		{
 			b, _ := json.Marshal(r.ReplyParameters)
@@ -316,7 +327,9 @@ func (r *CopyMessageRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("video_start_timestamp")
 		fw.Write(b)
 	}
-	w.WriteField("caption", r.Caption)
+	if r.Caption != "" {
+		w.WriteField("caption", r.Caption)
+	}
 	w.WriteField("parse_mode", string(r.ParseMode))
 	if r.CaptionEntities != nil {
 		{
@@ -436,7 +449,9 @@ type SendPhotoRequest struct {
 }
 
 func (r *SendPhotoRequest) WriteMultipart(w *multipart.Writer) {
-	w.WriteField("business_connection_id", r.BusinessConnectionId)
+	if r.BusinessConnectionId != "" {
+		w.WriteField("business_connection_id", r.BusinessConnectionId)
+	}
 	w.WriteField("chat_id", r.ChatId.String())
 
 	{
@@ -454,7 +469,9 @@ func (r *SendPhotoRequest) WriteMultipart(w *multipart.Writer) {
 	default:
 		panic(v)
 	}
-	w.WriteField("caption", r.Caption)
+	if r.Caption != "" {
+		w.WriteField("caption", r.Caption)
+	}
 	w.WriteField("parse_mode", string(r.ParseMode))
 	if r.CaptionEntities != nil {
 		{
@@ -493,7 +510,9 @@ func (r *SendPhotoRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("allow_paid_broadcast")
 		fw.Write(b)
 	}
-	w.WriteField("message_effect_id", r.MessageEffectId)
+	if r.MessageEffectId != "" {
+		w.WriteField("message_effect_id", r.MessageEffectId)
+	}
 	if r.ReplyParameters != nil {
 		{
 			b, _ := json.Marshal(r.ReplyParameters)
@@ -532,7 +551,9 @@ type SendAudioRequest struct {
 }
 
 func (r *SendAudioRequest) WriteMultipart(w *multipart.Writer) {
-	w.WriteField("business_connection_id", r.BusinessConnectionId)
+	if r.BusinessConnectionId != "" {
+		w.WriteField("business_connection_id", r.BusinessConnectionId)
+	}
 	w.WriteField("chat_id", r.ChatId.String())
 
 	{
@@ -550,7 +571,9 @@ func (r *SendAudioRequest) WriteMultipart(w *multipart.Writer) {
 	default:
 		panic(v)
 	}
-	w.WriteField("caption", r.Caption)
+	if r.Caption != "" {
+		w.WriteField("caption", r.Caption)
+	}
 	w.WriteField("parse_mode", string(r.ParseMode))
 	if r.CaptionEntities != nil {
 		{
@@ -565,17 +588,22 @@ func (r *SendAudioRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("duration")
 		fw.Write(b)
 	}
-	w.WriteField("performer", r.Performer)
-	w.WriteField("title", r.Title)
-
-	switch v := r.Thumbnail.(type) {
-	case string:
-		w.WriteField("thumbnail", v)
-	case NamedReader:
-		fw, _ := w.CreateFormFile("thumbnail", v.Name())
-		io.Copy(fw, v)
-	default:
-		panic(v)
+	if r.Performer != "" {
+		w.WriteField("performer", r.Performer)
+	}
+	if r.Title != "" {
+		w.WriteField("title", r.Title)
+	}
+	if r.Thumbnail != nil {
+		switch v := r.Thumbnail.(type) {
+		case string:
+			w.WriteField("thumbnail", v)
+		case NamedReader:
+			fw, _ := w.CreateFormFile("thumbnail", v.Name())
+			io.Copy(fw, v)
+		default:
+			panic(v)
+		}
 	}
 
 	{
@@ -595,7 +623,9 @@ func (r *SendAudioRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("allow_paid_broadcast")
 		fw.Write(b)
 	}
-	w.WriteField("message_effect_id", r.MessageEffectId)
+	if r.MessageEffectId != "" {
+		w.WriteField("message_effect_id", r.MessageEffectId)
+	}
 	if r.ReplyParameters != nil {
 		{
 			b, _ := json.Marshal(r.ReplyParameters)
@@ -632,7 +662,9 @@ type SendDocumentRequest struct {
 }
 
 func (r *SendDocumentRequest) WriteMultipart(w *multipart.Writer) {
-	w.WriteField("business_connection_id", r.BusinessConnectionId)
+	if r.BusinessConnectionId != "" {
+		w.WriteField("business_connection_id", r.BusinessConnectionId)
+	}
 	w.WriteField("chat_id", r.ChatId.String())
 
 	{
@@ -650,17 +682,20 @@ func (r *SendDocumentRequest) WriteMultipart(w *multipart.Writer) {
 	default:
 		panic(v)
 	}
-
-	switch v := r.Thumbnail.(type) {
-	case string:
-		w.WriteField("thumbnail", v)
-	case NamedReader:
-		fw, _ := w.CreateFormFile("thumbnail", v.Name())
-		io.Copy(fw, v)
-	default:
-		panic(v)
+	if r.Thumbnail != nil {
+		switch v := r.Thumbnail.(type) {
+		case string:
+			w.WriteField("thumbnail", v)
+		case NamedReader:
+			fw, _ := w.CreateFormFile("thumbnail", v.Name())
+			io.Copy(fw, v)
+		default:
+			panic(v)
+		}
 	}
-	w.WriteField("caption", r.Caption)
+	if r.Caption != "" {
+		w.WriteField("caption", r.Caption)
+	}
 	w.WriteField("parse_mode", string(r.ParseMode))
 	if r.CaptionEntities != nil {
 		{
@@ -693,7 +728,9 @@ func (r *SendDocumentRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("allow_paid_broadcast")
 		fw.Write(b)
 	}
-	w.WriteField("message_effect_id", r.MessageEffectId)
+	if r.MessageEffectId != "" {
+		w.WriteField("message_effect_id", r.MessageEffectId)
+	}
 	if r.ReplyParameters != nil {
 		{
 			b, _ := json.Marshal(r.ReplyParameters)
@@ -737,7 +774,9 @@ type SendVideoRequest struct {
 }
 
 func (r *SendVideoRequest) WriteMultipart(w *multipart.Writer) {
-	w.WriteField("business_connection_id", r.BusinessConnectionId)
+	if r.BusinessConnectionId != "" {
+		w.WriteField("business_connection_id", r.BusinessConnectionId)
+	}
 	w.WriteField("chat_id", r.ChatId.String())
 
 	{
@@ -773,25 +812,27 @@ func (r *SendVideoRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("height")
 		fw.Write(b)
 	}
-
-	switch v := r.Thumbnail.(type) {
-	case string:
-		w.WriteField("thumbnail", v)
-	case NamedReader:
-		fw, _ := w.CreateFormFile("thumbnail", v.Name())
-		io.Copy(fw, v)
-	default:
-		panic(v)
+	if r.Thumbnail != nil {
+		switch v := r.Thumbnail.(type) {
+		case string:
+			w.WriteField("thumbnail", v)
+		case NamedReader:
+			fw, _ := w.CreateFormFile("thumbnail", v.Name())
+			io.Copy(fw, v)
+		default:
+			panic(v)
+		}
 	}
-
-	switch v := r.Cover.(type) {
-	case string:
-		w.WriteField("cover", v)
-	case NamedReader:
-		fw, _ := w.CreateFormFile("cover", v.Name())
-		io.Copy(fw, v)
-	default:
-		panic(v)
+	if r.Cover != nil {
+		switch v := r.Cover.(type) {
+		case string:
+			w.WriteField("cover", v)
+		case NamedReader:
+			fw, _ := w.CreateFormFile("cover", v.Name())
+			io.Copy(fw, v)
+		default:
+			panic(v)
+		}
 	}
 
 	{
@@ -799,7 +840,9 @@ func (r *SendVideoRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("start_timestamp")
 		fw.Write(b)
 	}
-	w.WriteField("caption", r.Caption)
+	if r.Caption != "" {
+		w.WriteField("caption", r.Caption)
+	}
 	w.WriteField("parse_mode", string(r.ParseMode))
 	if r.CaptionEntities != nil {
 		{
@@ -844,7 +887,9 @@ func (r *SendVideoRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("allow_paid_broadcast")
 		fw.Write(b)
 	}
-	w.WriteField("message_effect_id", r.MessageEffectId)
+	if r.MessageEffectId != "" {
+		w.WriteField("message_effect_id", r.MessageEffectId)
+	}
 	if r.ReplyParameters != nil {
 		{
 			b, _ := json.Marshal(r.ReplyParameters)
@@ -885,7 +930,9 @@ type SendAnimationRequest struct {
 }
 
 func (r *SendAnimationRequest) WriteMultipart(w *multipart.Writer) {
-	w.WriteField("business_connection_id", r.BusinessConnectionId)
+	if r.BusinessConnectionId != "" {
+		w.WriteField("business_connection_id", r.BusinessConnectionId)
+	}
 	w.WriteField("chat_id", r.ChatId.String())
 
 	{
@@ -921,17 +968,20 @@ func (r *SendAnimationRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("height")
 		fw.Write(b)
 	}
-
-	switch v := r.Thumbnail.(type) {
-	case string:
-		w.WriteField("thumbnail", v)
-	case NamedReader:
-		fw, _ := w.CreateFormFile("thumbnail", v.Name())
-		io.Copy(fw, v)
-	default:
-		panic(v)
+	if r.Thumbnail != nil {
+		switch v := r.Thumbnail.(type) {
+		case string:
+			w.WriteField("thumbnail", v)
+		case NamedReader:
+			fw, _ := w.CreateFormFile("thumbnail", v.Name())
+			io.Copy(fw, v)
+		default:
+			panic(v)
+		}
 	}
-	w.WriteField("caption", r.Caption)
+	if r.Caption != "" {
+		w.WriteField("caption", r.Caption)
+	}
 	w.WriteField("parse_mode", string(r.ParseMode))
 	if r.CaptionEntities != nil {
 		{
@@ -970,7 +1020,9 @@ func (r *SendAnimationRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("allow_paid_broadcast")
 		fw.Write(b)
 	}
-	w.WriteField("message_effect_id", r.MessageEffectId)
+	if r.MessageEffectId != "" {
+		w.WriteField("message_effect_id", r.MessageEffectId)
+	}
 	if r.ReplyParameters != nil {
 		{
 			b, _ := json.Marshal(r.ReplyParameters)
@@ -1006,7 +1058,9 @@ type SendVoiceRequest struct {
 }
 
 func (r *SendVoiceRequest) WriteMultipart(w *multipart.Writer) {
-	w.WriteField("business_connection_id", r.BusinessConnectionId)
+	if r.BusinessConnectionId != "" {
+		w.WriteField("business_connection_id", r.BusinessConnectionId)
+	}
 	w.WriteField("chat_id", r.ChatId.String())
 
 	{
@@ -1024,7 +1078,9 @@ func (r *SendVoiceRequest) WriteMultipart(w *multipart.Writer) {
 	default:
 		panic(v)
 	}
-	w.WriteField("caption", r.Caption)
+	if r.Caption != "" {
+		w.WriteField("caption", r.Caption)
+	}
 	w.WriteField("parse_mode", string(r.ParseMode))
 	if r.CaptionEntities != nil {
 		{
@@ -1057,7 +1113,9 @@ func (r *SendVoiceRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("allow_paid_broadcast")
 		fw.Write(b)
 	}
-	w.WriteField("message_effect_id", r.MessageEffectId)
+	if r.MessageEffectId != "" {
+		w.WriteField("message_effect_id", r.MessageEffectId)
+	}
 	if r.ReplyParameters != nil {
 		{
 			b, _ := json.Marshal(r.ReplyParameters)
@@ -1092,7 +1150,9 @@ type SendVideoNoteRequest struct {
 }
 
 func (r *SendVideoNoteRequest) WriteMultipart(w *multipart.Writer) {
-	w.WriteField("business_connection_id", r.BusinessConnectionId)
+	if r.BusinessConnectionId != "" {
+		w.WriteField("business_connection_id", r.BusinessConnectionId)
+	}
 	w.WriteField("chat_id", r.ChatId.String())
 
 	{
@@ -1122,15 +1182,16 @@ func (r *SendVideoNoteRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("length")
 		fw.Write(b)
 	}
-
-	switch v := r.Thumbnail.(type) {
-	case string:
-		w.WriteField("thumbnail", v)
-	case NamedReader:
-		fw, _ := w.CreateFormFile("thumbnail", v.Name())
-		io.Copy(fw, v)
-	default:
-		panic(v)
+	if r.Thumbnail != nil {
+		switch v := r.Thumbnail.(type) {
+		case string:
+			w.WriteField("thumbnail", v)
+		case NamedReader:
+			fw, _ := w.CreateFormFile("thumbnail", v.Name())
+			io.Copy(fw, v)
+		default:
+			panic(v)
+		}
 	}
 
 	{
@@ -1150,7 +1211,9 @@ func (r *SendVideoNoteRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("allow_paid_broadcast")
 		fw.Write(b)
 	}
-	w.WriteField("message_effect_id", r.MessageEffectId)
+	if r.MessageEffectId != "" {
+		w.WriteField("message_effect_id", r.MessageEffectId)
+	}
 	if r.ReplyParameters != nil {
 		{
 			b, _ := json.Marshal(r.ReplyParameters)
@@ -1186,7 +1249,9 @@ type SendPaidMediaRequest struct {
 }
 
 func (r *SendPaidMediaRequest) WriteMultipart(w *multipart.Writer) {
-	w.WriteField("business_connection_id", r.BusinessConnectionId)
+	if r.BusinessConnectionId != "" {
+		w.WriteField("business_connection_id", r.BusinessConnectionId)
+	}
 	w.WriteField("chat_id", r.ChatId.String())
 
 	{
@@ -1200,8 +1265,12 @@ func (r *SendPaidMediaRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("media")
 		fw.Write(b)
 	}
-	w.WriteField("payload", r.Payload)
-	w.WriteField("caption", r.Caption)
+	if r.Payload != "" {
+		w.WriteField("payload", r.Payload)
+	}
+	if r.Caption != "" {
+		w.WriteField("caption", r.Caption)
+	}
 	w.WriteField("parse_mode", string(r.ParseMode))
 	if r.CaptionEntities != nil {
 		{
@@ -1252,19 +1321,21 @@ func (r *SendPaidMediaRequest) WriteMultipart(w *multipart.Writer) {
 
 // see Bot.SendMediaGroup(ctx, &SendMediaGroupRequest{})
 type SendMediaGroupRequest struct {
-	BusinessConnectionId string                 // Unique identifier of the business connection on behalf of which the message will be sent
-	ChatId               ChatId                 // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-	MessageThreadId      int64                  // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
-	Media                []MediaGroupInputMedia // A JSON-serialized array describing messages to be sent, must include 2-10 items
-	DisableNotification  bool                   // Sends messages silently. Users will receive a notification with no sound.
-	ProtectContent       bool                   // Protects the contents of the sent messages from forwarding and saving
-	AllowPaidBroadcast   bool                   // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
-	MessageEffectId      string                 // Unique identifier of the message effect to be added to the message; for private chats only
-	ReplyParameters      *ReplyParameters       // Description of the message to reply to
+	BusinessConnectionId string           // Unique identifier of the business connection on behalf of which the message will be sent
+	ChatId               ChatId           // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+	MessageThreadId      int64            // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	Media                []InputMedia     // A JSON-serialized array describing messages to be sent, must include 2-10 items
+	DisableNotification  bool             // Sends messages silently. Users will receive a notification with no sound.
+	ProtectContent       bool             // Protects the contents of the sent messages from forwarding and saving
+	AllowPaidBroadcast   bool             // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	MessageEffectId      string           // Unique identifier of the message effect to be added to the message; for private chats only
+	ReplyParameters      *ReplyParameters // Description of the message to reply to
 }
 
 func (r *SendMediaGroupRequest) WriteMultipart(w *multipart.Writer) {
-	w.WriteField("business_connection_id", r.BusinessConnectionId)
+	if r.BusinessConnectionId != "" {
+		w.WriteField("business_connection_id", r.BusinessConnectionId)
+	}
 	w.WriteField("chat_id", r.ChatId.String())
 
 	{
@@ -1273,6 +1344,15 @@ func (r *SendMediaGroupRequest) WriteMultipart(w *multipart.Writer) {
 		fw.Write(b)
 	}
 
+	for i := 0; i < len(r.Media); i++ {
+		inputMedia := r.Media[i]
+		fieldName := "media" + strconv.Itoa(i)
+		if reader, ok := inputMedia.getMedia().(NamedReader); ok {
+			fw, _ := w.CreateFormFile(fieldName, reader.Name())
+			io.Copy(fw, reader)
+			inputMedia.setMedia("attach://" + fieldName)
+		}
+	}
 	{
 		b, _ := json.Marshal(r.Media)
 		fw, _ := w.CreateFormField("media")
@@ -1296,7 +1376,9 @@ func (r *SendMediaGroupRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("allow_paid_broadcast")
 		fw.Write(b)
 	}
-	w.WriteField("message_effect_id", r.MessageEffectId)
+	if r.MessageEffectId != "" {
+		w.WriteField("message_effect_id", r.MessageEffectId)
+	}
 	if r.ReplyParameters != nil {
 		{
 			b, _ := json.Marshal(r.ReplyParameters)
@@ -1326,7 +1408,9 @@ type SendLocationRequest struct {
 }
 
 func (r *SendLocationRequest) WriteMultipart(w *multipart.Writer) {
-	w.WriteField("business_connection_id", r.BusinessConnectionId)
+	if r.BusinessConnectionId != "" {
+		w.WriteField("business_connection_id", r.BusinessConnectionId)
+	}
 	w.WriteField("chat_id", r.ChatId.String())
 
 	{
@@ -1388,7 +1472,9 @@ func (r *SendLocationRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("allow_paid_broadcast")
 		fw.Write(b)
 	}
-	w.WriteField("message_effect_id", r.MessageEffectId)
+	if r.MessageEffectId != "" {
+		w.WriteField("message_effect_id", r.MessageEffectId)
+	}
 	if r.ReplyParameters != nil {
 		{
 			b, _ := json.Marshal(r.ReplyParameters)
@@ -1427,7 +1513,9 @@ type SendVenueRequest struct {
 }
 
 func (r *SendVenueRequest) WriteMultipart(w *multipart.Writer) {
-	w.WriteField("business_connection_id", r.BusinessConnectionId)
+	if r.BusinessConnectionId != "" {
+		w.WriteField("business_connection_id", r.BusinessConnectionId)
+	}
 	w.WriteField("chat_id", r.ChatId.String())
 
 	{
@@ -1447,12 +1535,22 @@ func (r *SendVenueRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("longitude")
 		fw.Write(b)
 	}
+
 	w.WriteField("title", r.Title)
+
 	w.WriteField("address", r.Address)
-	w.WriteField("foursquare_id", r.FoursquareId)
-	w.WriteField("foursquare_type", r.FoursquareType)
-	w.WriteField("google_place_id", r.GooglePlaceId)
-	w.WriteField("google_place_type", r.GooglePlaceType)
+	if r.FoursquareId != "" {
+		w.WriteField("foursquare_id", r.FoursquareId)
+	}
+	if r.FoursquareType != "" {
+		w.WriteField("foursquare_type", r.FoursquareType)
+	}
+	if r.GooglePlaceId != "" {
+		w.WriteField("google_place_id", r.GooglePlaceId)
+	}
+	if r.GooglePlaceType != "" {
+		w.WriteField("google_place_type", r.GooglePlaceType)
+	}
 
 	{
 		b, _ := json.Marshal(r.DisableNotification)
@@ -1471,7 +1569,9 @@ func (r *SendVenueRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("allow_paid_broadcast")
 		fw.Write(b)
 	}
-	w.WriteField("message_effect_id", r.MessageEffectId)
+	if r.MessageEffectId != "" {
+		w.WriteField("message_effect_id", r.MessageEffectId)
+	}
 	if r.ReplyParameters != nil {
 		{
 			b, _ := json.Marshal(r.ReplyParameters)
@@ -1506,7 +1606,9 @@ type SendContactRequest struct {
 }
 
 func (r *SendContactRequest) WriteMultipart(w *multipart.Writer) {
-	w.WriteField("business_connection_id", r.BusinessConnectionId)
+	if r.BusinessConnectionId != "" {
+		w.WriteField("business_connection_id", r.BusinessConnectionId)
+	}
 	w.WriteField("chat_id", r.ChatId.String())
 
 	{
@@ -1514,10 +1616,16 @@ func (r *SendContactRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("message_thread_id")
 		fw.Write(b)
 	}
+
 	w.WriteField("phone_number", r.PhoneNumber)
+
 	w.WriteField("first_name", r.FirstName)
-	w.WriteField("last_name", r.LastName)
-	w.WriteField("vcard", r.Vcard)
+	if r.LastName != "" {
+		w.WriteField("last_name", r.LastName)
+	}
+	if r.Vcard != "" {
+		w.WriteField("vcard", r.Vcard)
+	}
 
 	{
 		b, _ := json.Marshal(r.DisableNotification)
@@ -1536,7 +1644,9 @@ func (r *SendContactRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("allow_paid_broadcast")
 		fw.Write(b)
 	}
-	w.WriteField("message_effect_id", r.MessageEffectId)
+	if r.MessageEffectId != "" {
+		w.WriteField("message_effect_id", r.MessageEffectId)
+	}
 	if r.ReplyParameters != nil {
 		{
 			b, _ := json.Marshal(r.ReplyParameters)
@@ -1581,7 +1691,9 @@ type SendPollRequest struct {
 }
 
 func (r *SendPollRequest) WriteMultipart(w *multipart.Writer) {
-	w.WriteField("business_connection_id", r.BusinessConnectionId)
+	if r.BusinessConnectionId != "" {
+		w.WriteField("business_connection_id", r.BusinessConnectionId)
+	}
 	w.WriteField("chat_id", r.ChatId.String())
 
 	{
@@ -1589,8 +1701,11 @@ func (r *SendPollRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("message_thread_id")
 		fw.Write(b)
 	}
+
 	w.WriteField("question", r.Question)
-	w.WriteField("question_parse_mode", r.QuestionParseMode)
+	if r.QuestionParseMode != "" {
+		w.WriteField("question_parse_mode", r.QuestionParseMode)
+	}
 	if r.QuestionEntities != nil {
 		{
 			b, _ := json.Marshal(r.QuestionEntities)
@@ -1610,7 +1725,9 @@ func (r *SendPollRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("is_anonymous")
 		fw.Write(b)
 	}
-	w.WriteField("type", r.Type)
+	if r.Type != "" {
+		w.WriteField("type", r.Type)
+	}
 
 	{
 		b, _ := json.Marshal(r.AllowsMultipleAnswers)
@@ -1623,8 +1740,12 @@ func (r *SendPollRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("correct_option_id")
 		fw.Write(b)
 	}
-	w.WriteField("explanation", r.Explanation)
-	w.WriteField("explanation_parse_mode", r.ExplanationParseMode)
+	if r.Explanation != "" {
+		w.WriteField("explanation", r.Explanation)
+	}
+	if r.ExplanationParseMode != "" {
+		w.WriteField("explanation_parse_mode", r.ExplanationParseMode)
+	}
 	if r.ExplanationEntities != nil {
 		{
 			b, _ := json.Marshal(r.ExplanationEntities)
@@ -1668,7 +1789,9 @@ func (r *SendPollRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("allow_paid_broadcast")
 		fw.Write(b)
 	}
-	w.WriteField("message_effect_id", r.MessageEffectId)
+	if r.MessageEffectId != "" {
+		w.WriteField("message_effect_id", r.MessageEffectId)
+	}
 	if r.ReplyParameters != nil {
 		{
 			b, _ := json.Marshal(r.ReplyParameters)
@@ -1700,7 +1823,9 @@ type SendDiceRequest struct {
 }
 
 func (r *SendDiceRequest) WriteMultipart(w *multipart.Writer) {
-	w.WriteField("business_connection_id", r.BusinessConnectionId)
+	if r.BusinessConnectionId != "" {
+		w.WriteField("business_connection_id", r.BusinessConnectionId)
+	}
 	w.WriteField("chat_id", r.ChatId.String())
 
 	{
@@ -1708,7 +1833,9 @@ func (r *SendDiceRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("message_thread_id")
 		fw.Write(b)
 	}
-	w.WriteField("emoji", r.Emoji)
+	if r.Emoji != "" {
+		w.WriteField("emoji", r.Emoji)
+	}
 
 	{
 		b, _ := json.Marshal(r.DisableNotification)
@@ -1727,7 +1854,9 @@ func (r *SendDiceRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("allow_paid_broadcast")
 		fw.Write(b)
 	}
-	w.WriteField("message_effect_id", r.MessageEffectId)
+	if r.MessageEffectId != "" {
+		w.WriteField("message_effect_id", r.MessageEffectId)
+	}
 	if r.ReplyParameters != nil {
 		{
 			b, _ := json.Marshal(r.ReplyParameters)
@@ -1753,7 +1882,9 @@ type SendChatActionRequest struct {
 }
 
 func (r *SendChatActionRequest) WriteMultipart(w *multipart.Writer) {
-	w.WriteField("business_connection_id", r.BusinessConnectionId)
+	if r.BusinessConnectionId != "" {
+		w.WriteField("business_connection_id", r.BusinessConnectionId)
+	}
 	w.WriteField("chat_id", r.ChatId.String())
 
 	{
@@ -1835,7 +1966,9 @@ func (r *SetUserEmojiStatusRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("user_id")
 		fw.Write(b)
 	}
-	w.WriteField("emoji_status_custom_emoji_id", r.EmojiStatusCustomEmojiId)
+	if r.EmojiStatusCustomEmojiId != "" {
+		w.WriteField("emoji_status_custom_emoji_id", r.EmojiStatusCustomEmojiId)
+	}
 
 	{
 		b, _ := json.Marshal(r.EmojiStatusExpirationDate)
@@ -2079,6 +2212,7 @@ func (r *SetChatAdministratorCustomTitleRequest) WriteMultipart(w *multipart.Wri
 		fw, _ := w.CreateFormField("user_id")
 		fw.Write(b)
 	}
+
 	w.WriteField("custom_title", r.CustomTitle)
 }
 
@@ -2157,7 +2291,9 @@ type CreateChatInviteLinkRequest struct {
 
 func (r *CreateChatInviteLinkRequest) WriteMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatId.String())
-	w.WriteField("name", r.Name)
+	if r.Name != "" {
+		w.WriteField("name", r.Name)
+	}
 
 	{
 		b, _ := json.Marshal(r.ExpireDate)
@@ -2190,8 +2326,11 @@ type EditChatInviteLinkRequest struct {
 
 func (r *EditChatInviteLinkRequest) WriteMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatId.String())
+
 	w.WriteField("invite_link", r.InviteLink)
-	w.WriteField("name", r.Name)
+	if r.Name != "" {
+		w.WriteField("name", r.Name)
+	}
 
 	{
 		b, _ := json.Marshal(r.ExpireDate)
@@ -2222,7 +2361,9 @@ type CreateChatSubscriptionInviteLinkRequest struct {
 
 func (r *CreateChatSubscriptionInviteLinkRequest) WriteMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatId.String())
-	w.WriteField("name", r.Name)
+	if r.Name != "" {
+		w.WriteField("name", r.Name)
+	}
 
 	{
 		b, _ := json.Marshal(r.SubscriptionPeriod)
@@ -2246,8 +2387,11 @@ type EditChatSubscriptionInviteLinkRequest struct {
 
 func (r *EditChatSubscriptionInviteLinkRequest) WriteMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatId.String())
+
 	w.WriteField("invite_link", r.InviteLink)
-	w.WriteField("name", r.Name)
+	if r.Name != "" {
+		w.WriteField("name", r.Name)
+	}
 }
 
 // see Bot.RevokeChatInviteLink(ctx, &RevokeChatInviteLinkRequest{})
@@ -2258,6 +2402,7 @@ type RevokeChatInviteLinkRequest struct {
 
 func (r *RevokeChatInviteLinkRequest) WriteMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatId.String())
+
 	w.WriteField("invite_link", r.InviteLink)
 }
 
@@ -2330,6 +2475,7 @@ type SetChatTitleRequest struct {
 
 func (r *SetChatTitleRequest) WriteMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatId.String())
+
 	w.WriteField("title", r.Title)
 }
 
@@ -2341,7 +2487,9 @@ type SetChatDescriptionRequest struct {
 
 func (r *SetChatDescriptionRequest) WriteMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatId.String())
-	w.WriteField("description", r.Description)
+	if r.Description != "" {
+		w.WriteField("description", r.Description)
+	}
 }
 
 // see Bot.PinChatMessage(ctx, &PinChatMessageRequest{})
@@ -2353,7 +2501,9 @@ type PinChatMessageRequest struct {
 }
 
 func (r *PinChatMessageRequest) WriteMultipart(w *multipart.Writer) {
-	w.WriteField("business_connection_id", r.BusinessConnectionId)
+	if r.BusinessConnectionId != "" {
+		w.WriteField("business_connection_id", r.BusinessConnectionId)
+	}
 	w.WriteField("chat_id", r.ChatId.String())
 
 	{
@@ -2377,7 +2527,9 @@ type UnpinChatMessageRequest struct {
 }
 
 func (r *UnpinChatMessageRequest) WriteMultipart(w *multipart.Writer) {
-	w.WriteField("business_connection_id", r.BusinessConnectionId)
+	if r.BusinessConnectionId != "" {
+		w.WriteField("business_connection_id", r.BusinessConnectionId)
+	}
 	w.WriteField("chat_id", r.ChatId.String())
 
 	{
@@ -2456,6 +2608,7 @@ type SetChatStickerSetRequest struct {
 
 func (r *SetChatStickerSetRequest) WriteMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatId.String())
+
 	w.WriteField("sticker_set_name", r.StickerSetName)
 }
 
@@ -2478,6 +2631,7 @@ type CreateForumTopicRequest struct {
 
 func (r *CreateForumTopicRequest) WriteMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatId.String())
+
 	w.WriteField("name", r.Name)
 
 	{
@@ -2485,7 +2639,9 @@ func (r *CreateForumTopicRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("icon_color")
 		fw.Write(b)
 	}
-	w.WriteField("icon_custom_emoji_id", r.IconCustomEmojiId)
+	if r.IconCustomEmojiId != "" {
+		w.WriteField("icon_custom_emoji_id", r.IconCustomEmojiId)
+	}
 }
 
 // see Bot.EditForumTopic(ctx, &EditForumTopicRequest{})
@@ -2504,8 +2660,12 @@ func (r *EditForumTopicRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("message_thread_id")
 		fw.Write(b)
 	}
-	w.WriteField("name", r.Name)
-	w.WriteField("icon_custom_emoji_id", r.IconCustomEmojiId)
+	if r.Name != "" {
+		w.WriteField("name", r.Name)
+	}
+	if r.IconCustomEmojiId != "" {
+		w.WriteField("icon_custom_emoji_id", r.IconCustomEmojiId)
+	}
 }
 
 // see Bot.CloseForumTopic(ctx, &CloseForumTopicRequest{})
@@ -2580,6 +2740,7 @@ type EditGeneralForumTopicRequest struct {
 
 func (r *EditGeneralForumTopicRequest) WriteMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatId.String())
+
 	w.WriteField("name", r.Name)
 }
 
@@ -2639,14 +2800,18 @@ type AnswerCallbackQueryRequest struct {
 
 func (r *AnswerCallbackQueryRequest) WriteMultipart(w *multipart.Writer) {
 	w.WriteField("callback_query_id", r.CallbackQueryId)
-	w.WriteField("text", r.Text)
+	if r.Text != "" {
+		w.WriteField("text", r.Text)
+	}
 
 	{
 		b, _ := json.Marshal(r.ShowAlert)
 		fw, _ := w.CreateFormField("show_alert")
 		fw.Write(b)
 	}
-	w.WriteField("url", r.Url)
+	if r.Url != "" {
+		w.WriteField("url", r.Url)
+	}
 
 	{
 		b, _ := json.Marshal(r.CacheTime)
@@ -2700,7 +2865,9 @@ func (r *SetMyCommandsRequest) WriteMultipart(w *multipart.Writer) {
 			fw.Write(b)
 		}
 	}
-	w.WriteField("language_code", r.LanguageCode)
+	if r.LanguageCode != "" {
+		w.WriteField("language_code", r.LanguageCode)
+	}
 }
 
 // see Bot.DeleteMyCommands(ctx, &DeleteMyCommandsRequest{})
@@ -2717,7 +2884,9 @@ func (r *DeleteMyCommandsRequest) WriteMultipart(w *multipart.Writer) {
 			fw.Write(b)
 		}
 	}
-	w.WriteField("language_code", r.LanguageCode)
+	if r.LanguageCode != "" {
+		w.WriteField("language_code", r.LanguageCode)
+	}
 }
 
 // see Bot.GetMyCommands(ctx, &GetMyCommandsRequest{})
@@ -2734,7 +2903,9 @@ func (r *GetMyCommandsRequest) WriteMultipart(w *multipart.Writer) {
 			fw.Write(b)
 		}
 	}
-	w.WriteField("language_code", r.LanguageCode)
+	if r.LanguageCode != "" {
+		w.WriteField("language_code", r.LanguageCode)
+	}
 }
 
 // see Bot.SetMyName(ctx, &SetMyNameRequest{})
@@ -2744,8 +2915,12 @@ type SetMyNameRequest struct {
 }
 
 func (r *SetMyNameRequest) WriteMultipart(w *multipart.Writer) {
-	w.WriteField("name", r.Name)
-	w.WriteField("language_code", r.LanguageCode)
+	if r.Name != "" {
+		w.WriteField("name", r.Name)
+	}
+	if r.LanguageCode != "" {
+		w.WriteField("language_code", r.LanguageCode)
+	}
 }
 
 // see Bot.GetMyName(ctx, &GetMyNameRequest{})
@@ -2754,7 +2929,9 @@ type GetMyNameRequest struct {
 }
 
 func (r *GetMyNameRequest) WriteMultipart(w *multipart.Writer) {
-	w.WriteField("language_code", r.LanguageCode)
+	if r.LanguageCode != "" {
+		w.WriteField("language_code", r.LanguageCode)
+	}
 }
 
 // see Bot.SetMyDescription(ctx, &SetMyDescriptionRequest{})
@@ -2764,8 +2941,12 @@ type SetMyDescriptionRequest struct {
 }
 
 func (r *SetMyDescriptionRequest) WriteMultipart(w *multipart.Writer) {
-	w.WriteField("description", r.Description)
-	w.WriteField("language_code", r.LanguageCode)
+	if r.Description != "" {
+		w.WriteField("description", r.Description)
+	}
+	if r.LanguageCode != "" {
+		w.WriteField("language_code", r.LanguageCode)
+	}
 }
 
 // see Bot.GetMyDescription(ctx, &GetMyDescriptionRequest{})
@@ -2774,7 +2955,9 @@ type GetMyDescriptionRequest struct {
 }
 
 func (r *GetMyDescriptionRequest) WriteMultipart(w *multipart.Writer) {
-	w.WriteField("language_code", r.LanguageCode)
+	if r.LanguageCode != "" {
+		w.WriteField("language_code", r.LanguageCode)
+	}
 }
 
 // see Bot.SetMyShortDescription(ctx, &SetMyShortDescriptionRequest{})
@@ -2784,8 +2967,12 @@ type SetMyShortDescriptionRequest struct {
 }
 
 func (r *SetMyShortDescriptionRequest) WriteMultipart(w *multipart.Writer) {
-	w.WriteField("short_description", r.ShortDescription)
-	w.WriteField("language_code", r.LanguageCode)
+	if r.ShortDescription != "" {
+		w.WriteField("short_description", r.ShortDescription)
+	}
+	if r.LanguageCode != "" {
+		w.WriteField("language_code", r.LanguageCode)
+	}
 }
 
 // see Bot.GetMyShortDescription(ctx, &GetMyShortDescriptionRequest{})
@@ -2794,7 +2981,9 @@ type GetMyShortDescriptionRequest struct {
 }
 
 func (r *GetMyShortDescriptionRequest) WriteMultipart(w *multipart.Writer) {
-	w.WriteField("language_code", r.LanguageCode)
+	if r.LanguageCode != "" {
+		w.WriteField("language_code", r.LanguageCode)
+	}
 }
 
 // see Bot.SetChatMenuButton(ctx, &SetChatMenuButtonRequest{})
@@ -2880,7 +3069,9 @@ type EditMessageTextRequest struct {
 }
 
 func (r *EditMessageTextRequest) WriteMultipart(w *multipart.Writer) {
-	w.WriteField("business_connection_id", r.BusinessConnectionId)
+	if r.BusinessConnectionId != "" {
+		w.WriteField("business_connection_id", r.BusinessConnectionId)
+	}
 	w.WriteField("chat_id", r.ChatId.String())
 
 	{
@@ -2888,7 +3079,10 @@ func (r *EditMessageTextRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("message_id")
 		fw.Write(b)
 	}
-	w.WriteField("inline_message_id", r.InlineMessageId)
+	if r.InlineMessageId != "" {
+		w.WriteField("inline_message_id", r.InlineMessageId)
+	}
+
 	w.WriteField("text", r.Text)
 	w.WriteField("parse_mode", string(r.ParseMode))
 	if r.Entities != nil {
@@ -2928,7 +3122,9 @@ type EditMessageCaptionRequest struct {
 }
 
 func (r *EditMessageCaptionRequest) WriteMultipart(w *multipart.Writer) {
-	w.WriteField("business_connection_id", r.BusinessConnectionId)
+	if r.BusinessConnectionId != "" {
+		w.WriteField("business_connection_id", r.BusinessConnectionId)
+	}
 	w.WriteField("chat_id", r.ChatId.String())
 
 	{
@@ -2936,8 +3132,12 @@ func (r *EditMessageCaptionRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("message_id")
 		fw.Write(b)
 	}
-	w.WriteField("inline_message_id", r.InlineMessageId)
-	w.WriteField("caption", r.Caption)
+	if r.InlineMessageId != "" {
+		w.WriteField("inline_message_id", r.InlineMessageId)
+	}
+	if r.Caption != "" {
+		w.WriteField("caption", r.Caption)
+	}
 	w.WriteField("parse_mode", string(r.ParseMode))
 	if r.CaptionEntities != nil {
 		{
@@ -2972,7 +3172,9 @@ type EditMessageMediaRequest struct {
 }
 
 func (r *EditMessageMediaRequest) WriteMultipart(w *multipart.Writer) {
-	w.WriteField("business_connection_id", r.BusinessConnectionId)
+	if r.BusinessConnectionId != "" {
+		w.WriteField("business_connection_id", r.BusinessConnectionId)
+	}
 	w.WriteField("chat_id", r.ChatId.String())
 
 	{
@@ -2980,7 +3182,9 @@ func (r *EditMessageMediaRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("message_id")
 		fw.Write(b)
 	}
-	w.WriteField("inline_message_id", r.InlineMessageId)
+	if r.InlineMessageId != "" {
+		w.WriteField("inline_message_id", r.InlineMessageId)
+	}
 
 	if reader, ok := r.Media.getMedia().(NamedReader); ok {
 		fw, _ := w.CreateFormFile("media", reader.Name())
@@ -3017,7 +3221,9 @@ type EditMessageLiveLocationRequest struct {
 }
 
 func (r *EditMessageLiveLocationRequest) WriteMultipart(w *multipart.Writer) {
-	w.WriteField("business_connection_id", r.BusinessConnectionId)
+	if r.BusinessConnectionId != "" {
+		w.WriteField("business_connection_id", r.BusinessConnectionId)
+	}
 	w.WriteField("chat_id", r.ChatId.String())
 
 	{
@@ -3025,7 +3231,9 @@ func (r *EditMessageLiveLocationRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("message_id")
 		fw.Write(b)
 	}
-	w.WriteField("inline_message_id", r.InlineMessageId)
+	if r.InlineMessageId != "" {
+		w.WriteField("inline_message_id", r.InlineMessageId)
+	}
 
 	{
 		b, _ := json.Marshal(r.Latitude)
@@ -3081,7 +3289,9 @@ type StopMessageLiveLocationRequest struct {
 }
 
 func (r *StopMessageLiveLocationRequest) WriteMultipart(w *multipart.Writer) {
-	w.WriteField("business_connection_id", r.BusinessConnectionId)
+	if r.BusinessConnectionId != "" {
+		w.WriteField("business_connection_id", r.BusinessConnectionId)
+	}
 	w.WriteField("chat_id", r.ChatId.String())
 
 	{
@@ -3089,7 +3299,9 @@ func (r *StopMessageLiveLocationRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("message_id")
 		fw.Write(b)
 	}
-	w.WriteField("inline_message_id", r.InlineMessageId)
+	if r.InlineMessageId != "" {
+		w.WriteField("inline_message_id", r.InlineMessageId)
+	}
 	if r.ReplyMarkup != nil {
 		{
 			b, _ := json.Marshal(r.ReplyMarkup)
@@ -3109,7 +3321,9 @@ type EditMessageReplyMarkupRequest struct {
 }
 
 func (r *EditMessageReplyMarkupRequest) WriteMultipart(w *multipart.Writer) {
-	w.WriteField("business_connection_id", r.BusinessConnectionId)
+	if r.BusinessConnectionId != "" {
+		w.WriteField("business_connection_id", r.BusinessConnectionId)
+	}
 	w.WriteField("chat_id", r.ChatId.String())
 
 	{
@@ -3117,7 +3331,9 @@ func (r *EditMessageReplyMarkupRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("message_id")
 		fw.Write(b)
 	}
-	w.WriteField("inline_message_id", r.InlineMessageId)
+	if r.InlineMessageId != "" {
+		w.WriteField("inline_message_id", r.InlineMessageId)
+	}
 	if r.ReplyMarkup != nil {
 		{
 			b, _ := json.Marshal(r.ReplyMarkup)
@@ -3136,7 +3352,9 @@ type StopPollRequest struct {
 }
 
 func (r *StopPollRequest) WriteMultipart(w *multipart.Writer) {
-	w.WriteField("business_connection_id", r.BusinessConnectionId)
+	if r.BusinessConnectionId != "" {
+		w.WriteField("business_connection_id", r.BusinessConnectionId)
+	}
 	w.WriteField("chat_id", r.ChatId.String())
 
 	{
@@ -3201,7 +3419,9 @@ type SendStickerRequest struct {
 }
 
 func (r *SendStickerRequest) WriteMultipart(w *multipart.Writer) {
-	w.WriteField("business_connection_id", r.BusinessConnectionId)
+	if r.BusinessConnectionId != "" {
+		w.WriteField("business_connection_id", r.BusinessConnectionId)
+	}
 	w.WriteField("chat_id", r.ChatId.String())
 
 	{
@@ -3219,7 +3439,9 @@ func (r *SendStickerRequest) WriteMultipart(w *multipart.Writer) {
 	default:
 		panic(v)
 	}
-	w.WriteField("emoji", r.Emoji)
+	if r.Emoji != "" {
+		w.WriteField("emoji", r.Emoji)
+	}
 
 	{
 		b, _ := json.Marshal(r.DisableNotification)
@@ -3238,7 +3460,9 @@ func (r *SendStickerRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("allow_paid_broadcast")
 		fw.Write(b)
 	}
-	w.WriteField("message_effect_id", r.MessageEffectId)
+	if r.MessageEffectId != "" {
+		w.WriteField("message_effect_id", r.MessageEffectId)
+	}
 	if r.ReplyParameters != nil {
 		{
 			b, _ := json.Marshal(r.ReplyParameters)
@@ -3300,6 +3524,7 @@ func (r *UploadStickerFileRequest) WriteMultipart(w *multipart.Writer) {
 	default:
 		panic(v)
 	}
+
 	w.WriteField("sticker_format", r.StickerFormat)
 }
 
@@ -3319,7 +3544,9 @@ func (r *CreateNewStickerSetRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("user_id")
 		fw.Write(b)
 	}
+
 	w.WriteField("name", r.Name)
+
 	w.WriteField("title", r.Title)
 
 	{
@@ -3327,7 +3554,9 @@ func (r *CreateNewStickerSetRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("stickers")
 		fw.Write(b)
 	}
-	w.WriteField("sticker_type", r.StickerType)
+	if r.StickerType != "" {
+		w.WriteField("sticker_type", r.StickerType)
+	}
 
 	{
 		b, _ := json.Marshal(r.NeedsRepainting)
@@ -3349,6 +3578,7 @@ func (r *AddStickerToSetRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("user_id")
 		fw.Write(b)
 	}
+
 	w.WriteField("name", r.Name)
 
 	{
@@ -3397,7 +3627,9 @@ func (r *ReplaceStickerInSetRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("user_id")
 		fw.Write(b)
 	}
+
 	w.WriteField("name", r.Name)
+
 	w.WriteField("old_sticker", r.OldSticker)
 
 	{
@@ -3465,6 +3697,7 @@ type SetStickerSetTitleRequest struct {
 
 func (r *SetStickerSetTitleRequest) WriteMultipart(w *multipart.Writer) {
 	w.WriteField("name", r.Name)
+
 	w.WriteField("title", r.Title)
 }
 
@@ -3484,16 +3717,18 @@ func (r *SetStickerSetThumbnailRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("user_id")
 		fw.Write(b)
 	}
-
-	switch v := r.Thumbnail.(type) {
-	case string:
-		w.WriteField("thumbnail", v)
-	case NamedReader:
-		fw, _ := w.CreateFormFile("thumbnail", v.Name())
-		io.Copy(fw, v)
-	default:
-		panic(v)
+	if r.Thumbnail != nil {
+		switch v := r.Thumbnail.(type) {
+		case string:
+			w.WriteField("thumbnail", v)
+		case NamedReader:
+			fw, _ := w.CreateFormFile("thumbnail", v.Name())
+			io.Copy(fw, v)
+		default:
+			panic(v)
+		}
 	}
+
 	w.WriteField("format", r.Format)
 }
 
@@ -3505,7 +3740,9 @@ type SetCustomEmojiStickerSetThumbnailRequest struct {
 
 func (r *SetCustomEmojiStickerSetThumbnailRequest) WriteMultipart(w *multipart.Writer) {
 	w.WriteField("name", r.Name)
-	w.WriteField("custom_emoji_id", r.CustomEmojiId)
+	if r.CustomEmojiId != "" {
+		w.WriteField("custom_emoji_id", r.CustomEmojiId)
+	}
 }
 
 // see Bot.DeleteStickerSet(ctx, &DeleteStickerSetRequest{})
@@ -3535,6 +3772,7 @@ func (r *SendGiftRequest) WriteMultipart(w *multipart.Writer) {
 		fw.Write(b)
 	}
 	w.WriteField("chat_id", r.ChatId.String())
+
 	w.WriteField("gift_id", r.GiftId)
 
 	{
@@ -3542,8 +3780,12 @@ func (r *SendGiftRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("pay_for_upgrade")
 		fw.Write(b)
 	}
-	w.WriteField("text", r.Text)
-	w.WriteField("text_parse_mode", r.TextParseMode)
+	if r.Text != "" {
+		w.WriteField("text", r.Text)
+	}
+	if r.TextParseMode != "" {
+		w.WriteField("text_parse_mode", r.TextParseMode)
+	}
 	if r.TextEntities != nil {
 		{
 			b, _ := json.Marshal(r.TextEntities)
@@ -3565,7 +3807,9 @@ func (r *VerifyUserRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("user_id")
 		fw.Write(b)
 	}
-	w.WriteField("custom_description", r.CustomDescription)
+	if r.CustomDescription != "" {
+		w.WriteField("custom_description", r.CustomDescription)
+	}
 }
 
 // see Bot.VerifyChat(ctx, &VerifyChatRequest{})
@@ -3576,7 +3820,9 @@ type VerifyChatRequest struct {
 
 func (r *VerifyChatRequest) WriteMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatId.String())
-	w.WriteField("custom_description", r.CustomDescription)
+	if r.CustomDescription != "" {
+		w.WriteField("custom_description", r.CustomDescription)
+	}
 }
 
 // see Bot.RemoveUserVerification(ctx, &RemoveUserVerificationRequest{})
@@ -3631,7 +3877,9 @@ func (r *AnswerInlineQueryRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("is_personal")
 		fw.Write(b)
 	}
-	w.WriteField("next_offset", r.NextOffset)
+	if r.NextOffset != "" {
+		w.WriteField("next_offset", r.NextOffset)
+	}
 	if r.Button != nil {
 		{
 			b, _ := json.Marshal(r.Button)
@@ -3746,10 +3994,16 @@ func (r *SendInvoiceRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("message_thread_id")
 		fw.Write(b)
 	}
+
 	w.WriteField("title", r.Title)
+
 	w.WriteField("description", r.Description)
+
 	w.WriteField("payload", r.Payload)
-	w.WriteField("provider_token", r.ProviderToken)
+	if r.ProviderToken != "" {
+		w.WriteField("provider_token", r.ProviderToken)
+	}
+
 	w.WriteField("currency", r.Currency)
 
 	{
@@ -3770,9 +4024,15 @@ func (r *SendInvoiceRequest) WriteMultipart(w *multipart.Writer) {
 			fw.Write(b)
 		}
 	}
-	w.WriteField("start_parameter", r.StartParameter)
-	w.WriteField("provider_data", r.ProviderData)
-	w.WriteField("photo_url", r.PhotoUrl)
+	if r.StartParameter != "" {
+		w.WriteField("start_parameter", r.StartParameter)
+	}
+	if r.ProviderData != "" {
+		w.WriteField("provider_data", r.ProviderData)
+	}
+	if r.PhotoUrl != "" {
+		w.WriteField("photo_url", r.PhotoUrl)
+	}
 
 	{
 		b, _ := json.Marshal(r.PhotoSize)
@@ -3851,7 +4111,9 @@ func (r *SendInvoiceRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("allow_paid_broadcast")
 		fw.Write(b)
 	}
-	w.WriteField("message_effect_id", r.MessageEffectId)
+	if r.MessageEffectId != "" {
+		w.WriteField("message_effect_id", r.MessageEffectId)
+	}
 	if r.ReplyParameters != nil {
 		{
 			b, _ := json.Marshal(r.ReplyParameters)
@@ -3895,11 +4157,19 @@ type CreateInvoiceLinkRequest struct {
 }
 
 func (r *CreateInvoiceLinkRequest) WriteMultipart(w *multipart.Writer) {
-	w.WriteField("business_connection_id", r.BusinessConnectionId)
+	if r.BusinessConnectionId != "" {
+		w.WriteField("business_connection_id", r.BusinessConnectionId)
+	}
+
 	w.WriteField("title", r.Title)
+
 	w.WriteField("description", r.Description)
+
 	w.WriteField("payload", r.Payload)
-	w.WriteField("provider_token", r.ProviderToken)
+	if r.ProviderToken != "" {
+		w.WriteField("provider_token", r.ProviderToken)
+	}
+
 	w.WriteField("currency", r.Currency)
 
 	{
@@ -3926,8 +4196,12 @@ func (r *CreateInvoiceLinkRequest) WriteMultipart(w *multipart.Writer) {
 			fw.Write(b)
 		}
 	}
-	w.WriteField("provider_data", r.ProviderData)
-	w.WriteField("photo_url", r.PhotoUrl)
+	if r.ProviderData != "" {
+		w.WriteField("provider_data", r.ProviderData)
+	}
+	if r.PhotoUrl != "" {
+		w.WriteField("photo_url", r.PhotoUrl)
+	}
 
 	{
 		b, _ := json.Marshal(r.PhotoSize)
@@ -4013,7 +4287,9 @@ func (r *AnswerShippingQueryRequest) WriteMultipart(w *multipart.Writer) {
 			fw.Write(b)
 		}
 	}
-	w.WriteField("error_message", r.ErrorMessage)
+	if r.ErrorMessage != "" {
+		w.WriteField("error_message", r.ErrorMessage)
+	}
 }
 
 // see Bot.AnswerPreCheckoutQuery(ctx, &AnswerPreCheckoutQueryRequest{})
@@ -4031,7 +4307,9 @@ func (r *AnswerPreCheckoutQueryRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("ok")
 		fw.Write(b)
 	}
-	w.WriteField("error_message", r.ErrorMessage)
+	if r.ErrorMessage != "" {
+		w.WriteField("error_message", r.ErrorMessage)
+	}
 }
 
 // see Bot.GetStarTransactions(ctx, &GetStarTransactionsRequest{})
@@ -4066,6 +4344,7 @@ func (r *RefundStarPaymentRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("user_id")
 		fw.Write(b)
 	}
+
 	w.WriteField("telegram_payment_charge_id", r.TelegramPaymentChargeId)
 }
 
@@ -4082,6 +4361,7 @@ func (r *EditUserStarSubscriptionRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("user_id")
 		fw.Write(b)
 	}
+
 	w.WriteField("telegram_payment_charge_id", r.TelegramPaymentChargeId)
 
 	{
@@ -4126,7 +4406,9 @@ type SendGameRequest struct {
 }
 
 func (r *SendGameRequest) WriteMultipart(w *multipart.Writer) {
-	w.WriteField("business_connection_id", r.BusinessConnectionId)
+	if r.BusinessConnectionId != "" {
+		w.WriteField("business_connection_id", r.BusinessConnectionId)
+	}
 
 	{
 		b, _ := json.Marshal(r.ChatId)
@@ -4139,6 +4421,7 @@ func (r *SendGameRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("message_thread_id")
 		fw.Write(b)
 	}
+
 	w.WriteField("game_short_name", r.GameShortName)
 
 	{
@@ -4158,7 +4441,9 @@ func (r *SendGameRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("allow_paid_broadcast")
 		fw.Write(b)
 	}
-	w.WriteField("message_effect_id", r.MessageEffectId)
+	if r.MessageEffectId != "" {
+		w.WriteField("message_effect_id", r.MessageEffectId)
+	}
 	if r.ReplyParameters != nil {
 		{
 			b, _ := json.Marshal(r.ReplyParameters)
@@ -4222,7 +4507,9 @@ func (r *SetGameScoreRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("message_id")
 		fw.Write(b)
 	}
-	w.WriteField("inline_message_id", r.InlineMessageId)
+	if r.InlineMessageId != "" {
+		w.WriteField("inline_message_id", r.InlineMessageId)
+	}
 }
 
 // see Bot.GetGameHighScores(ctx, &GetGameHighScoresRequest{})
@@ -4251,5 +4538,7 @@ func (r *GetGameHighScoresRequest) WriteMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("message_id")
 		fw.Write(b)
 	}
-	w.WriteField("inline_message_id", r.InlineMessageId)
+	if r.InlineMessageId != "" {
+		w.WriteField("inline_message_id", r.InlineMessageId)
+	}
 }

@@ -41,9 +41,6 @@ func (c ChatId) String() string {
 // InlineKeyboardMarkup | ReplyKeyboardMarkup | ReplyKeyboardRemove | ForceReply
 type Markup interface{}
 
-// InputMediaAudio | InputMediaDocument | InputMediaPhoto | InputMediaVideo
-type MediaGroupInputMedia InputMedia // TODO: replace this with just []InputMedia
-
 type NamedReader interface {
 	io.Reader
 	Name() string
@@ -67,7 +64,7 @@ type InputMedia interface {
 	getMedia() InputFile
 }
 
-// Use this if you need to pass an io.Reader that does not have .Name() method.
+// Use this if you need to pass an io.Reader as InputFile that does not have .Name() method.
 //
 // For example: you want to send a photo via Bot.SendPhoto() method, but you have only a bytes.Buffer and the photo filename.
 //

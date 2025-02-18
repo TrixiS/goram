@@ -185,6 +185,7 @@ func generateRequests(parser *Parser, methods []Method) {
 			"mime/multipart"
 			"encoding/json"
 			"io"
+			"strconv"
 		)
 	`)
 
@@ -218,8 +219,11 @@ func generateRequestWriteMultipart(
 	for _, field := range m.Fields {
 		parsedTypeField := parser.ParseTypeField(&field)
 
-		// TODO: support for MediaGroupInputMedia
 		if parsedTypeField.ParsedSpecType.GoType == "InputFile" {
+			if !parsedTypeField.Field.Required {
+				w.WriteString(fmt.Sprintf("if r.%s != nil {", parsedTypeField.GoName))
+			}
+
 			w.WriteString(fmt.Sprintf(`
 				switch v := r.%s.(type) {
 				case string:
@@ -235,6 +239,10 @@ func generateRequestWriteMultipart(
 				field.Name,
 				field.Name,
 			))
+
+			if !parsedTypeField.Field.Required {
+				w.WriteString("}\n")
+			}
 		} else if parsedTypeField.ParsedSpecType.GoType == "InputMedia" &&
 			parsedTypeField.ParsedSpecType.ParsedType != ParsedTypeArray {
 
@@ -257,6 +265,32 @@ func generateRequestWriteMultipart(
 				parsedTypeField.GoName,
 				field.Name,
 			))
+		} else if parsedTypeField.ParsedSpecType.GoType == "InputMedia" &&
+			parsedTypeField.ParsedSpecType.ParsedType == ParsedTypeArray &&
+			parsedTypeField.ParsedSpecType.Levels == 1 {
+
+			w.WriteString(fmt.Sprintf(`
+				for i := 0; i < len(r.%s); i++ {
+					inputMedia := r.%s[i]
+					fieldName := "%s" + strconv.Itoa(i)
+					if reader, ok := inputMedia.getMedia().(NamedReader); ok {
+						fw, _ := w.CreateFormFile(fieldName, reader.Name())
+						io.Copy(fw, reader)
+						inputMedia.setMedia("attach://" + fieldName)
+					}
+				}
+				{
+					b, _ := json.Marshal(r.%s)
+					fw, _ := w.CreateFormField("%s")
+					fw.Write(b)
+				}
+			`,
+				parsedTypeField.GoName,
+				parsedTypeField.GoName,
+				field.Name,
+				parsedTypeField.GoName,
+				field.Name,
+			))
 		} else if parsedTypeField.ParsedSpecType.GoType == "ChatId" {
 			w.WriteString(fmt.Sprintf(
 				`w.WriteField("%s", r.%s.String())
@@ -267,12 +301,20 @@ func generateRequestWriteMultipart(
 		} else if parsedTypeField.ParsedSpecType.GoType == "string" &&
 			parsedTypeField.ParsedSpecType.ParsedType == ParsedTypePrimitive {
 
-			w.WriteString(fmt.Sprintf(
-				`w.WriteField("%s", r.%s)
+			if !parsedTypeField.Field.Required {
+				w.WriteString(fmt.Sprintf(`if r.%s != "" {`, parsedTypeField.GoName))
+			}
+
+			w.WriteString(fmt.Sprintf(`
+				w.WriteField("%s", r.%s)
 				`,
 				field.Name,
 				parsedTypeField.GoName,
 			))
+
+			if !parsedTypeField.Field.Required {
+				w.WriteString("}\n")
+			}
 		} else if parsedTypeField.ParsedSpecType.ParsedType == ParsedTypeEnum {
 			w.WriteString(fmt.Sprintf(
 				`w.WriteField("%s", string(r.%s))
@@ -519,8 +561,9 @@ func (p *Parser) ParseTypeField(t *TypeField) *ParsedTypeField {
 		ptf.ParsedSpecType.GoType = "Markup"
 		ptf.ParsedSpecType.ParsedType = ParsedTypeInterface
 	} else if len(t.Types) == 4 && t.Name == "media" {
-		ptf.ParsedSpecType.GoType = "[]MediaGroupInputMedia"
-		ptf.ParsedSpecType.ParsedType = ParsedTypeInterface
+		ptf.ParsedSpecType.GoType = "InputMedia"
+		ptf.ParsedSpecType.ParsedType = ParsedTypeArray
+		ptf.ParsedSpecType.Levels = 1
 	} else if len(t.Types) == 2 && (t.Name == "id" || t.Name == "chat_id") {
 		ptf.ParsedSpecType.GoType = "ChatId"
 	} else if t.Types[0] == "Integer" &&
