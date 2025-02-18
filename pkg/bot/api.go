@@ -8,7 +8,9 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
+	"time"
 
+	"github.com/TrixiS/goram/pkg/flood"
 	"github.com/TrixiS/goram/pkg/types"
 )
 
@@ -31,21 +33,30 @@ type apiResponse[R any] struct {
 	Parameters  *types.ResponseParameters `json:"parameters"`
 }
 
+func (a *apiResponse[R]) error(method string) *Error {
+	return &Error{
+		Method:      method,
+		Description: a.Description,
+		ErrorCode:   a.ErrorCode,
+		Parameters:  a.Parameters,
+	}
+}
+
 type apiRequest interface {
 	WriteMultipart(*multipart.Writer)
 }
 
-// TODO: handle flood (seek body buffer)
 func makeRequest[R any](
 	ctx context.Context,
 	client *http.Client,
-	baseURL string,
+	baseUrl string,
 	apiMethod string,
+	floodHandler flood.Handler,
 	data apiRequest,
 ) (*apiResponse[R], error) {
-	url := baseURL + apiMethod
-	body := io.Reader(nil)
+	url := baseUrl + apiMethod
 	contentType := "multipart/form-data"
+	body := io.ReadSeeker(nil)
 
 	if data != nil {
 		buf := &bytes.Buffer{}
@@ -53,38 +64,52 @@ func makeRequest[R any](
 		data.WriteMultipart(w)
 		w.Close()
 		contentType = w.FormDataContentType()
-		body = buf
+		body = bytes.NewReader(buf.Bytes())
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, body)
+	for {
+		req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, body)
 
-	if err != nil {
-		return nil, err
-	}
+		if err != nil {
+			return nil, err
+		}
 
-	req.Header.Set("Content-Type", contentType)
-	res, err := client.Do(req)
+		req.Header.Set("Content-Type", contentType)
 
-	if err != nil {
-		return nil, err
-	}
+		if floodHandler != nil {
+			floodHandler.Enter(apiMethod, data)
+		}
 
-	defer res.Body.Close()
+		res, err := client.Do(req)
 
-	response := &apiResponse[R]{}
+		if err != nil {
+			return nil, err
+		}
 
-	if err = json.NewDecoder(res.Body).Decode(response); err != nil {
-		return nil, err
-	}
+		response := &apiResponse[R]{}
+		err = json.NewDecoder(res.Body).Decode(response)
+		res.Body.Close()
 
-	if !response.OK {
-		return response, &Error{
-			Method:      apiMethod,
-			Description: response.Description,
-			ErrorCode:   response.ErrorCode,
-			Parameters:  response.Parameters,
+		if err != nil {
+			return nil, err
+		}
+
+		if response.OK {
+			return response, nil
+		}
+
+		if response.ErrorCode != http.StatusTooManyRequests ||
+			response.Parameters == nil ||
+			floodHandler == nil {
+
+			return response, response.error(apiMethod)
+		}
+
+		duration := time.Second * time.Duration(response.Parameters.RetryAfter)
+		floodHandler.Handle(apiMethod, data, duration)
+
+		if body != nil {
+			body.Seek(0, io.SeekStart)
 		}
 	}
-
-	return response, nil
 }

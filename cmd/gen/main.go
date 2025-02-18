@@ -153,7 +153,7 @@ func generateMethods(parser *Parser, methods []Method) {
 
 		f.WriteString(
 			fmt.Sprintf(
-				`res, err := makeRequest[%s](ctx, b.options.Client, b.baseURL, "%s", %s)
+				`res, err := makeRequest[%s](ctx, b.options.Client, b.baseUrl, "%s", b.options.FloodHandler, %s)
 
 				if err != nil {
 					return r, err

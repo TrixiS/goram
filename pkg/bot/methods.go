@@ -9,7 +9,7 @@ import (
 //
 // https://core.telegram.org/bots/api#getupdates
 func (b *Bot) GetUpdates(ctx context.Context, request *types.GetUpdatesRequest) (r []types.Update, err error) {
-	res, err := makeRequest[[]types.Update](ctx, b.options.Client, b.baseURL, "getUpdates", request)
+	res, err := makeRequest[[]types.Update](ctx, b.options.Client, b.baseUrl, "getUpdates", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -24,7 +24,7 @@ func (b *Bot) GetUpdates(ctx context.Context, request *types.GetUpdatesRequest) 
 //
 // https://core.telegram.org/bots/api#setwebhook
 func (b *Bot) SetWebhook(ctx context.Context, request *types.SetWebhookRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "setWebhook", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "setWebhook", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -37,7 +37,7 @@ func (b *Bot) SetWebhook(ctx context.Context, request *types.SetWebhookRequest) 
 //
 // https://core.telegram.org/bots/api#deletewebhook
 func (b *Bot) DeleteWebhook(ctx context.Context, request *types.DeleteWebhookRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "deleteWebhook", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "deleteWebhook", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -50,7 +50,7 @@ func (b *Bot) DeleteWebhook(ctx context.Context, request *types.DeleteWebhookReq
 //
 // https://core.telegram.org/bots/api#getwebhookinfo
 func (b *Bot) GetWebhookInfo(ctx context.Context) (r *types.WebhookInfo, err error) {
-	res, err := makeRequest[*types.WebhookInfo](ctx, b.options.Client, b.baseURL, "getWebhookInfo", nil)
+	res, err := makeRequest[*types.WebhookInfo](ctx, b.options.Client, b.baseUrl, "getWebhookInfo", b.options.FloodHandler, nil)
 
 	if err != nil {
 		return r, err
@@ -63,7 +63,7 @@ func (b *Bot) GetWebhookInfo(ctx context.Context) (r *types.WebhookInfo, err err
 //
 // https://core.telegram.org/bots/api#getme
 func (b *Bot) GetMe(ctx context.Context) (r *types.User, err error) {
-	res, err := makeRequest[*types.User](ctx, b.options.Client, b.baseURL, "getMe", nil)
+	res, err := makeRequest[*types.User](ctx, b.options.Client, b.baseUrl, "getMe", b.options.FloodHandler, nil)
 
 	if err != nil {
 		return r, err
@@ -76,7 +76,7 @@ func (b *Bot) GetMe(ctx context.Context) (r *types.User, err error) {
 //
 // https://core.telegram.org/bots/api#logout
 func (b *Bot) LogOut(ctx context.Context) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "logOut", nil)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "logOut", b.options.FloodHandler, nil)
 
 	if err != nil {
 		return r, err
@@ -89,7 +89,7 @@ func (b *Bot) LogOut(ctx context.Context) (r bool, err error) {
 //
 // https://core.telegram.org/bots/api#close
 func (b *Bot) Close(ctx context.Context) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "close", nil)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "close", b.options.FloodHandler, nil)
 
 	if err != nil {
 		return r, err
@@ -102,7 +102,7 @@ func (b *Bot) Close(ctx context.Context) (r bool, err error) {
 //
 // https://core.telegram.org/bots/api#sendmessage
 func (b *Bot) SendMessage(ctx context.Context, request *types.SendMessageRequest) (r *types.Message, err error) {
-	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseURL, "sendMessage", request)
+	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseUrl, "sendMessage", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -115,7 +115,7 @@ func (b *Bot) SendMessage(ctx context.Context, request *types.SendMessageRequest
 //
 // https://core.telegram.org/bots/api#forwardmessage
 func (b *Bot) ForwardMessage(ctx context.Context, request *types.ForwardMessageRequest) (r *types.Message, err error) {
-	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseURL, "forwardMessage", request)
+	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseUrl, "forwardMessage", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -128,7 +128,7 @@ func (b *Bot) ForwardMessage(ctx context.Context, request *types.ForwardMessageR
 //
 // https://core.telegram.org/bots/api#forwardmessages
 func (b *Bot) ForwardMessages(ctx context.Context, request *types.ForwardMessagesRequest) (r []types.MessageId, err error) {
-	res, err := makeRequest[[]types.MessageId](ctx, b.options.Client, b.baseURL, "forwardMessages", request)
+	res, err := makeRequest[[]types.MessageId](ctx, b.options.Client, b.baseUrl, "forwardMessages", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -141,7 +141,7 @@ func (b *Bot) ForwardMessages(ctx context.Context, request *types.ForwardMessage
 //
 // https://core.telegram.org/bots/api#copymessage
 func (b *Bot) CopyMessage(ctx context.Context, request *types.CopyMessageRequest) (r *types.MessageId, err error) {
-	res, err := makeRequest[*types.MessageId](ctx, b.options.Client, b.baseURL, "copyMessage", request)
+	res, err := makeRequest[*types.MessageId](ctx, b.options.Client, b.baseUrl, "copyMessage", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -154,7 +154,7 @@ func (b *Bot) CopyMessage(ctx context.Context, request *types.CopyMessageRequest
 //
 // https://core.telegram.org/bots/api#copymessages
 func (b *Bot) CopyMessages(ctx context.Context, request *types.CopyMessagesRequest) (r []types.MessageId, err error) {
-	res, err := makeRequest[[]types.MessageId](ctx, b.options.Client, b.baseURL, "copyMessages", request)
+	res, err := makeRequest[[]types.MessageId](ctx, b.options.Client, b.baseUrl, "copyMessages", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -167,7 +167,7 @@ func (b *Bot) CopyMessages(ctx context.Context, request *types.CopyMessagesReque
 //
 // https://core.telegram.org/bots/api#sendphoto
 func (b *Bot) SendPhoto(ctx context.Context, request *types.SendPhotoRequest) (r *types.Message, err error) {
-	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseURL, "sendPhoto", request)
+	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseUrl, "sendPhoto", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -182,7 +182,7 @@ func (b *Bot) SendPhoto(ctx context.Context, request *types.SendPhotoRequest) (r
 //
 // https://core.telegram.org/bots/api#sendaudio
 func (b *Bot) SendAudio(ctx context.Context, request *types.SendAudioRequest) (r *types.Message, err error) {
-	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseURL, "sendAudio", request)
+	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseUrl, "sendAudio", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -195,7 +195,7 @@ func (b *Bot) SendAudio(ctx context.Context, request *types.SendAudioRequest) (r
 //
 // https://core.telegram.org/bots/api#senddocument
 func (b *Bot) SendDocument(ctx context.Context, request *types.SendDocumentRequest) (r *types.Message, err error) {
-	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseURL, "sendDocument", request)
+	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseUrl, "sendDocument", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -208,7 +208,7 @@ func (b *Bot) SendDocument(ctx context.Context, request *types.SendDocumentReque
 //
 // https://core.telegram.org/bots/api#sendvideo
 func (b *Bot) SendVideo(ctx context.Context, request *types.SendVideoRequest) (r *types.Message, err error) {
-	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseURL, "sendVideo", request)
+	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseUrl, "sendVideo", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -221,7 +221,7 @@ func (b *Bot) SendVideo(ctx context.Context, request *types.SendVideoRequest) (r
 //
 // https://core.telegram.org/bots/api#sendanimation
 func (b *Bot) SendAnimation(ctx context.Context, request *types.SendAnimationRequest) (r *types.Message, err error) {
-	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseURL, "sendAnimation", request)
+	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseUrl, "sendAnimation", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -234,7 +234,7 @@ func (b *Bot) SendAnimation(ctx context.Context, request *types.SendAnimationReq
 //
 // https://core.telegram.org/bots/api#sendvoice
 func (b *Bot) SendVoice(ctx context.Context, request *types.SendVoiceRequest) (r *types.Message, err error) {
-	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseURL, "sendVoice", request)
+	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseUrl, "sendVoice", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -247,7 +247,7 @@ func (b *Bot) SendVoice(ctx context.Context, request *types.SendVoiceRequest) (r
 //
 // https://core.telegram.org/bots/api#sendvideonote
 func (b *Bot) SendVideoNote(ctx context.Context, request *types.SendVideoNoteRequest) (r *types.Message, err error) {
-	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseURL, "sendVideoNote", request)
+	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseUrl, "sendVideoNote", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -260,7 +260,7 @@ func (b *Bot) SendVideoNote(ctx context.Context, request *types.SendVideoNoteReq
 //
 // https://core.telegram.org/bots/api#sendpaidmedia
 func (b *Bot) SendPaidMedia(ctx context.Context, request *types.SendPaidMediaRequest) (r *types.Message, err error) {
-	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseURL, "sendPaidMedia", request)
+	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseUrl, "sendPaidMedia", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -273,7 +273,7 @@ func (b *Bot) SendPaidMedia(ctx context.Context, request *types.SendPaidMediaReq
 //
 // https://core.telegram.org/bots/api#sendmediagroup
 func (b *Bot) SendMediaGroup(ctx context.Context, request *types.SendMediaGroupRequest) (r []types.Message, err error) {
-	res, err := makeRequest[[]types.Message](ctx, b.options.Client, b.baseURL, "sendMediaGroup", request)
+	res, err := makeRequest[[]types.Message](ctx, b.options.Client, b.baseUrl, "sendMediaGroup", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -286,7 +286,7 @@ func (b *Bot) SendMediaGroup(ctx context.Context, request *types.SendMediaGroupR
 //
 // https://core.telegram.org/bots/api#sendlocation
 func (b *Bot) SendLocation(ctx context.Context, request *types.SendLocationRequest) (r *types.Message, err error) {
-	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseURL, "sendLocation", request)
+	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseUrl, "sendLocation", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -299,7 +299,7 @@ func (b *Bot) SendLocation(ctx context.Context, request *types.SendLocationReque
 //
 // https://core.telegram.org/bots/api#sendvenue
 func (b *Bot) SendVenue(ctx context.Context, request *types.SendVenueRequest) (r *types.Message, err error) {
-	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseURL, "sendVenue", request)
+	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseUrl, "sendVenue", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -312,7 +312,7 @@ func (b *Bot) SendVenue(ctx context.Context, request *types.SendVenueRequest) (r
 //
 // https://core.telegram.org/bots/api#sendcontact
 func (b *Bot) SendContact(ctx context.Context, request *types.SendContactRequest) (r *types.Message, err error) {
-	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseURL, "sendContact", request)
+	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseUrl, "sendContact", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -325,7 +325,7 @@ func (b *Bot) SendContact(ctx context.Context, request *types.SendContactRequest
 //
 // https://core.telegram.org/bots/api#sendpoll
 func (b *Bot) SendPoll(ctx context.Context, request *types.SendPollRequest) (r *types.Message, err error) {
-	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseURL, "sendPoll", request)
+	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseUrl, "sendPoll", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -338,7 +338,7 @@ func (b *Bot) SendPoll(ctx context.Context, request *types.SendPollRequest) (r *
 //
 // https://core.telegram.org/bots/api#senddice
 func (b *Bot) SendDice(ctx context.Context, request *types.SendDiceRequest) (r *types.Message, err error) {
-	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseURL, "sendDice", request)
+	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseUrl, "sendDice", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -353,7 +353,7 @@ func (b *Bot) SendDice(ctx context.Context, request *types.SendDiceRequest) (r *
 //
 // https://core.telegram.org/bots/api#sendchataction
 func (b *Bot) SendChatAction(ctx context.Context, request *types.SendChatActionRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "sendChatAction", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "sendChatAction", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -366,7 +366,7 @@ func (b *Bot) SendChatAction(ctx context.Context, request *types.SendChatActionR
 //
 // https://core.telegram.org/bots/api#setmessagereaction
 func (b *Bot) SetMessageReaction(ctx context.Context, request *types.SetMessageReactionRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "setMessageReaction", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "setMessageReaction", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -379,7 +379,7 @@ func (b *Bot) SetMessageReaction(ctx context.Context, request *types.SetMessageR
 //
 // https://core.telegram.org/bots/api#getuserprofilephotos
 func (b *Bot) GetUserProfilePhotos(ctx context.Context, request *types.GetUserProfilePhotosRequest) (r *types.UserProfilePhotos, err error) {
-	res, err := makeRequest[*types.UserProfilePhotos](ctx, b.options.Client, b.baseURL, "getUserProfilePhotos", request)
+	res, err := makeRequest[*types.UserProfilePhotos](ctx, b.options.Client, b.baseUrl, "getUserProfilePhotos", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -392,7 +392,7 @@ func (b *Bot) GetUserProfilePhotos(ctx context.Context, request *types.GetUserPr
 //
 // https://core.telegram.org/bots/api#setuseremojistatus
 func (b *Bot) SetUserEmojiStatus(ctx context.Context, request *types.SetUserEmojiStatusRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "setUserEmojiStatus", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "setUserEmojiStatus", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -407,7 +407,7 @@ func (b *Bot) SetUserEmojiStatus(ctx context.Context, request *types.SetUserEmoj
 //
 // https://core.telegram.org/bots/api#getfile
 func (b *Bot) GetFile(ctx context.Context, request *types.GetFileRequest) (r *types.File, err error) {
-	res, err := makeRequest[*types.File](ctx, b.options.Client, b.baseURL, "getFile", request)
+	res, err := makeRequest[*types.File](ctx, b.options.Client, b.baseUrl, "getFile", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -420,7 +420,7 @@ func (b *Bot) GetFile(ctx context.Context, request *types.GetFileRequest) (r *ty
 //
 // https://core.telegram.org/bots/api#banchatmember
 func (b *Bot) BanChatMember(ctx context.Context, request *types.BanChatMemberRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "banChatMember", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "banChatMember", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -433,7 +433,7 @@ func (b *Bot) BanChatMember(ctx context.Context, request *types.BanChatMemberReq
 //
 // https://core.telegram.org/bots/api#unbanchatmember
 func (b *Bot) UnbanChatMember(ctx context.Context, request *types.UnbanChatMemberRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "unbanChatMember", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "unbanChatMember", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -446,7 +446,7 @@ func (b *Bot) UnbanChatMember(ctx context.Context, request *types.UnbanChatMembe
 //
 // https://core.telegram.org/bots/api#restrictchatmember
 func (b *Bot) RestrictChatMember(ctx context.Context, request *types.RestrictChatMemberRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "restrictChatMember", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "restrictChatMember", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -459,7 +459,7 @@ func (b *Bot) RestrictChatMember(ctx context.Context, request *types.RestrictCha
 //
 // https://core.telegram.org/bots/api#promotechatmember
 func (b *Bot) PromoteChatMember(ctx context.Context, request *types.PromoteChatMemberRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "promoteChatMember", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "promoteChatMember", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -472,7 +472,7 @@ func (b *Bot) PromoteChatMember(ctx context.Context, request *types.PromoteChatM
 //
 // https://core.telegram.org/bots/api#setchatadministratorcustomtitle
 func (b *Bot) SetChatAdministratorCustomTitle(ctx context.Context, request *types.SetChatAdministratorCustomTitleRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "setChatAdministratorCustomTitle", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "setChatAdministratorCustomTitle", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -485,7 +485,7 @@ func (b *Bot) SetChatAdministratorCustomTitle(ctx context.Context, request *type
 //
 // https://core.telegram.org/bots/api#banchatsenderchat
 func (b *Bot) BanChatSenderChat(ctx context.Context, request *types.BanChatSenderChatRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "banChatSenderChat", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "banChatSenderChat", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -498,7 +498,7 @@ func (b *Bot) BanChatSenderChat(ctx context.Context, request *types.BanChatSende
 //
 // https://core.telegram.org/bots/api#unbanchatsenderchat
 func (b *Bot) UnbanChatSenderChat(ctx context.Context, request *types.UnbanChatSenderChatRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "unbanChatSenderChat", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "unbanChatSenderChat", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -511,7 +511,7 @@ func (b *Bot) UnbanChatSenderChat(ctx context.Context, request *types.UnbanChatS
 //
 // https://core.telegram.org/bots/api#setchatpermissions
 func (b *Bot) SetChatPermissions(ctx context.Context, request *types.SetChatPermissionsRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "setChatPermissions", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "setChatPermissions", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -524,7 +524,7 @@ func (b *Bot) SetChatPermissions(ctx context.Context, request *types.SetChatPerm
 //
 // https://core.telegram.org/bots/api#exportchatinvitelink
 func (b *Bot) ExportChatInviteLink(ctx context.Context, request *types.ExportChatInviteLinkRequest) (r string, err error) {
-	res, err := makeRequest[string](ctx, b.options.Client, b.baseURL, "exportChatInviteLink", request)
+	res, err := makeRequest[string](ctx, b.options.Client, b.baseUrl, "exportChatInviteLink", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -537,7 +537,7 @@ func (b *Bot) ExportChatInviteLink(ctx context.Context, request *types.ExportCha
 //
 // https://core.telegram.org/bots/api#createchatinvitelink
 func (b *Bot) CreateChatInviteLink(ctx context.Context, request *types.CreateChatInviteLinkRequest) (r *types.ChatInviteLink, err error) {
-	res, err := makeRequest[*types.ChatInviteLink](ctx, b.options.Client, b.baseURL, "createChatInviteLink", request)
+	res, err := makeRequest[*types.ChatInviteLink](ctx, b.options.Client, b.baseUrl, "createChatInviteLink", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -550,7 +550,7 @@ func (b *Bot) CreateChatInviteLink(ctx context.Context, request *types.CreateCha
 //
 // https://core.telegram.org/bots/api#editchatinvitelink
 func (b *Bot) EditChatInviteLink(ctx context.Context, request *types.EditChatInviteLinkRequest) (r *types.ChatInviteLink, err error) {
-	res, err := makeRequest[*types.ChatInviteLink](ctx, b.options.Client, b.baseURL, "editChatInviteLink", request)
+	res, err := makeRequest[*types.ChatInviteLink](ctx, b.options.Client, b.baseUrl, "editChatInviteLink", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -563,7 +563,7 @@ func (b *Bot) EditChatInviteLink(ctx context.Context, request *types.EditChatInv
 //
 // https://core.telegram.org/bots/api#createchatsubscriptioninvitelink
 func (b *Bot) CreateChatSubscriptionInviteLink(ctx context.Context, request *types.CreateChatSubscriptionInviteLinkRequest) (r *types.ChatInviteLink, err error) {
-	res, err := makeRequest[*types.ChatInviteLink](ctx, b.options.Client, b.baseURL, "createChatSubscriptionInviteLink", request)
+	res, err := makeRequest[*types.ChatInviteLink](ctx, b.options.Client, b.baseUrl, "createChatSubscriptionInviteLink", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -576,7 +576,7 @@ func (b *Bot) CreateChatSubscriptionInviteLink(ctx context.Context, request *typ
 //
 // https://core.telegram.org/bots/api#editchatsubscriptioninvitelink
 func (b *Bot) EditChatSubscriptionInviteLink(ctx context.Context, request *types.EditChatSubscriptionInviteLinkRequest) (r *types.ChatInviteLink, err error) {
-	res, err := makeRequest[*types.ChatInviteLink](ctx, b.options.Client, b.baseURL, "editChatSubscriptionInviteLink", request)
+	res, err := makeRequest[*types.ChatInviteLink](ctx, b.options.Client, b.baseUrl, "editChatSubscriptionInviteLink", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -589,7 +589,7 @@ func (b *Bot) EditChatSubscriptionInviteLink(ctx context.Context, request *types
 //
 // https://core.telegram.org/bots/api#revokechatinvitelink
 func (b *Bot) RevokeChatInviteLink(ctx context.Context, request *types.RevokeChatInviteLinkRequest) (r *types.ChatInviteLink, err error) {
-	res, err := makeRequest[*types.ChatInviteLink](ctx, b.options.Client, b.baseURL, "revokeChatInviteLink", request)
+	res, err := makeRequest[*types.ChatInviteLink](ctx, b.options.Client, b.baseUrl, "revokeChatInviteLink", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -602,7 +602,7 @@ func (b *Bot) RevokeChatInviteLink(ctx context.Context, request *types.RevokeCha
 //
 // https://core.telegram.org/bots/api#approvechatjoinrequest
 func (b *Bot) ApproveChatJoinRequest(ctx context.Context, request *types.ApproveChatJoinRequestRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "approveChatJoinRequest", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "approveChatJoinRequest", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -615,7 +615,7 @@ func (b *Bot) ApproveChatJoinRequest(ctx context.Context, request *types.Approve
 //
 // https://core.telegram.org/bots/api#declinechatjoinrequest
 func (b *Bot) DeclineChatJoinRequest(ctx context.Context, request *types.DeclineChatJoinRequestRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "declineChatJoinRequest", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "declineChatJoinRequest", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -628,7 +628,7 @@ func (b *Bot) DeclineChatJoinRequest(ctx context.Context, request *types.Decline
 //
 // https://core.telegram.org/bots/api#setchatphoto
 func (b *Bot) SetChatPhoto(ctx context.Context, request *types.SetChatPhotoRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "setChatPhoto", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "setChatPhoto", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -641,7 +641,7 @@ func (b *Bot) SetChatPhoto(ctx context.Context, request *types.SetChatPhotoReque
 //
 // https://core.telegram.org/bots/api#deletechatphoto
 func (b *Bot) DeleteChatPhoto(ctx context.Context, request *types.DeleteChatPhotoRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "deleteChatPhoto", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "deleteChatPhoto", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -654,7 +654,7 @@ func (b *Bot) DeleteChatPhoto(ctx context.Context, request *types.DeleteChatPhot
 //
 // https://core.telegram.org/bots/api#setchattitle
 func (b *Bot) SetChatTitle(ctx context.Context, request *types.SetChatTitleRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "setChatTitle", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "setChatTitle", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -667,7 +667,7 @@ func (b *Bot) SetChatTitle(ctx context.Context, request *types.SetChatTitleReque
 //
 // https://core.telegram.org/bots/api#setchatdescription
 func (b *Bot) SetChatDescription(ctx context.Context, request *types.SetChatDescriptionRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "setChatDescription", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "setChatDescription", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -680,7 +680,7 @@ func (b *Bot) SetChatDescription(ctx context.Context, request *types.SetChatDesc
 //
 // https://core.telegram.org/bots/api#pinchatmessage
 func (b *Bot) PinChatMessage(ctx context.Context, request *types.PinChatMessageRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "pinChatMessage", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "pinChatMessage", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -693,7 +693,7 @@ func (b *Bot) PinChatMessage(ctx context.Context, request *types.PinChatMessageR
 //
 // https://core.telegram.org/bots/api#unpinchatmessage
 func (b *Bot) UnpinChatMessage(ctx context.Context, request *types.UnpinChatMessageRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "unpinChatMessage", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "unpinChatMessage", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -706,7 +706,7 @@ func (b *Bot) UnpinChatMessage(ctx context.Context, request *types.UnpinChatMess
 //
 // https://core.telegram.org/bots/api#unpinallchatmessages
 func (b *Bot) UnpinAllChatMessages(ctx context.Context, request *types.UnpinAllChatMessagesRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "unpinAllChatMessages", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "unpinAllChatMessages", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -719,7 +719,7 @@ func (b *Bot) UnpinAllChatMessages(ctx context.Context, request *types.UnpinAllC
 //
 // https://core.telegram.org/bots/api#leavechat
 func (b *Bot) LeaveChat(ctx context.Context, request *types.LeaveChatRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "leaveChat", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "leaveChat", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -732,7 +732,7 @@ func (b *Bot) LeaveChat(ctx context.Context, request *types.LeaveChatRequest) (r
 //
 // https://core.telegram.org/bots/api#getchat
 func (b *Bot) GetChat(ctx context.Context, request *types.GetChatRequest) (r *types.ChatFullInfo, err error) {
-	res, err := makeRequest[*types.ChatFullInfo](ctx, b.options.Client, b.baseURL, "getChat", request)
+	res, err := makeRequest[*types.ChatFullInfo](ctx, b.options.Client, b.baseUrl, "getChat", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -745,7 +745,7 @@ func (b *Bot) GetChat(ctx context.Context, request *types.GetChatRequest) (r *ty
 //
 // https://core.telegram.org/bots/api#getchatadministrators
 func (b *Bot) GetChatAdministrators(ctx context.Context, request *types.GetChatAdministratorsRequest) (r []types.ChatMember, err error) {
-	res, err := makeRequest[[]types.ChatMember](ctx, b.options.Client, b.baseURL, "getChatAdministrators", request)
+	res, err := makeRequest[[]types.ChatMember](ctx, b.options.Client, b.baseUrl, "getChatAdministrators", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -758,7 +758,7 @@ func (b *Bot) GetChatAdministrators(ctx context.Context, request *types.GetChatA
 //
 // https://core.telegram.org/bots/api#getchatmembercount
 func (b *Bot) GetChatMemberCount(ctx context.Context, request *types.GetChatMemberCountRequest) (r int, err error) {
-	res, err := makeRequest[int](ctx, b.options.Client, b.baseURL, "getChatMemberCount", request)
+	res, err := makeRequest[int](ctx, b.options.Client, b.baseUrl, "getChatMemberCount", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -771,7 +771,7 @@ func (b *Bot) GetChatMemberCount(ctx context.Context, request *types.GetChatMemb
 //
 // https://core.telegram.org/bots/api#getchatmember
 func (b *Bot) GetChatMember(ctx context.Context, request *types.GetChatMemberRequest) (r types.ChatMember, err error) {
-	res, err := makeRequest[types.ChatMember](ctx, b.options.Client, b.baseURL, "getChatMember", request)
+	res, err := makeRequest[types.ChatMember](ctx, b.options.Client, b.baseUrl, "getChatMember", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -784,7 +784,7 @@ func (b *Bot) GetChatMember(ctx context.Context, request *types.GetChatMemberReq
 //
 // https://core.telegram.org/bots/api#setchatstickerset
 func (b *Bot) SetChatStickerSet(ctx context.Context, request *types.SetChatStickerSetRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "setChatStickerSet", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "setChatStickerSet", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -797,7 +797,7 @@ func (b *Bot) SetChatStickerSet(ctx context.Context, request *types.SetChatStick
 //
 // https://core.telegram.org/bots/api#deletechatstickerset
 func (b *Bot) DeleteChatStickerSet(ctx context.Context, request *types.DeleteChatStickerSetRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "deleteChatStickerSet", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "deleteChatStickerSet", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -810,7 +810,7 @@ func (b *Bot) DeleteChatStickerSet(ctx context.Context, request *types.DeleteCha
 //
 // https://core.telegram.org/bots/api#getforumtopiciconstickers
 func (b *Bot) GetForumTopicIconStickers(ctx context.Context) (r []types.Sticker, err error) {
-	res, err := makeRequest[[]types.Sticker](ctx, b.options.Client, b.baseURL, "getForumTopicIconStickers", nil)
+	res, err := makeRequest[[]types.Sticker](ctx, b.options.Client, b.baseUrl, "getForumTopicIconStickers", b.options.FloodHandler, nil)
 
 	if err != nil {
 		return r, err
@@ -823,7 +823,7 @@ func (b *Bot) GetForumTopicIconStickers(ctx context.Context) (r []types.Sticker,
 //
 // https://core.telegram.org/bots/api#createforumtopic
 func (b *Bot) CreateForumTopic(ctx context.Context, request *types.CreateForumTopicRequest) (r *types.ForumTopic, err error) {
-	res, err := makeRequest[*types.ForumTopic](ctx, b.options.Client, b.baseURL, "createForumTopic", request)
+	res, err := makeRequest[*types.ForumTopic](ctx, b.options.Client, b.baseUrl, "createForumTopic", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -836,7 +836,7 @@ func (b *Bot) CreateForumTopic(ctx context.Context, request *types.CreateForumTo
 //
 // https://core.telegram.org/bots/api#editforumtopic
 func (b *Bot) EditForumTopic(ctx context.Context, request *types.EditForumTopicRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "editForumTopic", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "editForumTopic", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -849,7 +849,7 @@ func (b *Bot) EditForumTopic(ctx context.Context, request *types.EditForumTopicR
 //
 // https://core.telegram.org/bots/api#closeforumtopic
 func (b *Bot) CloseForumTopic(ctx context.Context, request *types.CloseForumTopicRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "closeForumTopic", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "closeForumTopic", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -862,7 +862,7 @@ func (b *Bot) CloseForumTopic(ctx context.Context, request *types.CloseForumTopi
 //
 // https://core.telegram.org/bots/api#reopenforumtopic
 func (b *Bot) ReopenForumTopic(ctx context.Context, request *types.ReopenForumTopicRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "reopenForumTopic", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "reopenForumTopic", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -875,7 +875,7 @@ func (b *Bot) ReopenForumTopic(ctx context.Context, request *types.ReopenForumTo
 //
 // https://core.telegram.org/bots/api#deleteforumtopic
 func (b *Bot) DeleteForumTopic(ctx context.Context, request *types.DeleteForumTopicRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "deleteForumTopic", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "deleteForumTopic", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -888,7 +888,7 @@ func (b *Bot) DeleteForumTopic(ctx context.Context, request *types.DeleteForumTo
 //
 // https://core.telegram.org/bots/api#unpinallforumtopicmessages
 func (b *Bot) UnpinAllForumTopicMessages(ctx context.Context, request *types.UnpinAllForumTopicMessagesRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "unpinAllForumTopicMessages", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "unpinAllForumTopicMessages", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -901,7 +901,7 @@ func (b *Bot) UnpinAllForumTopicMessages(ctx context.Context, request *types.Unp
 //
 // https://core.telegram.org/bots/api#editgeneralforumtopic
 func (b *Bot) EditGeneralForumTopic(ctx context.Context, request *types.EditGeneralForumTopicRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "editGeneralForumTopic", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "editGeneralForumTopic", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -914,7 +914,7 @@ func (b *Bot) EditGeneralForumTopic(ctx context.Context, request *types.EditGene
 //
 // https://core.telegram.org/bots/api#closegeneralforumtopic
 func (b *Bot) CloseGeneralForumTopic(ctx context.Context, request *types.CloseGeneralForumTopicRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "closeGeneralForumTopic", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "closeGeneralForumTopic", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -927,7 +927,7 @@ func (b *Bot) CloseGeneralForumTopic(ctx context.Context, request *types.CloseGe
 //
 // https://core.telegram.org/bots/api#reopengeneralforumtopic
 func (b *Bot) ReopenGeneralForumTopic(ctx context.Context, request *types.ReopenGeneralForumTopicRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "reopenGeneralForumTopic", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "reopenGeneralForumTopic", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -940,7 +940,7 @@ func (b *Bot) ReopenGeneralForumTopic(ctx context.Context, request *types.Reopen
 //
 // https://core.telegram.org/bots/api#hidegeneralforumtopic
 func (b *Bot) HideGeneralForumTopic(ctx context.Context, request *types.HideGeneralForumTopicRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "hideGeneralForumTopic", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "hideGeneralForumTopic", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -953,7 +953,7 @@ func (b *Bot) HideGeneralForumTopic(ctx context.Context, request *types.HideGene
 //
 // https://core.telegram.org/bots/api#unhidegeneralforumtopic
 func (b *Bot) UnhideGeneralForumTopic(ctx context.Context, request *types.UnhideGeneralForumTopicRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "unhideGeneralForumTopic", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "unhideGeneralForumTopic", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -966,7 +966,7 @@ func (b *Bot) UnhideGeneralForumTopic(ctx context.Context, request *types.Unhide
 //
 // https://core.telegram.org/bots/api#unpinallgeneralforumtopicmessages
 func (b *Bot) UnpinAllGeneralForumTopicMessages(ctx context.Context, request *types.UnpinAllGeneralForumTopicMessagesRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "unpinAllGeneralForumTopicMessages", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "unpinAllGeneralForumTopicMessages", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -979,7 +979,7 @@ func (b *Bot) UnpinAllGeneralForumTopicMessages(ctx context.Context, request *ty
 //
 // https://core.telegram.org/bots/api#answercallbackquery
 func (b *Bot) AnswerCallbackQuery(ctx context.Context, request *types.AnswerCallbackQueryRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "answerCallbackQuery", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "answerCallbackQuery", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -992,7 +992,7 @@ func (b *Bot) AnswerCallbackQuery(ctx context.Context, request *types.AnswerCall
 //
 // https://core.telegram.org/bots/api#getuserchatboosts
 func (b *Bot) GetUserChatBoosts(ctx context.Context, request *types.GetUserChatBoostsRequest) (r *types.UserChatBoosts, err error) {
-	res, err := makeRequest[*types.UserChatBoosts](ctx, b.options.Client, b.baseURL, "getUserChatBoosts", request)
+	res, err := makeRequest[*types.UserChatBoosts](ctx, b.options.Client, b.baseUrl, "getUserChatBoosts", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1005,7 +1005,7 @@ func (b *Bot) GetUserChatBoosts(ctx context.Context, request *types.GetUserChatB
 //
 // https://core.telegram.org/bots/api#getbusinessconnection
 func (b *Bot) GetBusinessConnection(ctx context.Context, request *types.GetBusinessConnectionRequest) (r *types.BusinessConnection, err error) {
-	res, err := makeRequest[*types.BusinessConnection](ctx, b.options.Client, b.baseURL, "getBusinessConnection", request)
+	res, err := makeRequest[*types.BusinessConnection](ctx, b.options.Client, b.baseUrl, "getBusinessConnection", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1018,7 +1018,7 @@ func (b *Bot) GetBusinessConnection(ctx context.Context, request *types.GetBusin
 //
 // https://core.telegram.org/bots/api#setmycommands
 func (b *Bot) SetMyCommands(ctx context.Context, request *types.SetMyCommandsRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "setMyCommands", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "setMyCommands", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1031,7 +1031,7 @@ func (b *Bot) SetMyCommands(ctx context.Context, request *types.SetMyCommandsReq
 //
 // https://core.telegram.org/bots/api#deletemycommands
 func (b *Bot) DeleteMyCommands(ctx context.Context, request *types.DeleteMyCommandsRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "deleteMyCommands", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "deleteMyCommands", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1044,7 +1044,7 @@ func (b *Bot) DeleteMyCommands(ctx context.Context, request *types.DeleteMyComma
 //
 // https://core.telegram.org/bots/api#getmycommands
 func (b *Bot) GetMyCommands(ctx context.Context, request *types.GetMyCommandsRequest) (r []types.BotCommand, err error) {
-	res, err := makeRequest[[]types.BotCommand](ctx, b.options.Client, b.baseURL, "getMyCommands", request)
+	res, err := makeRequest[[]types.BotCommand](ctx, b.options.Client, b.baseUrl, "getMyCommands", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1057,7 +1057,7 @@ func (b *Bot) GetMyCommands(ctx context.Context, request *types.GetMyCommandsReq
 //
 // https://core.telegram.org/bots/api#setmyname
 func (b *Bot) SetMyName(ctx context.Context, request *types.SetMyNameRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "setMyName", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "setMyName", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1070,7 +1070,7 @@ func (b *Bot) SetMyName(ctx context.Context, request *types.SetMyNameRequest) (r
 //
 // https://core.telegram.org/bots/api#getmyname
 func (b *Bot) GetMyName(ctx context.Context, request *types.GetMyNameRequest) (r *types.BotName, err error) {
-	res, err := makeRequest[*types.BotName](ctx, b.options.Client, b.baseURL, "getMyName", request)
+	res, err := makeRequest[*types.BotName](ctx, b.options.Client, b.baseUrl, "getMyName", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1083,7 +1083,7 @@ func (b *Bot) GetMyName(ctx context.Context, request *types.GetMyNameRequest) (r
 //
 // https://core.telegram.org/bots/api#setmydescription
 func (b *Bot) SetMyDescription(ctx context.Context, request *types.SetMyDescriptionRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "setMyDescription", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "setMyDescription", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1096,7 +1096,7 @@ func (b *Bot) SetMyDescription(ctx context.Context, request *types.SetMyDescript
 //
 // https://core.telegram.org/bots/api#getmydescription
 func (b *Bot) GetMyDescription(ctx context.Context, request *types.GetMyDescriptionRequest) (r *types.BotDescription, err error) {
-	res, err := makeRequest[*types.BotDescription](ctx, b.options.Client, b.baseURL, "getMyDescription", request)
+	res, err := makeRequest[*types.BotDescription](ctx, b.options.Client, b.baseUrl, "getMyDescription", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1109,7 +1109,7 @@ func (b *Bot) GetMyDescription(ctx context.Context, request *types.GetMyDescript
 //
 // https://core.telegram.org/bots/api#setmyshortdescription
 func (b *Bot) SetMyShortDescription(ctx context.Context, request *types.SetMyShortDescriptionRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "setMyShortDescription", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "setMyShortDescription", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1122,7 +1122,7 @@ func (b *Bot) SetMyShortDescription(ctx context.Context, request *types.SetMySho
 //
 // https://core.telegram.org/bots/api#getmyshortdescription
 func (b *Bot) GetMyShortDescription(ctx context.Context, request *types.GetMyShortDescriptionRequest) (r *types.BotShortDescription, err error) {
-	res, err := makeRequest[*types.BotShortDescription](ctx, b.options.Client, b.baseURL, "getMyShortDescription", request)
+	res, err := makeRequest[*types.BotShortDescription](ctx, b.options.Client, b.baseUrl, "getMyShortDescription", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1135,7 +1135,7 @@ func (b *Bot) GetMyShortDescription(ctx context.Context, request *types.GetMySho
 //
 // https://core.telegram.org/bots/api#setchatmenubutton
 func (b *Bot) SetChatMenuButton(ctx context.Context, request *types.SetChatMenuButtonRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "setChatMenuButton", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "setChatMenuButton", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1148,7 +1148,7 @@ func (b *Bot) SetChatMenuButton(ctx context.Context, request *types.SetChatMenuB
 //
 // https://core.telegram.org/bots/api#getchatmenubutton
 func (b *Bot) GetChatMenuButton(ctx context.Context, request *types.GetChatMenuButtonRequest) (r types.MenuButton, err error) {
-	res, err := makeRequest[types.MenuButton](ctx, b.options.Client, b.baseURL, "getChatMenuButton", request)
+	res, err := makeRequest[types.MenuButton](ctx, b.options.Client, b.baseUrl, "getChatMenuButton", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1161,7 +1161,7 @@ func (b *Bot) GetChatMenuButton(ctx context.Context, request *types.GetChatMenuB
 //
 // https://core.telegram.org/bots/api#setmydefaultadministratorrights
 func (b *Bot) SetMyDefaultAdministratorRights(ctx context.Context, request *types.SetMyDefaultAdministratorRightsRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "setMyDefaultAdministratorRights", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "setMyDefaultAdministratorRights", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1174,7 +1174,7 @@ func (b *Bot) SetMyDefaultAdministratorRights(ctx context.Context, request *type
 //
 // https://core.telegram.org/bots/api#getmydefaultadministratorrights
 func (b *Bot) GetMyDefaultAdministratorRights(ctx context.Context, request *types.GetMyDefaultAdministratorRightsRequest) (r *types.ChatAdministratorRights, err error) {
-	res, err := makeRequest[*types.ChatAdministratorRights](ctx, b.options.Client, b.baseURL, "getMyDefaultAdministratorRights", request)
+	res, err := makeRequest[*types.ChatAdministratorRights](ctx, b.options.Client, b.baseUrl, "getMyDefaultAdministratorRights", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1187,7 +1187,7 @@ func (b *Bot) GetMyDefaultAdministratorRights(ctx context.Context, request *type
 //
 // https://core.telegram.org/bots/api#editmessagetext
 func (b *Bot) EditMessageText(ctx context.Context, request *types.EditMessageTextRequest) (r *types.Message, err error) {
-	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseURL, "editMessageText", request)
+	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseUrl, "editMessageText", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1200,7 +1200,7 @@ func (b *Bot) EditMessageText(ctx context.Context, request *types.EditMessageTex
 //
 // https://core.telegram.org/bots/api#editmessagecaption
 func (b *Bot) EditMessageCaption(ctx context.Context, request *types.EditMessageCaptionRequest) (r *types.Message, err error) {
-	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseURL, "editMessageCaption", request)
+	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseUrl, "editMessageCaption", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1213,7 +1213,7 @@ func (b *Bot) EditMessageCaption(ctx context.Context, request *types.EditMessage
 //
 // https://core.telegram.org/bots/api#editmessagemedia
 func (b *Bot) EditMessageMedia(ctx context.Context, request *types.EditMessageMediaRequest) (r *types.Message, err error) {
-	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseURL, "editMessageMedia", request)
+	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseUrl, "editMessageMedia", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1226,7 +1226,7 @@ func (b *Bot) EditMessageMedia(ctx context.Context, request *types.EditMessageMe
 //
 // https://core.telegram.org/bots/api#editmessagelivelocation
 func (b *Bot) EditMessageLiveLocation(ctx context.Context, request *types.EditMessageLiveLocationRequest) (r *types.Message, err error) {
-	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseURL, "editMessageLiveLocation", request)
+	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseUrl, "editMessageLiveLocation", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1239,7 +1239,7 @@ func (b *Bot) EditMessageLiveLocation(ctx context.Context, request *types.EditMe
 //
 // https://core.telegram.org/bots/api#stopmessagelivelocation
 func (b *Bot) StopMessageLiveLocation(ctx context.Context, request *types.StopMessageLiveLocationRequest) (r *types.Message, err error) {
-	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseURL, "stopMessageLiveLocation", request)
+	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseUrl, "stopMessageLiveLocation", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1252,7 +1252,7 @@ func (b *Bot) StopMessageLiveLocation(ctx context.Context, request *types.StopMe
 //
 // https://core.telegram.org/bots/api#editmessagereplymarkup
 func (b *Bot) EditMessageReplyMarkup(ctx context.Context, request *types.EditMessageReplyMarkupRequest) (r *types.Message, err error) {
-	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseURL, "editMessageReplyMarkup", request)
+	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseUrl, "editMessageReplyMarkup", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1265,7 +1265,7 @@ func (b *Bot) EditMessageReplyMarkup(ctx context.Context, request *types.EditMes
 //
 // https://core.telegram.org/bots/api#stoppoll
 func (b *Bot) StopPoll(ctx context.Context, request *types.StopPollRequest) (r *types.Poll, err error) {
-	res, err := makeRequest[*types.Poll](ctx, b.options.Client, b.baseURL, "stopPoll", request)
+	res, err := makeRequest[*types.Poll](ctx, b.options.Client, b.baseUrl, "stopPoll", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1296,7 +1296,7 @@ func (b *Bot) StopPoll(ctx context.Context, request *types.StopPollRequest) (r *
 //
 // https://core.telegram.org/bots/api#deletemessage
 func (b *Bot) DeleteMessage(ctx context.Context, request *types.DeleteMessageRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "deleteMessage", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "deleteMessage", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1309,7 +1309,7 @@ func (b *Bot) DeleteMessage(ctx context.Context, request *types.DeleteMessageReq
 //
 // https://core.telegram.org/bots/api#deletemessages
 func (b *Bot) DeleteMessages(ctx context.Context, request *types.DeleteMessagesRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "deleteMessages", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "deleteMessages", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1322,7 +1322,7 @@ func (b *Bot) DeleteMessages(ctx context.Context, request *types.DeleteMessagesR
 //
 // https://core.telegram.org/bots/api#sendsticker
 func (b *Bot) SendSticker(ctx context.Context, request *types.SendStickerRequest) (r *types.Message, err error) {
-	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseURL, "sendSticker", request)
+	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseUrl, "sendSticker", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1335,7 +1335,7 @@ func (b *Bot) SendSticker(ctx context.Context, request *types.SendStickerRequest
 //
 // https://core.telegram.org/bots/api#getstickerset
 func (b *Bot) GetStickerSet(ctx context.Context, request *types.GetStickerSetRequest) (r *types.StickerSet, err error) {
-	res, err := makeRequest[*types.StickerSet](ctx, b.options.Client, b.baseURL, "getStickerSet", request)
+	res, err := makeRequest[*types.StickerSet](ctx, b.options.Client, b.baseUrl, "getStickerSet", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1348,7 +1348,7 @@ func (b *Bot) GetStickerSet(ctx context.Context, request *types.GetStickerSetReq
 //
 // https://core.telegram.org/bots/api#getcustomemojistickers
 func (b *Bot) GetCustomEmojiStickers(ctx context.Context, request *types.GetCustomEmojiStickersRequest) (r []types.Sticker, err error) {
-	res, err := makeRequest[[]types.Sticker](ctx, b.options.Client, b.baseURL, "getCustomEmojiStickers", request)
+	res, err := makeRequest[[]types.Sticker](ctx, b.options.Client, b.baseUrl, "getCustomEmojiStickers", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1361,7 +1361,7 @@ func (b *Bot) GetCustomEmojiStickers(ctx context.Context, request *types.GetCust
 //
 // https://core.telegram.org/bots/api#uploadstickerfile
 func (b *Bot) UploadStickerFile(ctx context.Context, request *types.UploadStickerFileRequest) (r *types.File, err error) {
-	res, err := makeRequest[*types.File](ctx, b.options.Client, b.baseURL, "uploadStickerFile", request)
+	res, err := makeRequest[*types.File](ctx, b.options.Client, b.baseUrl, "uploadStickerFile", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1374,7 +1374,7 @@ func (b *Bot) UploadStickerFile(ctx context.Context, request *types.UploadSticke
 //
 // https://core.telegram.org/bots/api#createnewstickerset
 func (b *Bot) CreateNewStickerSet(ctx context.Context, request *types.CreateNewStickerSetRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "createNewStickerSet", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "createNewStickerSet", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1387,7 +1387,7 @@ func (b *Bot) CreateNewStickerSet(ctx context.Context, request *types.CreateNewS
 //
 // https://core.telegram.org/bots/api#addstickertoset
 func (b *Bot) AddStickerToSet(ctx context.Context, request *types.AddStickerToSetRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "addStickerToSet", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "addStickerToSet", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1400,7 +1400,7 @@ func (b *Bot) AddStickerToSet(ctx context.Context, request *types.AddStickerToSe
 //
 // https://core.telegram.org/bots/api#setstickerpositioninset
 func (b *Bot) SetStickerPositionInSet(ctx context.Context, request *types.SetStickerPositionInSetRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "setStickerPositionInSet", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "setStickerPositionInSet", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1413,7 +1413,7 @@ func (b *Bot) SetStickerPositionInSet(ctx context.Context, request *types.SetSti
 //
 // https://core.telegram.org/bots/api#deletestickerfromset
 func (b *Bot) DeleteStickerFromSet(ctx context.Context, request *types.DeleteStickerFromSetRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "deleteStickerFromSet", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "deleteStickerFromSet", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1426,7 +1426,7 @@ func (b *Bot) DeleteStickerFromSet(ctx context.Context, request *types.DeleteSti
 //
 // https://core.telegram.org/bots/api#replacestickerinset
 func (b *Bot) ReplaceStickerInSet(ctx context.Context, request *types.ReplaceStickerInSetRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "replaceStickerInSet", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "replaceStickerInSet", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1439,7 +1439,7 @@ func (b *Bot) ReplaceStickerInSet(ctx context.Context, request *types.ReplaceSti
 //
 // https://core.telegram.org/bots/api#setstickeremojilist
 func (b *Bot) SetStickerEmojiList(ctx context.Context, request *types.SetStickerEmojiListRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "setStickerEmojiList", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "setStickerEmojiList", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1452,7 +1452,7 @@ func (b *Bot) SetStickerEmojiList(ctx context.Context, request *types.SetSticker
 //
 // https://core.telegram.org/bots/api#setstickerkeywords
 func (b *Bot) SetStickerKeywords(ctx context.Context, request *types.SetStickerKeywordsRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "setStickerKeywords", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "setStickerKeywords", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1465,7 +1465,7 @@ func (b *Bot) SetStickerKeywords(ctx context.Context, request *types.SetStickerK
 //
 // https://core.telegram.org/bots/api#setstickermaskposition
 func (b *Bot) SetStickerMaskPosition(ctx context.Context, request *types.SetStickerMaskPositionRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "setStickerMaskPosition", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "setStickerMaskPosition", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1478,7 +1478,7 @@ func (b *Bot) SetStickerMaskPosition(ctx context.Context, request *types.SetStic
 //
 // https://core.telegram.org/bots/api#setstickersettitle
 func (b *Bot) SetStickerSetTitle(ctx context.Context, request *types.SetStickerSetTitleRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "setStickerSetTitle", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "setStickerSetTitle", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1491,7 +1491,7 @@ func (b *Bot) SetStickerSetTitle(ctx context.Context, request *types.SetStickerS
 //
 // https://core.telegram.org/bots/api#setstickersetthumbnail
 func (b *Bot) SetStickerSetThumbnail(ctx context.Context, request *types.SetStickerSetThumbnailRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "setStickerSetThumbnail", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "setStickerSetThumbnail", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1504,7 +1504,7 @@ func (b *Bot) SetStickerSetThumbnail(ctx context.Context, request *types.SetStic
 //
 // https://core.telegram.org/bots/api#setcustomemojistickersetthumbnail
 func (b *Bot) SetCustomEmojiStickerSetThumbnail(ctx context.Context, request *types.SetCustomEmojiStickerSetThumbnailRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "setCustomEmojiStickerSetThumbnail", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "setCustomEmojiStickerSetThumbnail", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1517,7 +1517,7 @@ func (b *Bot) SetCustomEmojiStickerSetThumbnail(ctx context.Context, request *ty
 //
 // https://core.telegram.org/bots/api#deletestickerset
 func (b *Bot) DeleteStickerSet(ctx context.Context, request *types.DeleteStickerSetRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "deleteStickerSet", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "deleteStickerSet", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1530,7 +1530,7 @@ func (b *Bot) DeleteStickerSet(ctx context.Context, request *types.DeleteSticker
 //
 // https://core.telegram.org/bots/api#getavailablegifts
 func (b *Bot) GetAvailableGifts(ctx context.Context) (r *types.Gifts, err error) {
-	res, err := makeRequest[*types.Gifts](ctx, b.options.Client, b.baseURL, "getAvailableGifts", nil)
+	res, err := makeRequest[*types.Gifts](ctx, b.options.Client, b.baseUrl, "getAvailableGifts", b.options.FloodHandler, nil)
 
 	if err != nil {
 		return r, err
@@ -1543,7 +1543,7 @@ func (b *Bot) GetAvailableGifts(ctx context.Context) (r *types.Gifts, err error)
 //
 // https://core.telegram.org/bots/api#sendgift
 func (b *Bot) SendGift(ctx context.Context, request *types.SendGiftRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "sendGift", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "sendGift", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1556,7 +1556,7 @@ func (b *Bot) SendGift(ctx context.Context, request *types.SendGiftRequest) (r b
 //
 // https://core.telegram.org/bots/api#verifyuser
 func (b *Bot) VerifyUser(ctx context.Context, request *types.VerifyUserRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "verifyUser", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "verifyUser", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1569,7 +1569,7 @@ func (b *Bot) VerifyUser(ctx context.Context, request *types.VerifyUserRequest) 
 //
 // https://core.telegram.org/bots/api#verifychat
 func (b *Bot) VerifyChat(ctx context.Context, request *types.VerifyChatRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "verifyChat", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "verifyChat", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1582,7 +1582,7 @@ func (b *Bot) VerifyChat(ctx context.Context, request *types.VerifyChatRequest) 
 //
 // https://core.telegram.org/bots/api#removeuserverification
 func (b *Bot) RemoveUserVerification(ctx context.Context, request *types.RemoveUserVerificationRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "removeUserVerification", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "removeUserVerification", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1595,7 +1595,7 @@ func (b *Bot) RemoveUserVerification(ctx context.Context, request *types.RemoveU
 //
 // https://core.telegram.org/bots/api#removechatverification
 func (b *Bot) RemoveChatVerification(ctx context.Context, request *types.RemoveChatVerificationRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "removeChatVerification", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "removeChatVerification", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1610,7 +1610,7 @@ func (b *Bot) RemoveChatVerification(ctx context.Context, request *types.RemoveC
 //
 // https://core.telegram.org/bots/api#answerinlinequery
 func (b *Bot) AnswerInlineQuery(ctx context.Context, request *types.AnswerInlineQueryRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "answerInlineQuery", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "answerInlineQuery", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1623,7 +1623,7 @@ func (b *Bot) AnswerInlineQuery(ctx context.Context, request *types.AnswerInline
 //
 // https://core.telegram.org/bots/api#answerwebappquery
 func (b *Bot) AnswerWebAppQuery(ctx context.Context, request *types.AnswerWebAppQueryRequest) (r *types.SentWebAppMessage, err error) {
-	res, err := makeRequest[*types.SentWebAppMessage](ctx, b.options.Client, b.baseURL, "answerWebAppQuery", request)
+	res, err := makeRequest[*types.SentWebAppMessage](ctx, b.options.Client, b.baseUrl, "answerWebAppQuery", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1636,7 +1636,7 @@ func (b *Bot) AnswerWebAppQuery(ctx context.Context, request *types.AnswerWebApp
 //
 // https://core.telegram.org/bots/api#savepreparedinlinemessage
 func (b *Bot) SavePreparedInlineMessage(ctx context.Context, request *types.SavePreparedInlineMessageRequest) (r *types.PreparedInlineMessage, err error) {
-	res, err := makeRequest[*types.PreparedInlineMessage](ctx, b.options.Client, b.baseURL, "savePreparedInlineMessage", request)
+	res, err := makeRequest[*types.PreparedInlineMessage](ctx, b.options.Client, b.baseUrl, "savePreparedInlineMessage", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1649,7 +1649,7 @@ func (b *Bot) SavePreparedInlineMessage(ctx context.Context, request *types.Save
 //
 // https://core.telegram.org/bots/api#sendinvoice
 func (b *Bot) SendInvoice(ctx context.Context, request *types.SendInvoiceRequest) (r *types.Message, err error) {
-	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseURL, "sendInvoice", request)
+	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseUrl, "sendInvoice", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1662,7 +1662,7 @@ func (b *Bot) SendInvoice(ctx context.Context, request *types.SendInvoiceRequest
 //
 // https://core.telegram.org/bots/api#createinvoicelink
 func (b *Bot) CreateInvoiceLink(ctx context.Context, request *types.CreateInvoiceLinkRequest) (r string, err error) {
-	res, err := makeRequest[string](ctx, b.options.Client, b.baseURL, "createInvoiceLink", request)
+	res, err := makeRequest[string](ctx, b.options.Client, b.baseUrl, "createInvoiceLink", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1675,7 +1675,7 @@ func (b *Bot) CreateInvoiceLink(ctx context.Context, request *types.CreateInvoic
 //
 // https://core.telegram.org/bots/api#answershippingquery
 func (b *Bot) AnswerShippingQuery(ctx context.Context, request *types.AnswerShippingQueryRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "answerShippingQuery", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "answerShippingQuery", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1688,7 +1688,7 @@ func (b *Bot) AnswerShippingQuery(ctx context.Context, request *types.AnswerShip
 //
 // https://core.telegram.org/bots/api#answerprecheckoutquery
 func (b *Bot) AnswerPreCheckoutQuery(ctx context.Context, request *types.AnswerPreCheckoutQueryRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "answerPreCheckoutQuery", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "answerPreCheckoutQuery", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1701,7 +1701,7 @@ func (b *Bot) AnswerPreCheckoutQuery(ctx context.Context, request *types.AnswerP
 //
 // https://core.telegram.org/bots/api#getstartransactions
 func (b *Bot) GetStarTransactions(ctx context.Context, request *types.GetStarTransactionsRequest) (r *types.StarTransactions, err error) {
-	res, err := makeRequest[*types.StarTransactions](ctx, b.options.Client, b.baseURL, "getStarTransactions", request)
+	res, err := makeRequest[*types.StarTransactions](ctx, b.options.Client, b.baseUrl, "getStarTransactions", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1714,7 +1714,7 @@ func (b *Bot) GetStarTransactions(ctx context.Context, request *types.GetStarTra
 //
 // https://core.telegram.org/bots/api#refundstarpayment
 func (b *Bot) RefundStarPayment(ctx context.Context, request *types.RefundStarPaymentRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "refundStarPayment", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "refundStarPayment", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1727,7 +1727,7 @@ func (b *Bot) RefundStarPayment(ctx context.Context, request *types.RefundStarPa
 //
 // https://core.telegram.org/bots/api#edituserstarsubscription
 func (b *Bot) EditUserStarSubscription(ctx context.Context, request *types.EditUserStarSubscriptionRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "editUserStarSubscription", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "editUserStarSubscription", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1742,7 +1742,7 @@ func (b *Bot) EditUserStarSubscription(ctx context.Context, request *types.EditU
 //
 // https://core.telegram.org/bots/api#setpassportdataerrors
 func (b *Bot) SetPassportDataErrors(ctx context.Context, request *types.SetPassportDataErrorsRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseURL, "setPassportDataErrors", request)
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "setPassportDataErrors", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1755,7 +1755,7 @@ func (b *Bot) SetPassportDataErrors(ctx context.Context, request *types.SetPassp
 //
 // https://core.telegram.org/bots/api#sendgame
 func (b *Bot) SendGame(ctx context.Context, request *types.SendGameRequest) (r *types.Message, err error) {
-	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseURL, "sendGame", request)
+	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseUrl, "sendGame", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1768,7 +1768,7 @@ func (b *Bot) SendGame(ctx context.Context, request *types.SendGameRequest) (r *
 //
 // https://core.telegram.org/bots/api#setgamescore
 func (b *Bot) SetGameScore(ctx context.Context, request *types.SetGameScoreRequest) (r *types.Message, err error) {
-	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseURL, "setGameScore", request)
+	res, err := makeRequest[*types.Message](ctx, b.options.Client, b.baseUrl, "setGameScore", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1781,7 +1781,7 @@ func (b *Bot) SetGameScore(ctx context.Context, request *types.SetGameScoreReque
 //
 // https://core.telegram.org/bots/api#getgamehighscores
 func (b *Bot) GetGameHighScores(ctx context.Context, request *types.GetGameHighScoresRequest) (r []types.GameHighScore, err error) {
-	res, err := makeRequest[[]types.GameHighScore](ctx, b.options.Client, b.baseURL, "getGameHighScores", request)
+	res, err := makeRequest[[]types.GameHighScore](ctx, b.options.Client, b.baseUrl, "getGameHighScores", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
