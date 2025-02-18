@@ -6,9 +6,9 @@ import (
 	"github.com/TrixiS/goram/pkg/types"
 )
 
-// Polls updates via calling Bot.GetUpdates() in a loop
+// Polls updates via calling Bot.GetUpdates() in a loop.
 //
-// Request parameter is used for initial options of getUpdates requests.
+// The `request` parameter is used as initial options of getUpdates requests.
 // The returned channel never gets closed.
 // This function does not panic and does not return errors encountered while making requests.
 // If you need to handle/log those errors or set some retry policy, rewrite it yourself.
