@@ -1,15 +1,18 @@
 package flood
 
 import (
+	"context"
 	"time"
 )
 
 type Handler interface {
 	Enter(
+		ctx context.Context,
 		method string,
 		request any,
 	) // Gets called BEFORE making an api request
 	Handle(
+		ctx context.Context,
 		method string,
 		request any,
 		duration time.Duration,
@@ -18,14 +21,24 @@ type Handler interface {
 
 // Dummy flood handler. It will just sleep for flood duration.
 type SimpleHandler struct {
-	OnFlood func(method string, request any, duration time.Duration) // Optional callback that will be called before sleeping
+	OnFlood func(
+		ctx context.Context,
+		method string,
+		request any,
+		duration time.Duration,
+	) // Optional callback that will be called before sleeping
 }
 
-func (s *SimpleHandler) Enter(string, any) {}
+func (s *SimpleHandler) Enter(context.Context, string, any) {}
 
-func (s *SimpleHandler) Handle(method string, request any, duration time.Duration) {
+func (s *SimpleHandler) Handle(
+	ctx context.Context,
+	method string,
+	request any,
+	duration time.Duration,
+) {
 	if s.OnFlood != nil {
-		s.OnFlood(method, request, duration)
+		s.OnFlood(ctx, method, request, duration)
 	}
 
 	time.Sleep(duration)

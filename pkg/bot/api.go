@@ -77,7 +77,7 @@ func makeRequest[R any](
 		req.Header.Set("Content-Type", contentType)
 
 		if floodHandler != nil {
-			floodHandler.Enter(apiMethod, data)
+			floodHandler.Enter(ctx, apiMethod, data)
 		}
 
 		res, err := client.Do(req)
@@ -106,7 +106,7 @@ func makeRequest[R any](
 		}
 
 		duration := time.Second * time.Duration(response.Parameters.RetryAfter)
-		floodHandler.Handle(apiMethod, data, duration)
+		floodHandler.Handle(ctx, apiMethod, data, duration)
 
 		if body != nil {
 			body.Seek(0, io.SeekStart)
