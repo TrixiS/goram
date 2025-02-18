@@ -27,7 +27,7 @@ func LongPollUpdates(
 				continue
 			}
 
-			request.Offset = updates[len(updates)-1].UpdateID + 1
+			request.Offset = updates[len(updates)-1].UpdateId + 1
 
 			for _, u := range updates {
 				c <- u

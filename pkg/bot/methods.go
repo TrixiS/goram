@@ -127,8 +127,8 @@ func (b *Bot) ForwardMessage(ctx context.Context, request *types.ForwardMessageR
 // Use this method to forward multiple messages of any kind. If some of the specified messages can't be found or forwarded, they are skipped. Service messages and messages with protected content can't be forwarded. Album grouping is kept for forwarded messages. On success, an array of MessageId of the sent messages is returned.
 //
 // https://core.telegram.org/bots/api#forwardmessages
-func (b *Bot) ForwardMessages(ctx context.Context, request *types.ForwardMessagesRequest) (r []types.MessageID, err error) {
-	res, err := makeRequest[[]types.MessageID](ctx, b.options.Client, b.baseURL, "forwardMessages", request)
+func (b *Bot) ForwardMessages(ctx context.Context, request *types.ForwardMessagesRequest) (r []types.MessageId, err error) {
+	res, err := makeRequest[[]types.MessageId](ctx, b.options.Client, b.baseURL, "forwardMessages", request)
 
 	if err != nil {
 		return r, err
@@ -140,8 +140,8 @@ func (b *Bot) ForwardMessages(ctx context.Context, request *types.ForwardMessage
 // Use this method to copy messages of any kind. Service messages, paid media messages, giveaway messages, giveaway winners messages, and invoice messages can't be copied. A quiz poll can be copied only if the value of the field correct_option_id is known to the bot. The method is analogous to the method forwardMessage, but the copied message doesn't have a link to the original message. Returns the MessageId of the sent message on success.
 //
 // https://core.telegram.org/bots/api#copymessage
-func (b *Bot) CopyMessage(ctx context.Context, request *types.CopyMessageRequest) (r *types.MessageID, err error) {
-	res, err := makeRequest[*types.MessageID](ctx, b.options.Client, b.baseURL, "copyMessage", request)
+func (b *Bot) CopyMessage(ctx context.Context, request *types.CopyMessageRequest) (r *types.MessageId, err error) {
+	res, err := makeRequest[*types.MessageId](ctx, b.options.Client, b.baseURL, "copyMessage", request)
 
 	if err != nil {
 		return r, err
@@ -153,8 +153,8 @@ func (b *Bot) CopyMessage(ctx context.Context, request *types.CopyMessageRequest
 // Use this method to copy messages of any kind. If some of the specified messages can't be found or copied, they are skipped. Service messages, paid media messages, giveaway messages, giveaway winners messages, and invoice messages can't be copied. A quiz poll can be copied only if the value of the field correct_option_id is known to the bot. The method is analogous to the method forwardMessages, but the copied messages don't have a link to the original message. Album grouping is kept for copied messages. On success, an array of MessageId of the sent messages is returned.
 //
 // https://core.telegram.org/bots/api#copymessages
-func (b *Bot) CopyMessages(ctx context.Context, request *types.CopyMessagesRequest) (r []types.MessageID, err error) {
-	res, err := makeRequest[[]types.MessageID](ctx, b.options.Client, b.baseURL, "copyMessages", request)
+func (b *Bot) CopyMessages(ctx context.Context, request *types.CopyMessagesRequest) (r []types.MessageId, err error) {
+	res, err := makeRequest[[]types.MessageId](ctx, b.options.Client, b.baseURL, "copyMessages", request)
 
 	if err != nil {
 		return r, err

@@ -244,46 +244,58 @@ func generateRequestWriteMultipart(
 					io.Copy(fw, reader)
 					r.%s.setMedia("attach://%s")
 				}
-
-				%s, _ := json.Marshal(r.%s)
-				w.WriteField("%s", string(%s))
+				{
+					b, _ := json.Marshal(r.%s)
+					fw, _ := w.CreateFormField("%s")
+					fw.Write(b)
+				}
 			`,
 				parsedTypeField.GoName,
 				field.Name,
 				parsedTypeField.GoName,
 				field.Name,
-				field.Name,
 				parsedTypeField.GoName,
 				field.Name,
-				field.Name,
 			))
-		} else if parsedTypeField.ParsedSpecType.GoType == "ChatID" {
-			w.WriteString(fmt.Sprintf(`
-				w.WriteField("%s", r.%s.String())
-			`, field.Name, parsedTypeField.GoName))
+		} else if parsedTypeField.ParsedSpecType.GoType == "ChatId" {
+			w.WriteString(fmt.Sprintf(
+				`w.WriteField("%s", r.%s.String())
+				`,
+				field.Name,
+				parsedTypeField.GoName,
+			))
 		} else if parsedTypeField.ParsedSpecType.GoType == "string" &&
 			parsedTypeField.ParsedSpecType.ParsedType == ParsedTypePrimitive {
 
-			w.WriteString(fmt.Sprintf(`
-					w.WriteField("%s", r.%s)
-				`, field.Name, parsedTypeField.GoName))
+			w.WriteString(fmt.Sprintf(
+				`w.WriteField("%s", r.%s)
+				`,
+				field.Name,
+				parsedTypeField.GoName,
+			))
 		} else if parsedTypeField.ParsedSpecType.ParsedType == ParsedTypeEnum {
-			w.WriteString(fmt.Sprintf(`
-					w.WriteField("%s", string(r.%s))
-				`, field.Name, parsedTypeField.GoName))
+			w.WriteString(fmt.Sprintf(
+				`w.WriteField("%s", string(r.%s))
+				`,
+				field.Name,
+				parsedTypeField.GoName,
+			))
 		} else {
-			checkForNil := parsedTypeField.ParsedSpecType.ParsedType == ParsedTypeStruct ||
+			checkForNil := !parsedTypeField.Field.Required && (parsedTypeField.ParsedSpecType.ParsedType == ParsedTypeStruct ||
 				parsedTypeField.ParsedSpecType.Levels > 0 ||
-				parsedTypeField.ParsedSpecType.ParsedType == ParsedTypeInterface
+				parsedTypeField.ParsedSpecType.ParsedType == ParsedTypeInterface)
 
 			if checkForNil {
 				w.WriteString(fmt.Sprintf(`if r.%s != nil {`, parsedTypeField.GoName))
 			}
 
-			// TODO: write to a field via encoder, do not cast to string
-			w.WriteString(fmt.Sprintf(`%s, _ := json.Marshal(r.%s)
-					w.WriteField("%s", string(%s))
-				`, field.Name, parsedTypeField.GoName, field.Name, field.Name))
+			w.WriteString(fmt.Sprintf(`
+				{
+					b, _ := json.Marshal(r.%s)
+					fw, _ := w.CreateFormField("%s")
+					fw.Write(b)
+				}
+			`, parsedTypeField.GoName, field.Name))
 
 			if checkForNil {
 				w.WriteString("}\n")
@@ -509,16 +521,12 @@ func (p *Parser) ParseTypeField(t *TypeField) *ParsedTypeField {
 	} else if len(t.Types) == 4 && t.Name == "media" {
 		ptf.ParsedSpecType.GoType = "[]MediaGroupInputMedia"
 		ptf.ParsedSpecType.ParsedType = ParsedTypeInterface
-	} else if t.Name == "message_ids" {
-		ptf.ParsedSpecType.GoType = "int"
-		ptf.ParsedSpecType.ParsedType = ParsedTypeArray
-		ptf.ParsedSpecType.Levels = 1
-		ptf.GoName = "MessageIDs"
-	} else if strings.HasPrefix(t.Name, "message_id") {
-		ptf.ParsedSpecType.GoType = "int"
 	} else if len(t.Types) == 2 && (t.Name == "id" || t.Name == "chat_id") {
-		ptf.ParsedSpecType.GoType = "ChatID"
-	} else if t.Types[0] == "Integer" && (strings.HasSuffix(t.Name, "id") || t.Name == "offset") {
+		ptf.ParsedSpecType.GoType = "ChatId"
+	} else if t.Types[0] == "Integer" &&
+		(strings.HasSuffix(t.Name, "id") || t.Name == "offset") &&
+		t.Name != "message_id" {
+
 		ptf.ParsedSpecType.GoType = "int64"
 	} else if t.Name == "parse_mode" {
 		ptf.ParsedSpecType.GoType = "ParseMode"
@@ -565,16 +573,9 @@ func (g *Parser) parseSpecType(p *ParsedSpecType, fieldType string) {
 }
 
 func toPascalCase(v string) string {
-	if v == "ok" || v == "url" {
-		return strings.ToUpper(v)
-	}
-
 	runes := []rune(v)
-
 	builder := &strings.Builder{}
-
 	upper := false
-	c := len(runes)
 
 	for i, r := range runes {
 		if r == '_' {
@@ -582,8 +583,7 @@ func toPascalCase(v string) string {
 			continue
 		}
 
-		if upper || i == 0 || (i == c-2 && r == 'i' && runes[i+1] == 'd') || // detect tailing ID
-			(i == c-1 && r == 'd' && (runes[i-1] == 'i' || runes[i-1] == 'I')) {
+		if upper || i == 0 {
 
 			upper = false
 			builder.WriteRune(unicode.ToUpper(r))
