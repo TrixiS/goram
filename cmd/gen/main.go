@@ -180,8 +180,13 @@ func generateRequests(parser *Parser, methods []Method) {
 	}
 
 	f.WriteString("package types\n\n")
-	f.WriteString("import \"mime/multipart\"\n")
-	f.WriteString("import \"encoding/json\"\n\n")
+	f.WriteString(`
+		import (
+			"mime/multipart"
+			"encoding/json"
+			"io"
+		)
+	`)
 
 	for _, m := range methods {
 		if len(m.Fields) == 0 {
@@ -190,8 +195,8 @@ func generateRequests(parser *Parser, methods []Method) {
 
 		pascalName := toPascalCase(m.Type.Name)
 		structName := pascalName + "Request"
-		f.WriteString(fmt.Sprintf("// use Bot.%s(ctx, &%s{})\n", pascalName, structName))
-		typeString := GenerateTypeString(parser, &m.Type, "Request", false, false)
+		f.WriteString(fmt.Sprintf("// see Bot.%s(ctx, &%s{})\n", pascalName, structName))
+		typeString := generateTypeString(parser, &m.Type, "Request", false, false)
 		f.WriteString(typeString)
 		f.WriteString("\n")
 		generateRequestWriteMultipart(f, parser, &m, structName)
@@ -213,16 +218,45 @@ func generateRequestWriteMultipart(
 	for _, field := range m.Fields {
 		parsedTypeField := parser.ParseTypeField(&field)
 
+		// TODO: support for MediaGroupInputMedia
 		if parsedTypeField.ParsedSpecType.GoType == "InputFile" {
-			// TODO: switch on type of input file here
-			// TODO: implement uploading
 			w.WriteString(fmt.Sprintf(`
-				if s, ok := r.%s.(string); ok {
-					w.WriteField("%s", s)
-				} else {
-					// fw, _ := w.CreateFormFile("%s", "%s") 
+				switch v := r.%s.(type) {
+				case string:
+					w.WriteField("%s", v)
+				case NamedReader:
+					fw, _ := w.CreateFormFile("%s", v.Name())
+					io.Copy(fw, v)
+				default:
+					panic(v)
 				}
-			`, parsedTypeField.GoName, field.Name, field.Name, "todo.jpeg"))
+			`,
+				parsedTypeField.GoName,
+				field.Name,
+				field.Name,
+			))
+		} else if parsedTypeField.ParsedSpecType.GoType == "InputMedia" &&
+			parsedTypeField.ParsedSpecType.ParsedType != ParsedTypeArray {
+
+			w.WriteString(fmt.Sprintf(`
+				if reader, ok := r.%s.getMedia().(NamedReader); ok {
+					fw, _ := w.CreateFormFile("%s", reader.Name())
+					io.Copy(fw, reader)
+					r.%s.setMedia("attach://%s")
+				}
+
+				%s, _ := json.Marshal(r.%s)
+				w.WriteField("%s", string(%s))
+			`,
+				parsedTypeField.GoName,
+				field.Name,
+				parsedTypeField.GoName,
+				field.Name,
+				field.Name,
+				parsedTypeField.GoName,
+				field.Name,
+				field.Name,
+			))
 		} else if parsedTypeField.ParsedSpecType.GoType == "ChatID" {
 			w.WriteString(fmt.Sprintf(`
 				w.WriteField("%s", r.%s.String())
@@ -260,6 +294,8 @@ func generateRequestWriteMultipart(
 	w.WriteString("}\n")
 }
 
+var builtinTypes = []string{"InputMedia"}
+
 func generateTypes(parser *Parser, types []Type) {
 	f, err := os.OpenFile("./pkg/types/types.go", genFileMode, genFilePerm)
 
@@ -270,16 +306,42 @@ func generateTypes(parser *Parser, types []Type) {
 	f.WriteString("package types\n\n")
 
 	for _, t := range types {
-		f.WriteString(GenerateTypeString(parser, &t, "", true, true))
+		if slices.Contains(builtinTypes, t.Name) {
+			continue
+		}
+
+		f.WriteString(generateTypeString(parser, &t, "", true, true))
+
+		const inputMediaPrefix = "InputMedia"
+		const inputPaidMediaPrefix = "InputPaidMedia"
+
+		if strings.HasPrefix(t.Name, inputMediaPrefix) ||
+			(strings.HasPrefix(t.Name, inputPaidMediaPrefix) && len(t.Fields) > 0) {
+			generateInputMediaMethods(f, &t)
+		}
 	}
 
 	f.Close()
 }
 
-func GenerateTypeString(parser *Parser, t *Type, suffix string, doc bool, tagJSON bool) string {
+func generateInputMediaMethods(w io.StringWriter, t *Type) {
+	w.WriteString(fmt.Sprintf(`
+		func (i *%s) setMedia(media string) {
+			i.Media = media
+		}
+	`, t.Name))
+
+	w.WriteString(fmt.Sprintf(`
+		func (i *%s) getMedia() InputFile {
+			return i.Media
+		}
+	`, t.Name))
+}
+
+// TODO: do not use fmt here
+func generateTypeString(parser *Parser, t *Type, suffix string, doc bool, tagJSON bool) string {
 	builder := strings.Builder{}
 
-	// TODO: do not use fmt here
 	if doc {
 		for _, d := range t.Description {
 			comment := fmt.Sprintf("// %s\n//\n", d)
@@ -357,7 +419,6 @@ type ParsedTypeField struct {
 	Field          *TypeField
 	GoName         string
 	ParsedSpecType ParsedSpecType
-	Ignored        bool
 }
 
 func (p *ParsedTypeField) StructField(tagJSON bool) string {
@@ -379,16 +440,11 @@ func (p *ParsedTypeField) StructField(tagJSON bool) string {
 	if tagJSON {
 		builder.WriteRune(' ')
 		builder.WriteString("`json:\"")
+		builder.WriteString(p.Field.Name)
 
-		if p.Ignored {
-			builder.WriteRune('-')
-		} else {
-			builder.WriteString(p.Field.Name)
-
-			if !p.Field.Required {
-				builder.WriteRune(',')
-				builder.WriteString("omitempty")
-			}
+		if !p.Field.Required {
+			builder.WriteRune(',')
+			builder.WriteString("omitempty")
 		}
 
 		builder.WriteString("\"`")
@@ -456,27 +512,30 @@ func (p *Parser) ParseTypeField(t *TypeField) *ParsedTypeField {
 	} else if t.Name == "message_ids" {
 		ptf.ParsedSpecType.GoType = "int"
 		ptf.ParsedSpecType.ParsedType = ParsedTypeArray
+		ptf.ParsedSpecType.Levels = 1
 		ptf.GoName = "MessageIDs"
-	} else if strings.Contains(t.Name, "message") && strings.Contains(t.Name, "id") {
+	} else if strings.HasPrefix(t.Name, "message_id") {
 		ptf.ParsedSpecType.GoType = "int"
 	} else if len(t.Types) == 2 && (t.Name == "id" || t.Name == "chat_id") {
 		ptf.ParsedSpecType.GoType = "ChatID"
+	} else if t.Types[0] == "Integer" && (strings.HasSuffix(t.Name, "id") || t.Name == "offset") {
+		ptf.ParsedSpecType.GoType = "int64"
 	} else if t.Name == "parse_mode" {
 		ptf.ParsedSpecType.GoType = "ParseMode"
 		ptf.ParsedSpecType.ParsedType = ParsedTypeEnum
+	} else if t.Name == "media" && t.Types[0] == "String" {
+		ptf.ParsedSpecType.GoType = "InputFile"
+		ptf.ParsedSpecType.ParsedType = ParsedTypeInterface
 	} else {
 		ptf.ParsedSpecType = p.ParseSpecTypes(t.Types)
 	}
-
-	ptf.Ignored = ptf.ParsedSpecType.ParsedType != ParsedTypeArray &&
-		slices.Contains(p.IgnoredTypeNames, ptf.ParsedSpecType.GoType)
 
 	return ptf
 }
 
 func (g *Parser) parseSpecType(p *ParsedSpecType, fieldType string) {
 	if fieldType == "Integer" {
-		p.GoType = "int64"
+		p.GoType = "int"
 		return
 	} else if fieldType == "String" {
 		p.GoType = "string"
@@ -506,6 +565,10 @@ func (g *Parser) parseSpecType(p *ParsedSpecType, fieldType string) {
 }
 
 func toPascalCase(v string) string {
+	if v == "ok" || v == "url" {
+		return strings.ToUpper(v)
+	}
+
 	runes := []rune(v)
 
 	builder := &strings.Builder{}

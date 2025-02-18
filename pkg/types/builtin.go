@@ -42,9 +42,27 @@ func (c ChatID) String() string {
 type Markup interface{}
 
 // InputMediaAudio | InputMediaDocument | InputMediaPhoto | InputMediaVideo
-type MediaGroupInputMedia interface{}
+type MediaGroupInputMedia InputMedia // TODO: replace this with just []InputMedia
 
 type NamedReader interface {
 	io.Reader
 	Name() string
+}
+
+// This object represents the content of a media message to be sent. It should be one of
+//
+// - InputMediaAnimation
+//
+// - InputMediaDocument
+//
+// - InputMediaAudio
+//
+// - InputMediaPhoto
+//
+// - InputMediaVideo
+//
+// https://core.telegram.org/bots/api#inputmedia
+type InputMedia interface {
+	setMedia(string)
+	getMedia() InputFile
 }

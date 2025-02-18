@@ -44,7 +44,6 @@ func makeRequest[R any](
 	data apiRequest,
 ) (*apiResponse[R], error) {
 	url := baseURL + apiMethod
-
 	body := io.Reader(nil)
 	contentType := "multipart/form-data"
 

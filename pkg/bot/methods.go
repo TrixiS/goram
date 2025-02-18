@@ -757,8 +757,8 @@ func (b *Bot) GetChatAdministrators(ctx context.Context, request *types.GetChatA
 // Use this method to get the number of members in a chat. Returns Int on success.
 //
 // https://core.telegram.org/bots/api#getchatmembercount
-func (b *Bot) GetChatMemberCount(ctx context.Context, request *types.GetChatMemberCountRequest) (r int64, err error) {
-	res, err := makeRequest[int64](ctx, b.options.Client, b.baseURL, "getChatMemberCount", request)
+func (b *Bot) GetChatMemberCount(ctx context.Context, request *types.GetChatMemberCountRequest) (r int, err error) {
+	res, err := makeRequest[int](ctx, b.options.Client, b.baseURL, "getChatMemberCount", request)
 
 	if err != nil {
 		return r, err
