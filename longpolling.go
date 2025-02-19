@@ -2,32 +2,66 @@ package goram
 
 import (
 	"context"
+	"time"
 )
 
+// See goram.LongPollUpdates()
+type LongPollUpdatesOptions struct {
+	RequestOptions GetUpdatesRequest // Initial getUpdates request options
+	Cap            uint              // Optional. Updates channel capacity
+	RetryInterval  time.Duration     // Optional. Sleep for this duration if an error happens on getUpdates request. Default is 0
+	MaxErrors      uint              // Optional. Exit from polling loop after MaxErrors errors in a row. The returned channel gets closed too. Default is unlimited
+	Timeout        time.Duration     // Optional. Timeout for getUpdates requests
+}
+
 // Polls updates via calling Bot.GetUpdates() in a loop.
-//
-// The `request` parameter is used as initial options of getUpdates requests.
-// The returned channel is unbuffered, never gets closed, streams []Update instead of just Update because it enables better media group handling.
-// This function does not panic and does not return errors encountered while making requests.
-// If you need to handle/log those errors or set some retry policy, rewrite it yourself.
+// Streams []Update instead of just Update because it enables better media group handling.
 func LongPollUpdates(
 	ctx context.Context,
 	bot *Bot,
-	request *GetUpdatesRequest,
+	options *LongPollUpdatesOptions,
 ) chan []Update {
-	c := make(chan []Update)
+	c := make(chan []Update, options.Cap)
 
 	go func() {
-		for {
-			updates, err := bot.GetUpdates(ctx, request)
+		var errCount uint
 
-			if err != nil || len(updates) == 0 {
+		for {
+			var updates []Update
+			var err error
+
+			if options.Timeout > 0 {
+				tctx, cancel := context.WithTimeout(ctx, options.Timeout)
+				updates, err = bot.GetUpdates(tctx, &options.RequestOptions)
+				cancel()
+			} else {
+				updates, err = bot.GetUpdates(ctx, &options.RequestOptions)
+			}
+
+			if err != nil {
+				if options.MaxErrors > 0 {
+					errCount++
+
+					if errCount >= options.MaxErrors {
+						break
+					}
+				}
+
+				time.Sleep(options.RetryInterval)
 				continue
 			}
 
-			request.Offset = updates[len(updates)-1].UpdateId + 1
+			errCount = 0
+
+			if len(updates) == 0 {
+				continue
+			}
+
+			options.RequestOptions.Offset = updates[len(updates)-1].UpdateId + 1
 			c <- updates
 		}
+
+		close(c)
 	}()
 
 	return c
