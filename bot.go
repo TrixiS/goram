@@ -19,6 +19,10 @@ type BotOptions struct {
 // Holds all methods of Telegram Bot API.
 //
 // For example: Bot.SendMessage()
+//
+// If a method call fails, it can return `*APIError` as the second return value. The returned error can be checked whether it's an API error as easy as:
+//
+// apiError, ok := err.(*APIError)
 type Bot struct {
 	options BotOptions
 	baseUrl string
