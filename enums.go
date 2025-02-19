@@ -1,4 +1,4 @@
-package types
+package goram
 
 type ChatType string
 

@@ -76,20 +76,20 @@ func main() {
 	generateRequests(parser, spec.Methods)
 	generateMethods(parser, spec.Methods)
 
-	exec.Command("gofmt", "-s", "-w", "./pkg").Run()
+	exec.Command("gofmt", "-s", "-w", ".").Run()
 }
 
 const genFileMode = os.O_WRONLY | os.O_TRUNC | os.O_CREATE
 const genFilePerm = 0o660
 
 func generateEnums(enums []Enum) {
-	f, err := os.OpenFile("./pkg/types/enums.go", genFileMode, genFilePerm)
+	f, err := os.OpenFile("./enums.go", genFileMode, genFilePerm)
 
 	if err != nil {
 		panic(err)
 	}
 
-	f.WriteString("package types\n\n")
+	f.WriteString("package goram\n\n")
 
 	for _, e := range enums {
 		decl := fmt.Sprintf("type %s string\n", e.Name)
@@ -110,33 +110,32 @@ func generateEnums(enums []Enum) {
 }
 
 func generateMethods(parser *Parser, methods []Method) {
-	f, err := os.OpenFile("./pkg/bot/methods.go", genFileMode, genFilePerm)
+	f, err := os.OpenFile("./methods.go", genFileMode, genFilePerm)
 
 	if err != nil {
 		panic(err)
 	}
 
-	f.WriteString("package bot")
+	f.WriteString("package goram")
 
 	f.WriteString(`
 		import (
 			"context"
-			"github.com/TrixiS/goram/pkg/types"
 		)
 	`)
 
 	for _, m := range methods {
 		pascalName := toPascalCase(m.Name)
 		parsedSpecType := parser.ParseSpecTypes(m.Returns)
-		importedTypeString := parsedSpecType.ImportedTypeString("types")
-		returnType := fmt.Sprintf("(r %s, err error)", importedTypeString)
+		typeString := parsedSpecType.TypeString()
+		returnType := fmt.Sprintf("(r %s, err error)", typeString)
 		args := ""
 		data := "nil"
 
 		if len(m.Fields) == 0 {
 			args = "(ctx context.Context)"
 		} else {
-			args = fmt.Sprintf("(ctx context.Context, request *types.%sRequest)", pascalName)
+			args = fmt.Sprintf("(ctx context.Context, request *%sRequest)", pascalName)
 			data = "request"
 		}
 
@@ -162,7 +161,7 @@ func generateMethods(parser *Parser, methods []Method) {
 				return res.Result, nil
 			}
 				`,
-				importedTypeString,
+				typeString,
 				m.Name,
 				data,
 			),
@@ -173,13 +172,13 @@ func generateMethods(parser *Parser, methods []Method) {
 }
 
 func generateRequests(parser *Parser, methods []Method) {
-	f, err := os.OpenFile("./pkg/types/requests.go", genFileMode, genFilePerm)
+	f, err := os.OpenFile("./requests.go", genFileMode, genFilePerm)
 
 	if err != nil {
 		panic(err)
 	}
 
-	f.WriteString("package types\n\n")
+	f.WriteString("package goram\n\n")
 	f.WriteString(`
 		import (
 			"mime/multipart"
@@ -213,7 +212,7 @@ func generateRequestWriteMultipart(
 	structName string,
 ) {
 	w.WriteString(
-		fmt.Sprintf("func (r *%s) WriteMultipart(w *multipart.Writer) {", structName),
+		fmt.Sprintf("func (r *%s) writeMultipart(w *multipart.Writer) {", structName),
 	)
 
 	for _, field := range m.Fields {
@@ -351,13 +350,13 @@ func generateRequestWriteMultipart(
 var builtinTypes = []string{"InputMedia"}
 
 func generateTypes(parser *Parser, types []Type) {
-	f, err := os.OpenFile("./pkg/types/types.go", genFileMode, genFilePerm)
+	f, err := os.OpenFile("./types.go", genFileMode, genFilePerm)
 
 	if err != nil {
 		panic(err)
 	}
 
-	f.WriteString("package types\n\n")
+	f.WriteString("package goram\n\n")
 
 	for _, t := range types {
 		if slices.Contains(builtinTypes, t.Name) {
@@ -449,7 +448,7 @@ type ParsedSpecType struct {
 	Levels     int // for arrays
 }
 
-func (p *ParsedSpecType) ImportedTypeString(pkg string) string {
+func (p *ParsedSpecType) TypeString() string {
 	builder := strings.Builder{}
 
 	if p.ParsedType == ParsedTypeStruct {
@@ -458,11 +457,6 @@ func (p *ParsedSpecType) ImportedTypeString(pkg string) string {
 		for i := 0; i < p.Levels; i++ {
 			builder.WriteString("[]")
 		}
-	}
-
-	if p.ParsedType != ParsedTypePrimitive {
-		builder.WriteString(pkg)
-		builder.WriteRune('.')
 	}
 
 	builder.WriteString(p.GoType)
@@ -480,16 +474,7 @@ func (p *ParsedTypeField) StructField(tagJSON bool) string {
 
 	builder.WriteString(p.GoName)
 	builder.WriteRune(' ')
-
-	if p.ParsedSpecType.ParsedType == ParsedTypeStruct {
-		builder.WriteRune('*')
-	} else if p.ParsedSpecType.ParsedType == ParsedTypeArray {
-		for i := 0; i < p.ParsedSpecType.Levels; i++ {
-			builder.WriteString("[]")
-		}
-	}
-
-	builder.WriteString(p.ParsedSpecType.GoType)
+	builder.WriteString(p.ParsedSpecType.TypeString())
 
 	if tagJSON {
 		builder.WriteRune(' ')

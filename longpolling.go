@@ -1,9 +1,7 @@
-package bot
+package goram
 
 import (
 	"context"
-
-	"github.com/TrixiS/goram/pkg/types"
 )
 
 // Polls updates via calling Bot.GetUpdates() in a loop.
@@ -15,9 +13,9 @@ import (
 func LongPollUpdates(
 	ctx context.Context,
 	bot *Bot,
-	request *types.GetUpdatesRequest,
-) chan []types.Update {
-	c := make(chan []types.Update)
+	request *GetUpdatesRequest,
+) chan []Update {
+	c := make(chan []Update)
 
 	go func() {
 		for {

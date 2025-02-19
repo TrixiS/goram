@@ -1,4 +1,4 @@
-package bot
+package goram
 
 import (
 	"bytes"
@@ -10,31 +10,31 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/TrixiS/goram/pkg/flood"
-	"github.com/TrixiS/goram/pkg/types"
+	"github.com/TrixiS/goram/flood"
 )
 
-type Error struct {
-	Method      string
+// Represents Telegram API error
+type APIError struct {
+	Method      string // Called API method
 	Description string
 	ErrorCode   int
-	Parameters  *types.ResponseParameters
+	Parameters  *ResponseParameters
 }
 
-func (a *Error) Error() string {
+func (a *APIError) Error() string {
 	return fmt.Sprintf("%s: %d %s", a.Method, a.ErrorCode, a.Description)
 }
 
 type apiResponse[R any] struct {
-	OK          bool                      `json:"ok"`
-	Description string                    `json:"description"`
-	Result      R                         `json:"result"`
-	ErrorCode   int                       `json:"error_code"`
-	Parameters  *types.ResponseParameters `json:"parameters"`
+	OK          bool                `json:"ok"`
+	Description string              `json:"description"`
+	Result      R                   `json:"result"`
+	ErrorCode   int                 `json:"error_code"`
+	Parameters  *ResponseParameters `json:"parameters"`
 }
 
-func (a *apiResponse[R]) error(method string) *Error {
-	return &Error{
+func (a *apiResponse[R]) error(method string) *APIError {
+	return &APIError{
 		Method:      method,
 		Description: a.Description,
 		ErrorCode:   a.ErrorCode,
@@ -43,7 +43,7 @@ func (a *apiResponse[R]) error(method string) *Error {
 }
 
 type apiRequest interface {
-	WriteMultipart(*multipart.Writer)
+	writeMultipart(*multipart.Writer)
 }
 
 func makeRequest[R any](
@@ -61,7 +61,7 @@ func makeRequest[R any](
 	if data != nil {
 		buf := &bytes.Buffer{}
 		w := multipart.NewWriter(buf)
-		data.WriteMultipart(w)
+		data.writeMultipart(w)
 		w.Close()
 		contentType = w.FormDataContentType()
 		body = bytes.NewReader(buf.Bytes())

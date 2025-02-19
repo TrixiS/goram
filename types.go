@@ -1,4 +1,4 @@
-package types
+package goram
 
 // This object represents an incoming update.
 //

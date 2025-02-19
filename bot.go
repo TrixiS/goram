@@ -1,4 +1,4 @@
-package bot
+package goram
 
 import (
 	"context"
@@ -6,8 +6,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/TrixiS/goram/pkg/flood"
-	"github.com/TrixiS/goram/pkg/types"
+	"github.com/TrixiS/goram/flood"
 )
 
 type BotOptions struct {
@@ -45,7 +44,7 @@ func NewBot(options BotOptions) *Bot {
 type ErrDownloadFile struct {
 	Code   int
 	Status string
-	File   *types.File
+	File   *File
 }
 
 func (e *ErrDownloadFile) Error() string {
@@ -56,7 +55,7 @@ func (e *ErrDownloadFile) Error() string {
 //
 // If download http request status != 200, returns *ErrDownloadFile
 func (b *Bot) DownloadFile(ctx context.Context, fileId string, dst io.Writer) error {
-	file, err := b.GetFile(ctx, &types.GetFileRequest{
+	file, err := b.GetFile(ctx, &GetFileRequest{
 		FileId: fileId,
 	})
 
