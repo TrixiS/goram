@@ -11,7 +11,7 @@ type ChatId struct {
 	Username string // Plain username, without leading @
 }
 
-// For json encoding ChatID inside structs
+// For json encoding ChatId inside structs
 func (c ChatId) MarshalJSON() ([]byte, error) {
 	if c.ID != 0 {
 		stringID := strconv.FormatInt(c.ID, 10)
