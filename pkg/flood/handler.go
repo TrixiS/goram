@@ -20,7 +20,7 @@ type Handler interface {
 }
 
 // Dummy flood handler. It will just sleep for flood duration.
-type SimpleHandler struct {
+type SleepHandler struct {
 	OnFlood func(
 		ctx context.Context,
 		method string,
@@ -29,9 +29,9 @@ type SimpleHandler struct {
 	) // Optional callback that will be called before sleeping
 }
 
-func (s *SimpleHandler) Enter(context.Context, string, any) {}
+func (s *SleepHandler) Enter(context.Context, string, any) {}
 
-func (s *SimpleHandler) Handle(
+func (s *SleepHandler) Handle(
 	ctx context.Context,
 	method string,
 	request any,
