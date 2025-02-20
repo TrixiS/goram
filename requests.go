@@ -192,7 +192,7 @@ func (r *SendMessageRequest) writeMultipart(w *multipart.Writer) {
 type ForwardMessageRequest struct {
 	ChatId              ChatId // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 	MessageThreadId     int64  // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
-	FromChatId          int64  // Unique identifier for the chat where the original message was sent (or channel username in the format @channelusername)
+	FromChatId          ChatId // Unique identifier for the chat where the original message was sent (or channel username in the format @channelusername)
 	VideoStartTimestamp int    // New start timestamp for the forwarded video in the message
 	DisableNotification bool   // Sends the message silently. Users will receive a notification with no sound.
 	ProtectContent      bool   // Protects the contents of the forwarded message from forwarding and saving
@@ -207,12 +207,7 @@ func (r *ForwardMessageRequest) writeMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("message_thread_id")
 		fw.Write(b)
 	}
-
-	{
-		b, _ := json.Marshal(r.FromChatId)
-		fw, _ := w.CreateFormField("from_chat_id")
-		fw.Write(b)
-	}
+	w.WriteField("from_chat_id", r.FromChatId.String())
 
 	{
 		b, _ := json.Marshal(r.VideoStartTimestamp)
@@ -243,7 +238,7 @@ func (r *ForwardMessageRequest) writeMultipart(w *multipart.Writer) {
 type ForwardMessagesRequest struct {
 	ChatId              ChatId // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 	MessageThreadId     int64  // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
-	FromChatId          int64  // Unique identifier for the chat where the original messages were sent (or channel username in the format @channelusername)
+	FromChatId          ChatId // Unique identifier for the chat where the original messages were sent (or channel username in the format @channelusername)
 	MessageIds          []int  // A JSON-serialized list of 1-100 identifiers of messages in the chat from_chat_id to forward. The identifiers must be specified in a strictly increasing order.
 	DisableNotification bool   // Sends the messages silently. Users will receive a notification with no sound.
 	ProtectContent      bool   // Protects the contents of the forwarded messages from forwarding and saving
@@ -257,12 +252,7 @@ func (r *ForwardMessagesRequest) writeMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("message_thread_id")
 		fw.Write(b)
 	}
-
-	{
-		b, _ := json.Marshal(r.FromChatId)
-		fw, _ := w.CreateFormField("from_chat_id")
-		fw.Write(b)
-	}
+	w.WriteField("from_chat_id", r.FromChatId.String())
 
 	{
 		b, _ := json.Marshal(r.MessageIds)
@@ -287,7 +277,7 @@ func (r *ForwardMessagesRequest) writeMultipart(w *multipart.Writer) {
 type CopyMessageRequest struct {
 	ChatId                ChatId           // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 	MessageThreadId       int64            // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
-	FromChatId            int64            // Unique identifier for the chat where the original message was sent (or channel username in the format @channelusername)
+	FromChatId            ChatId           // Unique identifier for the chat where the original message was sent (or channel username in the format @channelusername)
 	MessageId             int              // Message identifier in the chat specified in from_chat_id
 	VideoStartTimestamp   int              // New start timestamp for the copied video in the message
 	Caption               string           // New caption for media, 0-1024 characters after entities parsing. If not specified, the original caption is kept
@@ -309,12 +299,7 @@ func (r *CopyMessageRequest) writeMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("message_thread_id")
 		fw.Write(b)
 	}
-
-	{
-		b, _ := json.Marshal(r.FromChatId)
-		fw, _ := w.CreateFormField("from_chat_id")
-		fw.Write(b)
-	}
+	w.WriteField("from_chat_id", r.FromChatId.String())
 
 	{
 		b, _ := json.Marshal(r.MessageId)
@@ -382,7 +367,7 @@ func (r *CopyMessageRequest) writeMultipart(w *multipart.Writer) {
 type CopyMessagesRequest struct {
 	ChatId              ChatId // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 	MessageThreadId     int64  // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
-	FromChatId          int64  // Unique identifier for the chat where the original messages were sent (or channel username in the format @channelusername)
+	FromChatId          ChatId // Unique identifier for the chat where the original messages were sent (or channel username in the format @channelusername)
 	MessageIds          []int  // A JSON-serialized list of 1-100 identifiers of messages in the chat from_chat_id to copy. The identifiers must be specified in a strictly increasing order.
 	DisableNotification bool   // Sends the messages silently. Users will receive a notification with no sound.
 	ProtectContent      bool   // Protects the contents of the sent messages from forwarding and saving
@@ -397,12 +382,7 @@ func (r *CopyMessagesRequest) writeMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("message_thread_id")
 		fw.Write(b)
 	}
-
-	{
-		b, _ := json.Marshal(r.FromChatId)
-		fw, _ := w.CreateFormField("from_chat_id")
-		fw.Write(b)
-	}
+	w.WriteField("from_chat_id", r.FromChatId.String())
 
 	{
 		b, _ := json.Marshal(r.MessageIds)

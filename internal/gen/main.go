@@ -549,7 +549,7 @@ func (p *Parser) ParseTypeField(t *TypeField) *ParsedTypeField {
 		ptf.ParsedSpecType.GoType = "InputMedia"
 		ptf.ParsedSpecType.ParsedType = ParsedTypeArray
 		ptf.ParsedSpecType.Levels = 1
-	} else if len(t.Types) == 2 && (t.Name == "id" || t.Name == "chat_id") {
+	} else if len(t.Types) == 2 && (t.Name == "id" || t.Name == "chat_id" || t.Name == "from_chat_id") {
 		ptf.ParsedSpecType.GoType = "ChatId"
 	} else if t.Types[0] == "Integer" &&
 		(strings.HasSuffix(t.Name, "id") || t.Name == "offset") &&
