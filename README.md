@@ -18,6 +18,7 @@ package main
 import (
     "context"
     "fmt"
+    "os"
     "time"
 
     "github.com/TrixiS/goram"
@@ -35,24 +36,28 @@ func main() {
     })
 
     ctx := context.Background()
-    me, err := bot.GetMe(ctx)
 
-    if err != nil {
-        panic(err)
-    }
-
+    me, _ := bot.GetMe(ctx) // errors aren't handled in this example, but you should do it
     fmt.Println("me", me)
 
-    message, err := bot.SendMessage(ctx, &goram.SendMessageRequest{
+    message, _ := bot.SendMessage(ctx, &goram.SendMessageRequest{
         ChatId: goram.ChatId{Username: "somecoolchannel"},
         Text:   "Hello world",
     })
 
-    if err != nil {
-        panic(err)
-    }
-
     fmt.Println("sent", message.MessageId)
+
+    // sending files
+    // you can use goram.NamedReader interface to send buffered files
+    photoFile, _ := os.Open("./photo.jpeg")
+    message, _ = bot.SendPhoto(ctx, &goram.SendPhotoRequest{
+        ChatId: goram.ChatId{ID: -100123123123123},
+        Photo:  photoFile,
+    })
+
+    // downloading files by file ids
+    downloadedFile, _ := os.OpenFile("./downloaded.jpeg", os.O_CREATE|os.O_WRONLY, 0o660)
+    bot.DownloadFile(ctx, message.Photo[0].FileId, downloadedFile) // accepts io.Writer
 }
 ```
 
