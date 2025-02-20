@@ -602,7 +602,7 @@ func (g *Parser) parseSpecType(p *ParsedSpecType, fieldType string) {
 
 func toPascalCase(v string) string {
 	runes := []rune(v)
-	builder := &strings.Builder{}
+	builder := strings.Builder{}
 	upper := false
 
 	for i, r := range runes {
@@ -612,7 +612,6 @@ func toPascalCase(v string) string {
 		}
 
 		if upper || i == 0 {
-
 			upper = false
 			builder.WriteRune(unicode.ToUpper(r))
 		} else {

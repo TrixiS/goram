@@ -11,7 +11,6 @@ type LongPollUpdatesOptions struct {
 	Cap            uint              // Optional. Updates channel capacity
 	RetryInterval  time.Duration     // Optional. Sleep for this duration if an error happens on getUpdates request. Default is 0
 	MaxErrors      uint              // Optional. Exit from polling loop after MaxErrors errors in a row. The returned channel gets closed too. Default is unlimited
-	Timeout        time.Duration     // Optional. Timeout for getUpdates requests
 }
 
 // Polls updates via calling Bot.GetUpdates() in a loop.
@@ -27,16 +26,7 @@ func LongPollUpdates(
 		var errCount uint
 
 		for {
-			var updates []Update
-			var err error
-
-			if options.Timeout > 0 {
-				tctx, cancel := context.WithTimeout(ctx, options.Timeout)
-				updates, err = bot.GetUpdates(tctx, &options.RequestOptions)
-				cancel()
-			} else {
-				updates, err = bot.GetUpdates(ctx, &options.RequestOptions)
-			}
+			updates, err := bot.GetUpdates(ctx, &options.RequestOptions)
 
 			if err != nil {
 				if options.MaxErrors > 0 {
