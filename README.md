@@ -65,6 +65,25 @@ func main() {
 }
 ```
 
+## Markups
+
+```Go
+import "github.com/TrixiS/goram/keyboards"
+
+bot.SendMessage(context.Background(), &goram.SendMessageRequest{
+    ChatId: goram.ChatId{Id: 578371487},
+    Text:   "Hello world",
+    ReplyMarkup: &goram.ReplyKeyboardMarkup{
+        Keyboard: keyboards.NewBuilder[goram.KeyboardButton]().
+            Add(goram.KeyboardButton{Text: "Hello"}).
+            Add(goram.KeyboardButton{Text: "World"}).
+            Adjust(1).
+            Build(),
+        ResizeKeyboard: true,
+    },
+})
+```
+
 ## Updates
 
 ```Go
