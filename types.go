@@ -1639,8 +1639,8 @@ type InputMediaPhoto struct {
 	HasSpoiler            bool            `json:"has_spoiler,omitempty"`              // Optional. Pass True if the photo needs to be covered with a spoiler animation
 }
 
-func (i *InputMediaPhoto) setMedia(media string) {
-	i.Media = media
+func (i *InputMediaPhoto) setMedia(fileId string) {
+	i.Media.FileId = fileId
 }
 
 func (i *InputMediaPhoto) getMedia() InputFile {
@@ -1667,8 +1667,8 @@ type InputMediaVideo struct {
 	HasSpoiler            bool            `json:"has_spoiler,omitempty"`              // Optional. Pass True if the video needs to be covered with a spoiler animation
 }
 
-func (i *InputMediaVideo) setMedia(media string) {
-	i.Media = media
+func (i *InputMediaVideo) setMedia(fileId string) {
+	i.Media.FileId = fileId
 }
 
 func (i *InputMediaVideo) getMedia() InputFile {
@@ -1692,8 +1692,8 @@ type InputMediaAnimation struct {
 	HasSpoiler            bool            `json:"has_spoiler,omitempty"`              // Optional. Pass True if the animation needs to be covered with a spoiler animation
 }
 
-func (i *InputMediaAnimation) setMedia(media string) {
-	i.Media = media
+func (i *InputMediaAnimation) setMedia(fileId string) {
+	i.Media.FileId = fileId
 }
 
 func (i *InputMediaAnimation) getMedia() InputFile {
@@ -1715,8 +1715,8 @@ type InputMediaAudio struct {
 	Title           string          `json:"title,omitempty"`            // Optional. Title of the audio
 }
 
-func (i *InputMediaAudio) setMedia(media string) {
-	i.Media = media
+func (i *InputMediaAudio) setMedia(fileId string) {
+	i.Media.FileId = fileId
 }
 
 func (i *InputMediaAudio) getMedia() InputFile {
@@ -1736,18 +1736,13 @@ type InputMediaDocument struct {
 	DisableContentTypeDetection bool            `json:"disable_content_type_detection,omitempty"` // Optional. Disables automatic server-side content type detection for files uploaded using multipart/form-data. Always True, if the document is sent as part of an album.
 }
 
-func (i *InputMediaDocument) setMedia(media string) {
-	i.Media = media
+func (i *InputMediaDocument) setMedia(fileId string) {
+	i.Media.FileId = fileId
 }
 
 func (i *InputMediaDocument) getMedia() InputFile {
 	return i.Media
 }
-
-// This object represents the contents of a file to be uploaded. Must be posted using multipart/form-data in the usual way that files are uploaded via the browser.
-//
-// https://core.telegram.org/bots/api#inputfile
-type InputFile interface{}
 
 // This object describes the paid media to be sent. Currently, it can be one of
 //
@@ -1766,8 +1761,8 @@ type InputPaidMediaPhoto struct {
 	Media InputFile `json:"media"` // File to send. Pass a file_id to send a file that exists on the Telegram servers (recommended), pass an HTTP URL for Telegram to get a file from the Internet, or pass "attach://<file_attach_name>" to upload a new one using multipart/form-data under <file_attach_name> name. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 }
 
-func (i *InputPaidMediaPhoto) setMedia(media string) {
-	i.Media = media
+func (i *InputPaidMediaPhoto) setMedia(fileId string) {
+	i.Media.FileId = fileId
 }
 
 func (i *InputPaidMediaPhoto) getMedia() InputFile {
@@ -1789,8 +1784,8 @@ type InputPaidMediaVideo struct {
 	SupportsStreaming bool      `json:"supports_streaming,omitempty"` // Optional. Pass True if the uploaded video is suitable for streaming
 }
 
-func (i *InputPaidMediaVideo) setMedia(media string) {
-	i.Media = media
+func (i *InputPaidMediaVideo) setMedia(fileId string) {
+	i.Media.FileId = fileId
 }
 
 func (i *InputPaidMediaVideo) getMedia() InputFile {

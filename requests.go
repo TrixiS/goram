@@ -55,16 +55,12 @@ type SetWebhookRequest struct {
 
 func (r *SetWebhookRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("url", r.Url)
-	if r.Certificate != nil {
-		switch v := r.Certificate.(type) {
-		case string:
-			w.WriteField("certificate", v)
-		case NamedReader:
-			fw, _ := w.CreateFormFile("certificate", v.Name())
-			io.Copy(fw, v)
-		default:
-			panic(v)
-		}
+
+	if r.Certificate.FileId != "" {
+		w.WriteField("certificate", r.Certificate.FileId)
+	} else if r.Certificate.Reader != nil {
+		fw, _ := w.CreateFormFile("certificate", r.Certificate.Reader.Name())
+		io.Copy(fw, r.Certificate.Reader)
 	}
 	if r.IpAddress != "" {
 		w.WriteField("ip_address", r.IpAddress)
@@ -440,14 +436,11 @@ func (r *SendPhotoRequest) writeMultipart(w *multipart.Writer) {
 		fw.Write(b)
 	}
 
-	switch v := r.Photo.(type) {
-	case string:
-		w.WriteField("photo", v)
-	case NamedReader:
-		fw, _ := w.CreateFormFile("photo", v.Name())
-		io.Copy(fw, v)
-	default:
-		panic(v)
+	if r.Photo.FileId != "" {
+		w.WriteField("photo", r.Photo.FileId)
+	} else if r.Photo.Reader != nil {
+		fw, _ := w.CreateFormFile("photo", r.Photo.Reader.Name())
+		io.Copy(fw, r.Photo.Reader)
 	}
 	if r.Caption != "" {
 		w.WriteField("caption", r.Caption)
@@ -542,14 +535,11 @@ func (r *SendAudioRequest) writeMultipart(w *multipart.Writer) {
 		fw.Write(b)
 	}
 
-	switch v := r.Audio.(type) {
-	case string:
-		w.WriteField("audio", v)
-	case NamedReader:
-		fw, _ := w.CreateFormFile("audio", v.Name())
-		io.Copy(fw, v)
-	default:
-		panic(v)
+	if r.Audio.FileId != "" {
+		w.WriteField("audio", r.Audio.FileId)
+	} else if r.Audio.Reader != nil {
+		fw, _ := w.CreateFormFile("audio", r.Audio.Reader.Name())
+		io.Copy(fw, r.Audio.Reader)
 	}
 	if r.Caption != "" {
 		w.WriteField("caption", r.Caption)
@@ -574,16 +564,12 @@ func (r *SendAudioRequest) writeMultipart(w *multipart.Writer) {
 	if r.Title != "" {
 		w.WriteField("title", r.Title)
 	}
-	if r.Thumbnail != nil {
-		switch v := r.Thumbnail.(type) {
-		case string:
-			w.WriteField("thumbnail", v)
-		case NamedReader:
-			fw, _ := w.CreateFormFile("thumbnail", v.Name())
-			io.Copy(fw, v)
-		default:
-			panic(v)
-		}
+
+	if r.Thumbnail.FileId != "" {
+		w.WriteField("thumbnail", r.Thumbnail.FileId)
+	} else if r.Thumbnail.Reader != nil {
+		fw, _ := w.CreateFormFile("thumbnail", r.Thumbnail.Reader.Name())
+		io.Copy(fw, r.Thumbnail.Reader)
 	}
 
 	{
@@ -653,25 +639,18 @@ func (r *SendDocumentRequest) writeMultipart(w *multipart.Writer) {
 		fw.Write(b)
 	}
 
-	switch v := r.Document.(type) {
-	case string:
-		w.WriteField("document", v)
-	case NamedReader:
-		fw, _ := w.CreateFormFile("document", v.Name())
-		io.Copy(fw, v)
-	default:
-		panic(v)
+	if r.Document.FileId != "" {
+		w.WriteField("document", r.Document.FileId)
+	} else if r.Document.Reader != nil {
+		fw, _ := w.CreateFormFile("document", r.Document.Reader.Name())
+		io.Copy(fw, r.Document.Reader)
 	}
-	if r.Thumbnail != nil {
-		switch v := r.Thumbnail.(type) {
-		case string:
-			w.WriteField("thumbnail", v)
-		case NamedReader:
-			fw, _ := w.CreateFormFile("thumbnail", v.Name())
-			io.Copy(fw, v)
-		default:
-			panic(v)
-		}
+
+	if r.Thumbnail.FileId != "" {
+		w.WriteField("thumbnail", r.Thumbnail.FileId)
+	} else if r.Thumbnail.Reader != nil {
+		fw, _ := w.CreateFormFile("thumbnail", r.Thumbnail.Reader.Name())
+		io.Copy(fw, r.Thumbnail.Reader)
 	}
 	if r.Caption != "" {
 		w.WriteField("caption", r.Caption)
@@ -765,14 +744,11 @@ func (r *SendVideoRequest) writeMultipart(w *multipart.Writer) {
 		fw.Write(b)
 	}
 
-	switch v := r.Video.(type) {
-	case string:
-		w.WriteField("video", v)
-	case NamedReader:
-		fw, _ := w.CreateFormFile("video", v.Name())
-		io.Copy(fw, v)
-	default:
-		panic(v)
+	if r.Video.FileId != "" {
+		w.WriteField("video", r.Video.FileId)
+	} else if r.Video.Reader != nil {
+		fw, _ := w.CreateFormFile("video", r.Video.Reader.Name())
+		io.Copy(fw, r.Video.Reader)
 	}
 
 	{
@@ -792,27 +768,19 @@ func (r *SendVideoRequest) writeMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("height")
 		fw.Write(b)
 	}
-	if r.Thumbnail != nil {
-		switch v := r.Thumbnail.(type) {
-		case string:
-			w.WriteField("thumbnail", v)
-		case NamedReader:
-			fw, _ := w.CreateFormFile("thumbnail", v.Name())
-			io.Copy(fw, v)
-		default:
-			panic(v)
-		}
+
+	if r.Thumbnail.FileId != "" {
+		w.WriteField("thumbnail", r.Thumbnail.FileId)
+	} else if r.Thumbnail.Reader != nil {
+		fw, _ := w.CreateFormFile("thumbnail", r.Thumbnail.Reader.Name())
+		io.Copy(fw, r.Thumbnail.Reader)
 	}
-	if r.Cover != nil {
-		switch v := r.Cover.(type) {
-		case string:
-			w.WriteField("cover", v)
-		case NamedReader:
-			fw, _ := w.CreateFormFile("cover", v.Name())
-			io.Copy(fw, v)
-		default:
-			panic(v)
-		}
+
+	if r.Cover.FileId != "" {
+		w.WriteField("cover", r.Cover.FileId)
+	} else if r.Cover.Reader != nil {
+		fw, _ := w.CreateFormFile("cover", r.Cover.Reader.Name())
+		io.Copy(fw, r.Cover.Reader)
 	}
 
 	{
@@ -921,14 +889,11 @@ func (r *SendAnimationRequest) writeMultipart(w *multipart.Writer) {
 		fw.Write(b)
 	}
 
-	switch v := r.Animation.(type) {
-	case string:
-		w.WriteField("animation", v)
-	case NamedReader:
-		fw, _ := w.CreateFormFile("animation", v.Name())
-		io.Copy(fw, v)
-	default:
-		panic(v)
+	if r.Animation.FileId != "" {
+		w.WriteField("animation", r.Animation.FileId)
+	} else if r.Animation.Reader != nil {
+		fw, _ := w.CreateFormFile("animation", r.Animation.Reader.Name())
+		io.Copy(fw, r.Animation.Reader)
 	}
 
 	{
@@ -948,16 +913,12 @@ func (r *SendAnimationRequest) writeMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("height")
 		fw.Write(b)
 	}
-	if r.Thumbnail != nil {
-		switch v := r.Thumbnail.(type) {
-		case string:
-			w.WriteField("thumbnail", v)
-		case NamedReader:
-			fw, _ := w.CreateFormFile("thumbnail", v.Name())
-			io.Copy(fw, v)
-		default:
-			panic(v)
-		}
+
+	if r.Thumbnail.FileId != "" {
+		w.WriteField("thumbnail", r.Thumbnail.FileId)
+	} else if r.Thumbnail.Reader != nil {
+		fw, _ := w.CreateFormFile("thumbnail", r.Thumbnail.Reader.Name())
+		io.Copy(fw, r.Thumbnail.Reader)
 	}
 	if r.Caption != "" {
 		w.WriteField("caption", r.Caption)
@@ -1049,14 +1010,11 @@ func (r *SendVoiceRequest) writeMultipart(w *multipart.Writer) {
 		fw.Write(b)
 	}
 
-	switch v := r.Voice.(type) {
-	case string:
-		w.WriteField("voice", v)
-	case NamedReader:
-		fw, _ := w.CreateFormFile("voice", v.Name())
-		io.Copy(fw, v)
-	default:
-		panic(v)
+	if r.Voice.FileId != "" {
+		w.WriteField("voice", r.Voice.FileId)
+	} else if r.Voice.Reader != nil {
+		fw, _ := w.CreateFormFile("voice", r.Voice.Reader.Name())
+		io.Copy(fw, r.Voice.Reader)
 	}
 	if r.Caption != "" {
 		w.WriteField("caption", r.Caption)
@@ -1141,14 +1099,11 @@ func (r *SendVideoNoteRequest) writeMultipart(w *multipart.Writer) {
 		fw.Write(b)
 	}
 
-	switch v := r.VideoNote.(type) {
-	case string:
-		w.WriteField("video_note", v)
-	case NamedReader:
-		fw, _ := w.CreateFormFile("video_note", v.Name())
-		io.Copy(fw, v)
-	default:
-		panic(v)
+	if r.VideoNote.FileId != "" {
+		w.WriteField("video_note", r.VideoNote.FileId)
+	} else if r.VideoNote.Reader != nil {
+		fw, _ := w.CreateFormFile("video_note", r.VideoNote.Reader.Name())
+		io.Copy(fw, r.VideoNote.Reader)
 	}
 
 	{
@@ -1162,16 +1117,12 @@ func (r *SendVideoNoteRequest) writeMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("length")
 		fw.Write(b)
 	}
-	if r.Thumbnail != nil {
-		switch v := r.Thumbnail.(type) {
-		case string:
-			w.WriteField("thumbnail", v)
-		case NamedReader:
-			fw, _ := w.CreateFormFile("thumbnail", v.Name())
-			io.Copy(fw, v)
-		default:
-			panic(v)
-		}
+
+	if r.Thumbnail.FileId != "" {
+		w.WriteField("thumbnail", r.Thumbnail.FileId)
+	} else if r.Thumbnail.Reader != nil {
+		fw, _ := w.CreateFormFile("thumbnail", r.Thumbnail.Reader.Name())
+		io.Copy(fw, r.Thumbnail.Reader)
 	}
 
 	{
@@ -1327,9 +1278,10 @@ func (r *SendMediaGroupRequest) writeMultipart(w *multipart.Writer) {
 	for i := 0; i < len(r.Media); i++ {
 		inputMedia := r.Media[i]
 		fieldName := "media" + strconv.Itoa(i)
-		if reader, ok := inputMedia.getMedia().(NamedReader); ok {
-			fw, _ := w.CreateFormFile(fieldName, reader.Name())
-			io.Copy(fw, reader)
+		inputFile := inputMedia.getMedia()
+		if inputFile.Reader != nil {
+			fw, _ := w.CreateFormFile(fieldName, inputFile.Reader.Name())
+			io.Copy(fw, inputFile.Reader)
 			inputMedia.setMedia("attach://" + fieldName)
 		}
 	}
@@ -2427,14 +2379,11 @@ type SetChatPhotoRequest struct {
 func (r *SetChatPhotoRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatId.String())
 
-	switch v := r.Photo.(type) {
-	case string:
-		w.WriteField("photo", v)
-	case NamedReader:
-		fw, _ := w.CreateFormFile("photo", v.Name())
-		io.Copy(fw, v)
-	default:
-		panic(v)
+	if r.Photo.FileId != "" {
+		w.WriteField("photo", r.Photo.FileId)
+	} else if r.Photo.Reader != nil {
+		fw, _ := w.CreateFormFile("photo", r.Photo.Reader.Name())
+		io.Copy(fw, r.Photo.Reader)
 	}
 }
 
@@ -3166,12 +3115,15 @@ func (r *EditMessageMediaRequest) writeMultipart(w *multipart.Writer) {
 		w.WriteField("inline_message_id", r.InlineMessageId)
 	}
 
-	if reader, ok := r.Media.getMedia().(NamedReader); ok {
-		fw, _ := w.CreateFormFile("media", reader.Name())
-		io.Copy(fw, reader)
-		r.Media.setMedia("attach://media")
-	}
 	{
+		inputFile := r.Media.getMedia()
+
+		if inputFile.Reader != nil {
+			fw, _ := w.CreateFormFile("media", inputFile.Reader.Name())
+			io.Copy(fw, inputFile.Reader)
+			r.Media.setMedia("attach://media")
+		}
+
 		b, _ := json.Marshal(r.Media)
 		fw, _ := w.CreateFormField("media")
 		fw.Write(b)
@@ -3410,14 +3362,11 @@ func (r *SendStickerRequest) writeMultipart(w *multipart.Writer) {
 		fw.Write(b)
 	}
 
-	switch v := r.Sticker.(type) {
-	case string:
-		w.WriteField("sticker", v)
-	case NamedReader:
-		fw, _ := w.CreateFormFile("sticker", v.Name())
-		io.Copy(fw, v)
-	default:
-		panic(v)
+	if r.Sticker.FileId != "" {
+		w.WriteField("sticker", r.Sticker.FileId)
+	} else if r.Sticker.Reader != nil {
+		fw, _ := w.CreateFormFile("sticker", r.Sticker.Reader.Name())
+		io.Copy(fw, r.Sticker.Reader)
 	}
 	if r.Emoji != "" {
 		w.WriteField("emoji", r.Emoji)
@@ -3495,14 +3444,11 @@ func (r *UploadStickerFileRequest) writeMultipart(w *multipart.Writer) {
 		fw.Write(b)
 	}
 
-	switch v := r.Sticker.(type) {
-	case string:
-		w.WriteField("sticker", v)
-	case NamedReader:
-		fw, _ := w.CreateFormFile("sticker", v.Name())
-		io.Copy(fw, v)
-	default:
-		panic(v)
+	if r.Sticker.FileId != "" {
+		w.WriteField("sticker", r.Sticker.FileId)
+	} else if r.Sticker.Reader != nil {
+		fw, _ := w.CreateFormFile("sticker", r.Sticker.Reader.Name())
+		io.Copy(fw, r.Sticker.Reader)
 	}
 
 	w.WriteField("sticker_format", r.StickerFormat)
@@ -3697,16 +3643,12 @@ func (r *SetStickerSetThumbnailRequest) writeMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("user_id")
 		fw.Write(b)
 	}
-	if r.Thumbnail != nil {
-		switch v := r.Thumbnail.(type) {
-		case string:
-			w.WriteField("thumbnail", v)
-		case NamedReader:
-			fw, _ := w.CreateFormFile("thumbnail", v.Name())
-			io.Copy(fw, v)
-		default:
-			panic(v)
-		}
+
+	if r.Thumbnail.FileId != "" {
+		w.WriteField("thumbnail", r.Thumbnail.FileId)
+	} else if r.Thumbnail.Reader != nil {
+		fw, _ := w.CreateFormFile("thumbnail", r.Thumbnail.Reader.Name())
+		io.Copy(fw, r.Thumbnail.Reader)
 	}
 
 	w.WriteField("format", r.Format)

@@ -73,7 +73,6 @@ func main() {
 	}
 
 	parser := NewParser(&spec)
-	parser.IgnoredTypeNames = []string{"InputFile"}
 
 	generateEnums(spec.Enums)
 	generateTypes(parser, spec.Types)
@@ -258,39 +257,35 @@ func generateRequestWriteMultipart(
 		parsedTypeField := parser.ParseTypeField(&field)
 
 		if parsedTypeField.ParsedSpecType.GoType == "InputFile" {
-			if !parsedTypeField.Field.Required {
-				w.WriteString(fmt.Sprintf("if r.%s != nil {", parsedTypeField.GoName))
-			}
-
 			w.WriteString(fmt.Sprintf(`
-				switch v := r.%s.(type) {
-				case string:
-					w.WriteField("%s", v)
-				case NamedReader:
-					fw, _ := w.CreateFormFile("%s", v.Name())
-					io.Copy(fw, v)
-				default:
-					panic(v)
+				if r.%s.FileId != "" {
+					w.WriteField("%s", r.%s.FileId)
+				} else if r.%s.Reader != nil {
+					fw, _ := w.CreateFormFile("%s", r.%s.Reader.Name()) 
+					io.Copy(fw, r.%s.Reader)
 				}
 			`,
 				parsedTypeField.GoName,
 				field.Name,
+				parsedTypeField.GoName,
+				parsedTypeField.GoName,
 				field.Name,
+				parsedTypeField.GoName,
+				parsedTypeField.GoName,
 			))
-
-			if !parsedTypeField.Field.Required {
-				w.WriteString("}\n")
-			}
 		} else if parsedTypeField.ParsedSpecType.GoType == "InputMedia" &&
 			parsedTypeField.ParsedSpecType.ParsedType != ParsedTypeArray {
 
 			w.WriteString(fmt.Sprintf(`
-				if reader, ok := r.%s.getMedia().(NamedReader); ok {
-					fw, _ := w.CreateFormFile("%s", reader.Name())
-					io.Copy(fw, reader)
-					r.%s.setMedia("attach://%s")
-				}
 				{
+					inputFile := r.%s.getMedia()
+
+					if inputFile.Reader != nil {
+						fw, _ := w.CreateFormFile("%s", inputFile.Reader.Name())
+						io.Copy(fw, inputFile.Reader)
+						r.%s.setMedia("attach://%s")	
+					}
+
 					b, _ := json.Marshal(r.%s)
 					fw, _ := w.CreateFormField("%s")
 					fw.Write(b)
@@ -311,11 +306,12 @@ func generateRequestWriteMultipart(
 				for i := 0; i < len(r.%s); i++ {
 					inputMedia := r.%s[i]
 					fieldName := "%s" + strconv.Itoa(i)
-					if reader, ok := inputMedia.getMedia().(NamedReader); ok {
-						fw, _ := w.CreateFormFile(fieldName, reader.Name())
-						io.Copy(fw, reader)
+					inputFile := inputMedia.getMedia()
+					if inputFile.Reader != nil {
+						fw, _ := w.CreateFormFile(fieldName, inputFile.Reader.Name())
+						io.Copy(fw, inputFile.Reader)
 						inputMedia.setMedia("attach://" + fieldName)
-					}
+					}					
 				}
 				{
 					b, _ := json.Marshal(r.%s)
@@ -386,7 +382,7 @@ func generateRequestWriteMultipart(
 	w.WriteString("}\n")
 }
 
-var builtinTypes = []string{"InputMedia"}
+var builtinTypes = []string{"InputMedia", "InputFile"}
 
 func generateTypes(parser *Parser, types []Type) {
 	f, err := os.OpenFile("./types.go", genFileMode, genFilePerm)
@@ -418,8 +414,8 @@ func generateTypes(parser *Parser, types []Type) {
 
 func generateInputMediaMethods(w io.StringWriter, t *Type) {
 	w.WriteString(fmt.Sprintf(`
-		func (i *%s) setMedia(media string) {
-			i.Media = media
+		func (i *%s) setMedia(fileId string) {
+			i.Media.FileId = fileId
 		}
 	`, t.Name))
 
@@ -535,9 +531,8 @@ func (p *ParsedTypeField) StructField(tagJSON bool) string {
 }
 
 type Parser struct {
-	EnumNames        []string
-	InterfaceNames   []string
-	IgnoredTypeNames []string
+	EnumNames      []string
+	InterfaceNames []string
 }
 
 func NewParser(spec *Spec) *Parser {
