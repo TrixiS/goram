@@ -48,7 +48,7 @@ func main() {
     fmt.Println("sent", message.MessageId)
 
     // sending files
-    // you can use goram.NamedReader interface to send buffered files
+    // you can use goram.NameReader struct to send buffered files
     photoFile, _ := os.Open("./photo.jpeg")
     message, _ = bot.SendPhoto(ctx, &goram.SendPhotoRequest{
         ChatId: goram.ChatId{ID: -100123123123123},
