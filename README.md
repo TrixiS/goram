@@ -2,6 +2,10 @@
 
 Zero-dependency Telegram Bot API library for Go
 
+```shell
+go get github.com/TrixiS/goram@latest
+```
+
 ## Features
 
 - **No dependencies** - built purely around Go standart library

@@ -20,9 +20,9 @@ type BotOptions struct {
 //
 // For example: Bot.SendMessage()
 //
-// If a method call fails, it can return `*APIError` as the second return value. The returned error can be checked whether it's an API error as easy as:
+// If a method call fails, it can return *goram.APIError as the second return value. The returned error can be checked whether it's an API error as easy as:
 //
-// apiError, ok := err.(*APIError)
+// apiError, ok := err.(*goram.APIError)
 type Bot struct {
 	options BotOptions
 	baseUrl string
