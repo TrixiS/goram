@@ -58,11 +58,9 @@ func (e ErrDownloadFile) Error() string {
 // Writes response to dst and returns amount of bytes written and an error.
 // This function does not close or seek the provided writer.
 //
-// If download http request status != 200, returns *ErrDownloadFile
+// If download http request status != 200, returns ErrDownloadFile
 func (b *Bot) DownloadFile(ctx context.Context, fileId string, dst io.Writer) (int64, error) {
-	file, err := b.GetFile(ctx, &GetFileRequest{
-		FileId: fileId,
-	})
+	file, err := b.GetFile(ctx, &GetFileRequest{FileId: fileId})
 
 	if err != nil {
 		return 0, err
