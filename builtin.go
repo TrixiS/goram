@@ -69,6 +69,8 @@ type InputMedia interface {
 // For example: you want to send a photo via Bot.SendPhoto() method, but you have only a bytes.Buffer and the photo filename.
 //
 // But it's always better to send a file from the file system directly without additional copying.
+//
+// Pass this by pointer only, not by value.
 type NameReader struct {
 	Reader   io.Reader
 	FileName string
