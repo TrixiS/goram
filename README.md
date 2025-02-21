@@ -32,11 +32,11 @@ import (
 func main() {
     bot := goram.NewBot(goram.BotOptions{
         Token: "YOUR_TOKEN",
-        FloodHandler: &flood.SleepHandler{ // Optional flood handler
-            OnFlood: func(ctx context.Context, method string, request any, duration time.Duration) {
+        FloodHandler: flood.NewCondHandler( // optional flood handler
+            func(ctx context.Context, method string, request any, duration time.Duration) {
                 fmt.Println("waiting for flood", method, duration)
             },
-        },
+        ),
     })
 
     ctx := context.Background()
@@ -55,13 +55,13 @@ func main() {
     // you can use goram.NameReader struct to send buffered files
     photoFile, _ := os.Open("./photo.jpeg")
     message, _ = bot.SendPhoto(ctx, &goram.SendPhotoRequest{
-        ChatId: goram.ChatId{ID: -100123123123123},
-        Photo:  photoFile,
+        ChatId: goram.ChatId{Id: -100123123123123},
+        Photo:  goram.InputFile{Reader: photoFile},
     })
 
     // downloading files by file ids
     downloadedFile, _ := os.OpenFile("./downloaded.jpeg", os.O_CREATE|os.O_WRONLY, 0o660)
-    bot.DownloadFile(ctx, message.Photo[0].FileId, downloadedFile) // accepts io.Writer
+    bot.DownloadFile(ctx, message.Photo[0].FileId, downloadedFile) // takes io.Writer
 }
 ```
 
@@ -73,25 +73,31 @@ package main
 import (
     "context"
     "fmt"
+    "time"
 
     "github.com/TrixiS/goram"
+    "github.com/TrixiS/goram/flood"
 )
 
 func main() {
-    bot := goram.NewBot(goram.BotOptions{
-        Token: "YOUR_TOKEN",
-    })
-
+    bot := goram.NewBot(goram.BotOptions{Token: "YOUR_TOKEN"})
     ctx := context.Background()
 
-    updatesChan := goram.LongPollUpdates(ctx, bot, &goram.GetUpdatesRequest{
-        Timeout:        10,
-        AllowedUpdates: []string{"message"},
+    updatesChan := goram.LongPollUpdates(ctx, bot, &goram.LongPollUpdatesOptions{
+        RequestOptions: goram.GetUpdatesRequest{
+            Limit:          100,
+            Timeout:        10,
+            AllowedUpdates: []string{goram.UpdateMessage, goram.UpdateEditedMessage},
+        },
     })
 
     for updates := range updatesChan {
         for _, u := range updates {
-            fmt.Println("new message", u.Message.Chat.Id, u.Message.Text)
+            if u.Message != nil {
+                fmt.Println("new message", u.Message.Chat.Id, u.Message.Text, u.Message.MessageId)
+            } else if u.EditedMessage != nil {
+                fmt.Println("edited message", u.EditedMessage.Chat.Id, u.EditedMessage.MessageId)
+            }
         }
     }
 }

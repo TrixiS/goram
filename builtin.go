@@ -49,6 +49,7 @@ type NamedReader interface {
 // This object represents the contents of a file to be uploaded.
 //
 // You can use file id of existing file or any struct that implements NamedReader interface.
+// Also you can use a url in the file id field to send files from the internet.
 // If FileId and Reader are both set, file id will be used.
 //
 // See goram.NameReader also.
