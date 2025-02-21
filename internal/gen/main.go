@@ -152,6 +152,12 @@ func generateMethods(parser *Parser, methods []Method) {
 
 	for _, m := range methods {
 		pascalName := toPascalCase(m.Name)
+		structName := pascalName
+
+		if !strings.HasSuffix(structName, "Request") {
+			structName += "Request"
+		}
+
 		parsedSpecType := parser.ParseSpecTypes(m.Returns)
 		typeString := parsedSpecType.TypeString()
 		returnType := fmt.Sprintf("(r %s, err error)", typeString)
@@ -161,7 +167,7 @@ func generateMethods(parser *Parser, methods []Method) {
 		if len(m.Fields) == 0 {
 			args = "(ctx context.Context)"
 		} else {
-			args = fmt.Sprintf("(ctx context.Context, request *%sRequest)", pascalName)
+			args = fmt.Sprintf("(ctx context.Context, request *%s)", structName)
 			data = "request"
 		}
 
@@ -220,9 +226,16 @@ func generateRequests(parser *Parser, methods []Method) {
 		}
 
 		pascalName := toPascalCase(m.Type.Name)
-		structName := pascalName + "Request"
+		structName := pascalName
+		suffix := ""
+
+		if !strings.HasSuffix(structName, "Request") {
+			structName += "Request"
+			suffix = "Request"
+		}
+
 		f.WriteString(fmt.Sprintf("// see Bot.%s(ctx, &%s{})\n", pascalName, structName))
-		typeString := generateTypeString(parser, &m.Type, "Request", false, false)
+		typeString := generateTypeString(parser, &m.Type, suffix, false, false)
 		f.WriteString(typeString)
 		f.WriteString("\n")
 		generateRequestWriteMultipart(f, parser, &m, structName)

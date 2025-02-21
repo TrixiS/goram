@@ -600,7 +600,7 @@ func (b *Bot) RevokeChatInviteLink(ctx context.Context, request *RevokeChatInvit
 // Use this method to approve a chat join request. The bot must be an administrator in the chat for this to work and must have the can_invite_users administrator right. Returns True on success.
 //
 // https://core.telegram.org/bots/api#approvechatjoinrequest
-func (b *Bot) ApproveChatJoinRequest(ctx context.Context, request *ApproveChatJoinRequestRequest) (r bool, err error) {
+func (b *Bot) ApproveChatJoinRequest(ctx context.Context, request *ApproveChatJoinRequest) (r bool, err error) {
 	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "approveChatJoinRequest", b.options.FloodHandler, request)
 
 	if err != nil {
@@ -613,7 +613,7 @@ func (b *Bot) ApproveChatJoinRequest(ctx context.Context, request *ApproveChatJo
 // Use this method to decline a chat join request. The bot must be an administrator in the chat for this to work and must have the can_invite_users administrator right. Returns True on success.
 //
 // https://core.telegram.org/bots/api#declinechatjoinrequest
-func (b *Bot) DeclineChatJoinRequest(ctx context.Context, request *DeclineChatJoinRequestRequest) (r bool, err error) {
+func (b *Bot) DeclineChatJoinRequest(ctx context.Context, request *DeclineChatJoinRequest) (r bool, err error) {
 	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "declineChatJoinRequest", b.options.FloodHandler, request)
 
 	if err != nil {

@@ -2386,13 +2386,13 @@ func (r *RevokeChatInviteLinkRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("invite_link", r.InviteLink)
 }
 
-// see Bot.ApproveChatJoinRequest(ctx, &ApproveChatJoinRequestRequest{})
-type ApproveChatJoinRequestRequest struct {
+// see Bot.ApproveChatJoinRequest(ctx, &ApproveChatJoinRequest{})
+type ApproveChatJoinRequest struct {
 	ChatId ChatId // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 	UserId int64  // Unique identifier of the target user
 }
 
-func (r *ApproveChatJoinRequestRequest) writeMultipart(w *multipart.Writer) {
+func (r *ApproveChatJoinRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatId.String())
 
 	{
@@ -2402,13 +2402,13 @@ func (r *ApproveChatJoinRequestRequest) writeMultipart(w *multipart.Writer) {
 	}
 }
 
-// see Bot.DeclineChatJoinRequest(ctx, &DeclineChatJoinRequestRequest{})
-type DeclineChatJoinRequestRequest struct {
+// see Bot.DeclineChatJoinRequest(ctx, &DeclineChatJoinRequest{})
+type DeclineChatJoinRequest struct {
 	ChatId ChatId // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 	UserId int64  // Unique identifier of the target user
 }
 
-func (r *DeclineChatJoinRequestRequest) writeMultipart(w *multipart.Writer) {
+func (r *DeclineChatJoinRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatId.String())
 
 	{
