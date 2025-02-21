@@ -68,6 +68,10 @@ func main() {
 		}
 	}
 
+	if spec.Types[0].Name == "Update" {
+		generateUpdates(spec.Types[0])
+	}
+
 	parser := NewParser(&spec)
 	parser.IgnoredTypeNames = []string{"InputFile"}
 
@@ -81,6 +85,28 @@ func main() {
 
 const genFileMode = os.O_WRONLY | os.O_TRUNC | os.O_CREATE
 const genFilePerm = 0o660
+
+func generateUpdates(updateType Type) {
+	f, err := os.OpenFile("./updates.go", genFileMode, genFilePerm)
+
+	if err != nil {
+		panic(err)
+	}
+
+	f.WriteString("package goram\n\n")
+	f.WriteString("const (\n")
+
+	for _, field := range updateType.Fields[1:] { // skip update_id
+		name := "Update" + toPascalCase(field.Name)
+		f.WriteString(fmt.Sprintf("// %s\n", field.Description[len("Optional. "):]))
+		f.WriteString(fmt.Sprintf(`%s string = "%s"`, name, field.Name))
+		f.WriteString("\n")
+	}
+
+	f.WriteString(")\n")
+
+	f.Close()
+}
 
 func generateEnums(enums []Enum) {
 	f, err := os.OpenFile("./enums.go", genFileMode, genFilePerm)
