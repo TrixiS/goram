@@ -46,25 +46,26 @@ func NewBot(options BotOptions) *Bot {
 }
 
 type ErrDownloadFile struct {
-	Code   int
-	Status string
-	File   *File
+	Response *http.Response
+	File     *File
 }
 
-func (e *ErrDownloadFile) Error() string {
-	return "downloadFile: " + e.Status
+func (e ErrDownloadFile) Error() string {
+	return "downloadFile: " + e.Response.Status
 }
 
-// Downloads a file by file id using provided or default http client. Writes response to dst or returns an error.
+// Downloads a file by file id using provided or default http client.
+// Writes response to dst and returns amount of bytes written and an error.
+// This function does not close or seek the provided writer.
 //
 // If download http request status != 200, returns *ErrDownloadFile
-func (b *Bot) DownloadFile(ctx context.Context, fileId string, dst io.Writer) error {
+func (b *Bot) DownloadFile(ctx context.Context, fileId string, dst io.Writer) (int64, error) {
 	file, err := b.GetFile(ctx, &GetFileRequest{
 		FileId: fileId,
 	})
 
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	urlBuilder := strings.Builder{}
@@ -77,25 +78,20 @@ func (b *Bot) DownloadFile(ctx context.Context, fileId string, dst io.Writer) er
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, urlBuilder.String(), nil)
 
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	res, err := b.options.Client.Do(req)
 
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
-		return &ErrDownloadFile{
-			Code:   res.StatusCode,
-			Status: res.Status,
-			File:   file,
-		}
+		return 0, ErrDownloadFile{Response: res, File: file}
 	}
 
-	_, err = io.Copy(dst, res.Body)
-	return err
+	return io.Copy(dst, res.Body)
 }
