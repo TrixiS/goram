@@ -17,32 +17,32 @@ func NewBuilder[B any](rows ...[]B) *Builder[B] {
 }
 
 // Appends a button to the last keyboard row.
-func (k *Builder[B]) Add(button B) *Builder[B] {
-	if len(k.rows) == 0 {
-		k.rows = append(k.rows, []B{button})
+func (b *Builder[B]) Add(button B) *Builder[B] {
+	if len(b.rows) == 0 {
+		b.rows = append(b.rows, []B{button})
 	} else {
-		lastIdx := len(k.rows) - 1
-		k.rows[lastIdx] = append(k.rows[lastIdx], button)
+		lastIdx := len(b.rows) - 1
+		b.rows[lastIdx] = append(b.rows[lastIdx], button)
 	}
 
-	return k
+	return b
 }
 
 // Appends a row of specified buttons to the keyboard.
-func (k *Builder[B]) Row(buttons ...B) *Builder[B] {
-	k.rows = append(k.rows, buttons)
-	return k
+func (b *Builder[B]) Row(buttons ...B) *Builder[B] {
+	b.rows = append(b.rows, buttons)
+	return b
 }
 
 // Resizes each row in the keyboard to fit at most rowSize buttons.
-func (k *Builder[B]) Adjust(rowSize int) *Builder[B] {
-	newRows := make([][]B, 0, len(k.rows))
+func (b *Builder[B]) Adjust(rowSize int) *Builder[B] {
+	newRows := make([][]B, 0, len(b.rows))
 	currentRow := make([]B, 0, rowSize)
 
-	lastIdx := len(k.rows) - 1
+	lastIdx := len(b.rows) - 1
 
 rowsLoop:
-	for i, row := range k.rows {
+	for i, row := range b.rows {
 		added := 0
 
 		for added < len(row) {
@@ -65,13 +65,13 @@ rowsLoop:
 		}
 	}
 
-	k.rows = newRows
-	return k
+	b.rows = newRows
+	return b
 }
 
 // Returns built keyboard. Sets the underlying keyboard to nil so that the builder could be reused.
-func (k *Builder[B]) Build() [][]B {
-	rows := k.rows
-	k.rows = nil
+func (b *Builder[B]) Build() [][]B {
+	rows := b.rows
+	b.rows = nil
 	return rows
 }
