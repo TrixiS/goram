@@ -39,18 +39,27 @@ func (k *Builder[B]) Adjust(rowSize int) *Builder[B] {
 	newRows := make([][]B, 0, len(k.rows))
 	currentRow := make([]B, 0, rowSize)
 
-	for y, row := range k.rows {
-		for x, b := range row {
-			last := y == len(k.rows)-1 && x == len(row)-1
-			currentRow = append(currentRow, b)
+	lastIdx := len(k.rows) - 1
 
-			if len(currentRow) != rowSize && !last {
-				continue
-			}
+rowsLoop:
+	for i, row := range k.rows {
+		added := 0
 
-			newRows = append(newRows, currentRow)
+		for added < len(row) {
+			toAdd := min(rowSize-len(currentRow), len(row)-added)
 
-			if !last {
+			currentRow = append(currentRow, row[added:added+toAdd]...)
+
+			added += toAdd
+			isLastAdd := i == lastIdx && added == len(row)
+
+			if len(currentRow) == rowSize || isLastAdd {
+				newRows = append(newRows, currentRow)
+
+				if isLastAdd {
+					break rowsLoop
+				}
+
 				currentRow = make([]B, 0, rowSize)
 			}
 		}
