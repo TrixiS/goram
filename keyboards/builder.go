@@ -1,9 +1,15 @@
 package keyboards
 
+import "github.com/TrixiS/goram"
+
+type keyboardButton interface {
+	goram.KeyboardButton | goram.InlineKeyboardButton
+}
+
 // Keyboard builder for goram.ReplyKeyboardMarkup and goram.InlineKeyboardMarkup.
 //
 // The generic type should be goram.KeyboardButton or goram.InlineKeyboardButton.
-type Builder[B any] struct {
+type Builder[B keyboardButton] struct {
 	rows [][]B
 }
 
@@ -12,7 +18,7 @@ type Builder[B any] struct {
 // Specified rows will be used as initial rows of the returned builder.
 //
 // See keyboards.Builder for more info.
-func NewBuilder[B any](rows ...[]B) *Builder[B] {
+func NewBuilder[B keyboardButton](rows ...[]B) *Builder[B] {
 	return &Builder[B]{rows}
 }
 
