@@ -99,7 +99,7 @@ func generateUpdates(updateType Type) {
 		name := "Update" + toPascalCase(field.Name)
 		f.WriteString(fmt.Sprintf("// %s\n", field.Description[len("Optional. "):]))
 		f.WriteString(fmt.Sprintf(`%s string = "%s"`, name, field.Name))
-		f.WriteString("\n")
+		f.WriteString("\n\n")
 	}
 
 	f.WriteString(")\n")
