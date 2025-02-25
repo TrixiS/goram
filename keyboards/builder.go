@@ -63,10 +63,6 @@ func (b *Builder[B]) Adjust(rowSize int) *Builder[B] {
 
 rowsLoop:
 	for i, row := range b.rows {
-		if row == nil {
-			continue
-		}
-
 		added := 0
 		shouldBreak := i < len(b.rows)-1 && b.rows[i+1] == nil
 
