@@ -16,6 +16,7 @@ type Builder[B keyboardButton] struct {
 // Creates and returns a pointer to keyboards.Builder. This is useful for chaining.
 //
 // Specified rows will be used as initial rows of the returned builder.
+// You can pass nil as a row to specify a break.
 //
 // See keyboards.Builder for more info.
 func NewBuilder[B keyboardButton](rows ...[]B) *Builder[B] {
@@ -24,10 +25,11 @@ func NewBuilder[B keyboardButton](rows ...[]B) *Builder[B] {
 
 // Appends a button to the last keyboard row.
 func (b *Builder[B]) Add(button B) *Builder[B] {
-	if len(b.rows) == 0 {
+	lastIdx := len(b.rows) - 1
+
+	if len(b.rows) == 0 || b.rows[lastIdx] == nil {
 		b.rows = append(b.rows, []B{button})
 	} else {
-		lastIdx := len(b.rows) - 1
 		b.rows[lastIdx] = append(b.rows[lastIdx], button)
 	}
 
@@ -40,6 +42,18 @@ func (b *Builder[B]) Row(buttons ...B) *Builder[B] {
 	return b
 }
 
+// Appends other keyboard builder rows to this builder keyboard. Other builder remains unchanged.
+func (b *Builder[B]) Merge(other *Builder[B]) *Builder[B] {
+	b.rows = append(b.rows, other.rows...)
+	return b
+}
+
+// Appends a break to the keyboard. You must call .Adjust() before .Build() if you use .Break().
+func (b *Builder[B]) Break() *Builder[B] {
+	b.rows = append(b.rows, nil)
+	return b
+}
+
 // Resizes each row in the keyboard to fit at most rowSize buttons.
 func (b *Builder[B]) Adjust(rowSize int) *Builder[B] {
 	newRows := make([][]B, 0, len(b.rows))
@@ -49,7 +63,12 @@ func (b *Builder[B]) Adjust(rowSize int) *Builder[B] {
 
 rowsLoop:
 	for i, row := range b.rows {
+		if row == nil {
+			continue
+		}
+
 		added := 0
+		shouldBreak := i < len(b.rows)-1 && b.rows[i+1] == nil
 
 		for added < len(row) {
 			toAdd := min(rowSize-len(currentRow), len(row)-added)
@@ -67,6 +86,16 @@ rowsLoop:
 				}
 
 				currentRow = make([]B, 0, rowSize)
+				continue
+			}
+
+			if shouldBreak {
+				if len(currentRow) > 0 {
+					newRows = append(newRows, currentRow)
+					currentRow = []B{}
+				}
+
+				shouldBreak = false
 			}
 		}
 	}
@@ -75,7 +104,7 @@ rowsLoop:
 	return b
 }
 
-// Returns built keyboard. Sets the underlying keyboard to nil so that the builder could be reused.
+// Returns the built keyboard. Sets the underlying keyboard to nil so that the builder could be reused.
 func (b *Builder[B]) Build() [][]B {
 	rows := b.rows
 	b.rows = nil
