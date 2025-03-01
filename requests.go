@@ -9,10 +9,10 @@ import (
 
 // see Bot.GetUpdates(ctx, &GetUpdatesRequest{})
 type GetUpdatesRequest struct {
-	Offset         int64    // Identifier of the first update to be returned. Must be greater by one than the highest among the identifiers of previously received updates. By default, updates starting with the earliest unconfirmed update are returned. An update is considered confirmed as soon as getUpdates is called with an offset higher than its update_id. The negative offset can be specified to retrieve updates starting from -offset update from the end of the updates queue. All previous updates will be forgotten.
-	Limit          int      // Limits the number of updates to be retrieved. Values between 1-100 are accepted. Defaults to 100.
-	Timeout        int      // Timeout in seconds for long polling. Defaults to 0, i.e. usual short polling. Should be positive, short polling should be used for testing purposes only.
-	AllowedUpdates []string // A JSON-serialized list of the update types you want your bot to receive. For example, specify ["message", "edited_channel_post", "callback_query"] to only receive updates of these types. See Update for a complete list of available update types. Specify an empty list to receive all update types except chat_member, message_reaction, and message_reaction_count (default). If not specified, the previous setting will be used. Please note that this parameter doesn't affect updates created before the call to getUpdates, so unwanted updates may be received for a short period of time.
+	Offset         int64        // Identifier of the first update to be returned. Must be greater by one than the highest among the identifiers of previously received updates. By default, updates starting with the earliest unconfirmed update are returned. An update is considered confirmed as soon as getUpdates is called with an offset higher than its update_id. The negative offset can be specified to retrieve updates starting from -offset update from the end of the updates queue. All previous updates will be forgotten.
+	Limit          int          // Limits the number of updates to be retrieved. Values between 1-100 are accepted. Defaults to 100.
+	Timeout        int          // Timeout in seconds for long polling. Defaults to 0, i.e. usual short polling. Should be positive, short polling should be used for testing purposes only.
+	AllowedUpdates []UpdateType // A JSON-serialized list of the update types you want your bot to receive. For example, specify ["message", "edited_channel_post", "callback_query"] to only receive updates of these types. See Update for a complete list of available update types. Specify an empty list to receive all update types except chat_member, message_reaction, and message_reaction_count (default). If not specified, the previous setting will be used. Please note that this parameter doesn't affect updates created before the call to getUpdates, so unwanted updates may be received for a short period of time.
 }
 
 func (r *GetUpdatesRequest) writeMultipart(w *multipart.Writer) {
@@ -44,13 +44,13 @@ func (r *GetUpdatesRequest) writeMultipart(w *multipart.Writer) {
 
 // see Bot.SetWebhook(ctx, &SetWebhookRequest{})
 type SetWebhookRequest struct {
-	Url                string    // HTTPS URL to send updates to. Use an empty string to remove webhook integration
-	Certificate        InputFile // Upload your public key certificate so that the root certificate in use can be checked. See our self-signed guide for details.
-	IpAddress          string    // The fixed IP address which will be used to send webhook requests instead of the IP address resolved through DNS
-	MaxConnections     int       // The maximum allowed number of simultaneous HTTPS connections to the webhook for update delivery, 1-100. Defaults to 40. Use lower values to limit the load on your bot's server, and higher values to increase your bot's throughput.
-	AllowedUpdates     []string  // A JSON-serialized list of the update types you want your bot to receive. For example, specify ["message", "edited_channel_post", "callback_query"] to only receive updates of these types. See Update for a complete list of available update types. Specify an empty list to receive all update types except chat_member, message_reaction, and message_reaction_count (default). If not specified, the previous setting will be used. Please note that this parameter doesn't affect updates created before the call to the setWebhook, so unwanted updates may be received for a short period of time.
-	DropPendingUpdates bool      // Pass True to drop all pending updates
-	SecretToken        string    // A secret token to be sent in a header "X-Telegram-Bot-Api-Secret-Token" in every webhook request, 1-256 characters. Only characters A-Z, a-z, 0-9, _ and - are allowed. The header is useful to ensure that the request comes from a webhook set by you.
+	Url                string       // HTTPS URL to send updates to. Use an empty string to remove webhook integration
+	Certificate        InputFile    // Upload your public key certificate so that the root certificate in use can be checked. See our self-signed guide for details.
+	IpAddress          string       // The fixed IP address which will be used to send webhook requests instead of the IP address resolved through DNS
+	MaxConnections     int          // The maximum allowed number of simultaneous HTTPS connections to the webhook for update delivery, 1-100. Defaults to 40. Use lower values to limit the load on your bot's server, and higher values to increase your bot's throughput.
+	AllowedUpdates     []UpdateType // A JSON-serialized list of the update types you want your bot to receive. For example, specify ["message", "edited_channel_post", "callback_query"] to only receive updates of these types. See Update for a complete list of available update types. Specify an empty list to receive all update types except chat_member, message_reaction, and message_reaction_count (default). If not specified, the previous setting will be used. Please note that this parameter doesn't affect updates created before the call to the setWebhook, so unwanted updates may be received for a short period of time.
+	DropPendingUpdates bool         // Pass True to drop all pending updates
+	SecretToken        string       // A secret token to be sent in a header "X-Telegram-Bot-Api-Secret-Token" in every webhook request, 1-256 characters. Only characters A-Z, a-z, 0-9, _ and - are allowed. The header is useful to ensure that the request comes from a webhook set by you.
 }
 
 func (r *SetWebhookRequest) writeMultipart(w *multipart.Writer) {

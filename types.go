@@ -36,15 +36,15 @@ type Update struct {
 //
 // https://core.telegram.org/bots/api#webhookinfo
 type WebhookInfo struct {
-	Url                          string   `json:"url"`                                       // Webhook URL, may be empty if webhook is not set up
-	HasCustomCertificate         bool     `json:"has_custom_certificate"`                    // True, if a custom certificate was provided for webhook certificate checks
-	PendingUpdateCount           int      `json:"pending_update_count"`                      // Number of updates awaiting delivery
-	IpAddress                    string   `json:"ip_address,omitempty"`                      // Optional. Currently used webhook IP address
-	LastErrorDate                int      `json:"last_error_date,omitempty"`                 // Optional. Unix time for the most recent error that happened when trying to deliver an update via webhook
-	LastErrorMessage             string   `json:"last_error_message,omitempty"`              // Optional. Error message in human-readable format for the most recent error that happened when trying to deliver an update via webhook
-	LastSynchronizationErrorDate int      `json:"last_synchronization_error_date,omitempty"` // Optional. Unix time of the most recent error that happened when trying to synchronize available updates with Telegram datacenters
-	MaxConnections               int      `json:"max_connections,omitempty"`                 // Optional. The maximum allowed number of simultaneous HTTPS connections to the webhook for update delivery
-	AllowedUpdates               []string `json:"allowed_updates,omitempty"`                 // Optional. A list of update types the bot is subscribed to. Defaults to all update types except chat_member
+	Url                          string       `json:"url"`                                       // Webhook URL, may be empty if webhook is not set up
+	HasCustomCertificate         bool         `json:"has_custom_certificate"`                    // True, if a custom certificate was provided for webhook certificate checks
+	PendingUpdateCount           int          `json:"pending_update_count"`                      // Number of updates awaiting delivery
+	IpAddress                    string       `json:"ip_address,omitempty"`                      // Optional. Currently used webhook IP address
+	LastErrorDate                int          `json:"last_error_date,omitempty"`                 // Optional. Unix time for the most recent error that happened when trying to deliver an update via webhook
+	LastErrorMessage             string       `json:"last_error_message,omitempty"`              // Optional. Error message in human-readable format for the most recent error that happened when trying to deliver an update via webhook
+	LastSynchronizationErrorDate int          `json:"last_synchronization_error_date,omitempty"` // Optional. Unix time of the most recent error that happened when trying to synchronize available updates with Telegram datacenters
+	MaxConnections               int          `json:"max_connections,omitempty"`                 // Optional. The maximum allowed number of simultaneous HTTPS connections to the webhook for update delivery
+	AllowedUpdates               []UpdateType `json:"allowed_updates,omitempty"`                 // Optional. A list of update types the bot is subscribed to. Defaults to all update types except chat_member
 }
 
 // This object represents a Telegram user or bot.

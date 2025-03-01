@@ -92,21 +92,18 @@ package main
 import (
     "context"
     "fmt"
-    "time"
 
     "github.com/TrixiS/goram"
-    "github.com/TrixiS/goram/flood"
 )
 
 func main() {
     bot := goram.NewBot(goram.BotOptions{Token: "YOUR_TOKEN"})
-    ctx := context.Background()
 
-    updatesChan := goram.LongPollUpdates(ctx, bot, &goram.LongPollUpdatesOptions{
+    updatesChan := goram.LongPollUpdates(context.Background(), bot, &goram.LongPollUpdatesOptions{
         RequestOptions: goram.GetUpdatesRequest{
             Limit:          100,
             Timeout:        10,
-            AllowedUpdates: []string{goram.UpdateMessage, goram.UpdateEditedMessage},
+            AllowedUpdates: []goram.UpdateType{goram.UpdateMessage, goram.UpdateEditedMessage},
         },
     })
 

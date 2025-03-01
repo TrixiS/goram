@@ -24,10 +24,6 @@ type Handler interface {
 }
 
 // Dummy flood handler. It will just sleep for flood duration.
-// It might be a wrong choice in a highly concurrent environment,
-// because every goroutine that gets flooded will sleep for n amount of seconds.
-// Also, this handler has no separation of api methods. If one method is flooded,
-// any nonflooded method call will be delayed too.
 //
 // See `flood.CondHandler`.
 type SleepHandler struct {

@@ -68,16 +68,15 @@ func main() {
 		}
 	}
 
-	if spec.Types[0].Name == "Update" {
-		generateUpdates(spec.Types[0])
-	}
-
 	parser := NewParser(&spec)
 
-	generateEnums(spec.Enums)
+	updateType := spec.Types[0]
+
+	generateEnums(updateType, spec.Enums)
 	generateTypes(parser, spec.Types)
 	generateRequests(parser, spec.Methods)
 	generateMethods(parser, spec.Methods)
+	generateHandlers(updateType)
 
 	exec.Command("gofmt", "-s", "-w", ".").Run()
 }
@@ -85,29 +84,151 @@ func main() {
 const genFileMode = os.O_WRONLY | os.O_TRUNC | os.O_CREATE
 const genFilePerm = 0o660
 
-func generateUpdates(updateType Type) {
-	f, err := os.OpenFile("./updates.go", genFileMode, genFilePerm)
+func generateHandlers(updateType Type) {
+	f, err := os.OpenFile("./handlers/handlers.go", genFileMode, genFilePerm)
 
 	if err != nil {
 		panic(err)
 	}
 
-	f.WriteString("package goram\n\n")
-	f.WriteString("const (\n")
+	f.WriteString("package handlers\n\n")
+	f.WriteString(`
+		import "github.com/TrixiS/goram"
+		import "context"
+	`)
 
-	for _, field := range updateType.Fields[1:] { // skip update_id
-		name := "Update" + toPascalCase(field.Name)
-		f.WriteString(fmt.Sprintf("// %s\n", field.Description[len("Optional. "):]))
-		f.WriteString(fmt.Sprintf(`%s string = "%s"`, name, field.Name))
-		f.WriteString("\n\n")
+	f.WriteString(`
+		type routerHandlers[T any] struct {
+			filters []Filter[T] // router-level filters for this update
+			handlers []handler[T]
+		}`,
+	)
+
+	f.WriteString("\n\ntype handlers struct {\n")
+
+	for _, update := range updateType.Fields[1:] {
+		fieldName := toPascalCase(update.Name, false)
+		f.WriteString(fmt.Sprintf("%s routerHandlers[*goram.%s]\n", fieldName, update.Types[0]))
 	}
 
-	f.WriteString(")\n")
+	f.WriteString("}\n")
+
+	for _, update := range updateType.Fields[1:] {
+		updatePascalName := toPascalCase(update.Name, true)
+		structFieldName := toPascalCase(update.Name, false)
+		typeVar := "goram." + update.Types[0]
+
+		f.WriteString(fmt.Sprintf(`
+			// Add %s handler with provided filters
+			func (r *Router) %s(handlerFunc Func[*%s], filters... Filter[*%s]) *Router {
+				h := handler[*%s]{
+				cb: handlerFunc,
+				filters: filters,
+				}
+
+				r.handlers.%s.handlers = append(r.handlers.%s.handlers, h)
+				return r
+			}
+		`,
+			updatePascalName,
+			updatePascalName,
+			typeVar,
+			typeVar,
+			typeVar,
+			structFieldName,
+			structFieldName,
+		))
+	}
+
+	for _, u := range updateType.Fields[1:] {
+		handlersFieldName := toPascalCase(u.Name, false)
+		updatePascalName := toPascalCase(u.Name, true)
+
+		f.WriteString(fmt.Sprintf(`
+			// Add router-level filter(s) to %s update
+			func (r *Router) Filter%s(filters... Filter[*goram.%s]) *Router {
+				r.handlers.%s.filters = append(r.handlers.%s.filters, filters...)
+				return r
+			}
+		`,
+			updatePascalName,
+			updatePascalName,
+			u.Types[0],
+			handlersFieldName,
+			handlersFieldName,
+		))
+	}
+
+	f.WriteString("\n")
+
+	for _, u := range updateType.Fields[1:] {
+		pascalName := toPascalCase(u.Name, true)
+		def := fmt.Sprintf(
+			"func (r *Router) call%sHandlers(ctx context.Context, bot *goram.Bot, update *goram.%s, data Data) (bool, error) {",
+			pascalName,
+			u.Types[0],
+		)
+
+		f.WriteString(def)
+
+		handlersFieldName := toPascalCase(u.Name, false)
+
+		body := fmt.Sprintf(`
+			for _, filter := range r.handlers.%s.filters {
+				if !filter(ctx, bot, update, data) {
+					return false, nil
+				}
+			}
+
+			found, err := callHandlers(ctx, bot, r.handlers.%s.handlers, update, data)
+
+			if found {
+				return found, err
+			}
+
+			for _, child := range r.children {
+				found, err := child.call%sHandlers(ctx, bot, update, data)
+
+				if found {
+					return found, err
+				}
+			}
+
+			return false, nil
+		`,
+			handlersFieldName,
+			handlersFieldName,
+			pascalName,
+		)
+
+		f.WriteString(body)
+		f.WriteString("}\n\n")
+	}
+
+	f.WriteString(
+		"func (r *Router) feedUpdate(ctx context.Context, bot *goram.Bot, update *goram.Update, data Data) (bool, error) {\n",
+	)
+
+	for _, u := range updateType.Fields[1:] {
+		fieldName := toPascalCase(u.Name, true)
+
+		f.WriteString(fmt.Sprintf("if update.%s != nil {\n", fieldName))
+		f.WriteString(fmt.Sprintf(
+			"return r.call%sHandlers(ctx, bot, update.%s, data)\n",
+			fieldName,
+			fieldName,
+		))
+
+		f.WriteString("}\n")
+	}
+
+	f.WriteString("return false, nil\n")
+	f.WriteString("}\n")
 
 	f.Close()
 }
 
-func generateEnums(enums []Enum) {
+func generateEnums(updateType Type, enums []Enum) {
 	f, err := os.OpenFile("./enums.go", genFileMode, genFilePerm)
 
 	if err != nil {
@@ -123,13 +244,25 @@ func generateEnums(enums []Enum) {
 		f.WriteString("const (\n")
 
 		for _, v := range e.Values {
-			name := e.Name + toPascalCase(v)
+			name := e.Name + toPascalCase(v, true)
 			assig := fmt.Sprintf("%s %s = \"%s\"\n", name, e.Name, v)
 			f.WriteString(assig)
 		}
 
 		f.WriteString("\n)\n")
 	}
+
+	f.WriteString("type UpdateType string\n\n")
+	f.WriteString("const (\n")
+
+	for _, field := range updateType.Fields[1:] { // skip update_id
+		name := "Update" + toPascalCase(field.Name, true)
+		f.WriteString(fmt.Sprintf("// %s\n", field.Description[len("Optional. "):]))
+		f.WriteString(fmt.Sprintf(`%s UpdateType = "%s"`, name, field.Name))
+		f.WriteString("\n\n")
+	}
+
+	f.WriteString(")\n")
 
 	f.Close()
 }
@@ -150,7 +283,7 @@ func generateMethods(parser *Parser, methods []Method) {
 	`)
 
 	for _, m := range methods {
-		pascalName := toPascalCase(m.Name)
+		pascalName := toPascalCase(m.Name, true)
 		structName := pascalName
 
 		if !strings.HasSuffix(structName, "Request") {
@@ -224,7 +357,7 @@ func generateRequests(parser *Parser, methods []Method) {
 			continue
 		}
 
-		pascalName := toPascalCase(m.Type.Name)
+		pascalName := toPascalCase(m.Type.Name, true)
 		structName := pascalName
 		suffix := ""
 
@@ -426,7 +559,6 @@ func generateInputMediaMethods(w io.StringWriter, t *Type) {
 	`, t.Name))
 }
 
-// TODO: do not use fmt here
 func generateTypeString(parser *Parser, t *Type, suffix string, doc bool, tagJSON bool) string {
 	builder := strings.Builder{}
 
@@ -439,7 +571,7 @@ func generateTypeString(parser *Parser, t *Type, suffix string, doc bool, tagJSO
 		builder.WriteString(fmt.Sprintf("// %s\n", t.Href))
 	}
 
-	pascalName := toPascalCase(t.Name)
+	pascalName := toPascalCase(t.Name, true)
 
 	if suffix != "" {
 		pascalName += suffix
@@ -573,7 +705,7 @@ func (p *Parser) ParseSpecTypes(types []string) ParsedSpecType {
 func (p *Parser) ParseTypeField(t *TypeField) *ParsedTypeField {
 	ptf := &ParsedTypeField{
 		Field:  t,
-		GoName: toPascalCase(t.Name),
+		GoName: toPascalCase(t.Name, true),
 	}
 
 	if t.Name == "reply_markup" && len(t.Types) == 4 {
@@ -590,6 +722,10 @@ func (p *Parser) ParseTypeField(t *TypeField) *ParsedTypeField {
 		t.Name != "message_id" {
 
 		ptf.ParsedSpecType.GoType = "int64"
+	} else if t.Name == "allowed_updates" {
+		ptf.ParsedSpecType.GoType = "UpdateType"
+		ptf.ParsedSpecType.ParsedType = ParsedTypeArray
+		ptf.ParsedSpecType.Levels = 1
 	} else if t.Name == "parse_mode" {
 		ptf.ParsedSpecType.GoType = "ParseMode"
 		ptf.ParsedSpecType.ParsedType = ParsedTypeEnum
@@ -631,10 +767,10 @@ func (g *Parser) parseSpecType(p *ParsedSpecType, fieldType string) {
 		p.ParsedType = ParsedTypeStruct
 	}
 
-	p.GoType = toPascalCase(fieldType)
+	p.GoType = toPascalCase(fieldType, true)
 }
 
-func toPascalCase(v string) string {
+func toPascalCase(v string, title bool) string {
 	runes := []rune(v)
 	builder := strings.Builder{}
 	upper := false
@@ -645,7 +781,7 @@ func toPascalCase(v string) string {
 			continue
 		}
 
-		if upper || i == 0 {
+		if upper || (title && i == 0) {
 			upper = false
 			builder.WriteRune(unicode.ToUpper(r))
 		} else {
