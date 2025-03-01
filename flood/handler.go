@@ -23,7 +23,7 @@ type Handler interface {
 	) // Gets called when 429 error happens
 }
 
-// Dummy flood handler. It will just sleep for flood duration.
+// Dummy flood handler. It will just sleep for the flood duration.
 //
 // See `flood.CondHandler`.
 type SleepHandler struct {

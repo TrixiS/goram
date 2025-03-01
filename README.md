@@ -3,8 +3,10 @@
 Zero-dependency Telegram Bot API library for Go
 
 ```shell
-go get github.com/TrixiS/goram@latest
+go get -u github.com/TrixiS/goram@latest
 ```
+
+See [Examples](https://github.com/TrixiS/goram/tree/master/examples) and [Reference](https://pkg.go.dev/github.com/TrixiS/goram)
 
 ## Features
 
@@ -63,25 +65,6 @@ func main() {
     downloadedFile, _ := os.OpenFile("./downloaded.jpeg", os.O_CREATE|os.O_WRONLY, 0o660)
     bot.DownloadFile(ctx, message.Photo[0].FileId, downloadedFile) // takes io.Writer
 }
-```
-
-## Markups
-
-```Go
-import "github.com/TrixiS/goram/keyboards"
-
-bot.SendMessage(context.Background(), &goram.SendMessageRequest{
-    ChatId: goram.ChatId{Id: 578371487},
-    Text:   "Hello world",
-    ReplyMarkup: &goram.ReplyKeyboardMarkup{
-        Keyboard: keyboards.NewBuilder[goram.KeyboardButton]().
-            Add(goram.KeyboardButton{Text: "Hello"}).
-            Add(goram.KeyboardButton{Text: "World"}).
-            Adjust(1).
-            Build(),
-        ResizeKeyboard: true,
-    },
-})
 ```
 
 ## Updates

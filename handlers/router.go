@@ -26,7 +26,8 @@ type RouterOptions struct {
 }
 
 type Router struct {
-	Options  RouterOptions
+	Options RouterOptions
+
 	handlers handlers
 	children []*Router
 }

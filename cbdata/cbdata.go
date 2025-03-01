@@ -60,7 +60,7 @@ func Unpack[T any](prefix string, callbackData string) (T, error) {
 }
 
 // Creates callback query filter for callback data. Unpacks callback data and check the prefix.
-// If a query has no data, the created filter returns true.
+// If a query has no data, the created filter returns false.
 // If the prefix matches, the created filter puts unpacked callback data to handler data
 // with "callbackData" key and returns true. Othersise returns false.
 // Panics if the error returned from .Unpack() != ErrInvalidPrefix.
@@ -73,11 +73,11 @@ func Filter[T any](prefix string) handlers.Filter[*goram.CallbackQuery] {
 		value, err := Unpack[T](prefix, query.Data)
 
 		if err != nil {
-			if err == ErrInvalidPrefix {
-				return false
+			if err != ErrInvalidPrefix {
+				panic(err)
 			}
 
-			panic(err)
+			return false
 		}
 
 		data["callbackData"] = value
