@@ -426,23 +426,28 @@ func (r *Router) FilterRemovedChatBoost(filters ...Filter[*goram.ChatBoostRemove
 }
 
 func (r *Router) callMessageHandlers(ctx context.Context, bot *goram.Bot, update *goram.Message, data Data) (bool, error) {
-	for _, filter := range r.handlers.message.filters {
-		if !filter(ctx, bot, update, data) {
-			return false, nil
+	queue := make([]*Router, 0, len(r.children)+1)
+	queue = append(queue, r)
+
+queueLoop:
+	for len(queue) > 0 {
+		current := queue[0]
+		queue = queue[1:]
+
+		for _, filter := range current.handlers.message.filters {
+			if !filter(ctx, bot, update, data) {
+				continue queueLoop
+			}
 		}
-	}
 
-	found, err := callHandlers(ctx, bot, r.handlers.message.handlers, update, data)
-
-	if found {
-		return found, err
-	}
-
-	for _, child := range r.children {
-		found, err := child.callMessageHandlers(ctx, bot, update, data)
+		found, err := callHandlers(ctx, bot, current.handlers.message.handlers, update, data)
 
 		if found {
 			return found, err
+		}
+
+		if len(current.children) > 0 {
+			queue = append(queue, current.children...)
 		}
 	}
 
@@ -450,23 +455,28 @@ func (r *Router) callMessageHandlers(ctx context.Context, bot *goram.Bot, update
 }
 
 func (r *Router) callEditedMessageHandlers(ctx context.Context, bot *goram.Bot, update *goram.Message, data Data) (bool, error) {
-	for _, filter := range r.handlers.editedMessage.filters {
-		if !filter(ctx, bot, update, data) {
-			return false, nil
+	queue := make([]*Router, 0, len(r.children)+1)
+	queue = append(queue, r)
+
+queueLoop:
+	for len(queue) > 0 {
+		current := queue[0]
+		queue = queue[1:]
+
+		for _, filter := range current.handlers.editedMessage.filters {
+			if !filter(ctx, bot, update, data) {
+				continue queueLoop
+			}
 		}
-	}
 
-	found, err := callHandlers(ctx, bot, r.handlers.editedMessage.handlers, update, data)
-
-	if found {
-		return found, err
-	}
-
-	for _, child := range r.children {
-		found, err := child.callEditedMessageHandlers(ctx, bot, update, data)
+		found, err := callHandlers(ctx, bot, current.handlers.editedMessage.handlers, update, data)
 
 		if found {
 			return found, err
+		}
+
+		if len(current.children) > 0 {
+			queue = append(queue, current.children...)
 		}
 	}
 
@@ -474,23 +484,28 @@ func (r *Router) callEditedMessageHandlers(ctx context.Context, bot *goram.Bot, 
 }
 
 func (r *Router) callChannelPostHandlers(ctx context.Context, bot *goram.Bot, update *goram.Message, data Data) (bool, error) {
-	for _, filter := range r.handlers.channelPost.filters {
-		if !filter(ctx, bot, update, data) {
-			return false, nil
+	queue := make([]*Router, 0, len(r.children)+1)
+	queue = append(queue, r)
+
+queueLoop:
+	for len(queue) > 0 {
+		current := queue[0]
+		queue = queue[1:]
+
+		for _, filter := range current.handlers.channelPost.filters {
+			if !filter(ctx, bot, update, data) {
+				continue queueLoop
+			}
 		}
-	}
 
-	found, err := callHandlers(ctx, bot, r.handlers.channelPost.handlers, update, data)
-
-	if found {
-		return found, err
-	}
-
-	for _, child := range r.children {
-		found, err := child.callChannelPostHandlers(ctx, bot, update, data)
+		found, err := callHandlers(ctx, bot, current.handlers.channelPost.handlers, update, data)
 
 		if found {
 			return found, err
+		}
+
+		if len(current.children) > 0 {
+			queue = append(queue, current.children...)
 		}
 	}
 
@@ -498,23 +513,28 @@ func (r *Router) callChannelPostHandlers(ctx context.Context, bot *goram.Bot, up
 }
 
 func (r *Router) callEditedChannelPostHandlers(ctx context.Context, bot *goram.Bot, update *goram.Message, data Data) (bool, error) {
-	for _, filter := range r.handlers.editedChannelPost.filters {
-		if !filter(ctx, bot, update, data) {
-			return false, nil
+	queue := make([]*Router, 0, len(r.children)+1)
+	queue = append(queue, r)
+
+queueLoop:
+	for len(queue) > 0 {
+		current := queue[0]
+		queue = queue[1:]
+
+		for _, filter := range current.handlers.editedChannelPost.filters {
+			if !filter(ctx, bot, update, data) {
+				continue queueLoop
+			}
 		}
-	}
 
-	found, err := callHandlers(ctx, bot, r.handlers.editedChannelPost.handlers, update, data)
-
-	if found {
-		return found, err
-	}
-
-	for _, child := range r.children {
-		found, err := child.callEditedChannelPostHandlers(ctx, bot, update, data)
+		found, err := callHandlers(ctx, bot, current.handlers.editedChannelPost.handlers, update, data)
 
 		if found {
 			return found, err
+		}
+
+		if len(current.children) > 0 {
+			queue = append(queue, current.children...)
 		}
 	}
 
@@ -522,23 +542,28 @@ func (r *Router) callEditedChannelPostHandlers(ctx context.Context, bot *goram.B
 }
 
 func (r *Router) callBusinessConnectionHandlers(ctx context.Context, bot *goram.Bot, update *goram.BusinessConnection, data Data) (bool, error) {
-	for _, filter := range r.handlers.businessConnection.filters {
-		if !filter(ctx, bot, update, data) {
-			return false, nil
+	queue := make([]*Router, 0, len(r.children)+1)
+	queue = append(queue, r)
+
+queueLoop:
+	for len(queue) > 0 {
+		current := queue[0]
+		queue = queue[1:]
+
+		for _, filter := range current.handlers.businessConnection.filters {
+			if !filter(ctx, bot, update, data) {
+				continue queueLoop
+			}
 		}
-	}
 
-	found, err := callHandlers(ctx, bot, r.handlers.businessConnection.handlers, update, data)
-
-	if found {
-		return found, err
-	}
-
-	for _, child := range r.children {
-		found, err := child.callBusinessConnectionHandlers(ctx, bot, update, data)
+		found, err := callHandlers(ctx, bot, current.handlers.businessConnection.handlers, update, data)
 
 		if found {
 			return found, err
+		}
+
+		if len(current.children) > 0 {
+			queue = append(queue, current.children...)
 		}
 	}
 
@@ -546,23 +571,28 @@ func (r *Router) callBusinessConnectionHandlers(ctx context.Context, bot *goram.
 }
 
 func (r *Router) callBusinessMessageHandlers(ctx context.Context, bot *goram.Bot, update *goram.Message, data Data) (bool, error) {
-	for _, filter := range r.handlers.businessMessage.filters {
-		if !filter(ctx, bot, update, data) {
-			return false, nil
+	queue := make([]*Router, 0, len(r.children)+1)
+	queue = append(queue, r)
+
+queueLoop:
+	for len(queue) > 0 {
+		current := queue[0]
+		queue = queue[1:]
+
+		for _, filter := range current.handlers.businessMessage.filters {
+			if !filter(ctx, bot, update, data) {
+				continue queueLoop
+			}
 		}
-	}
 
-	found, err := callHandlers(ctx, bot, r.handlers.businessMessage.handlers, update, data)
-
-	if found {
-		return found, err
-	}
-
-	for _, child := range r.children {
-		found, err := child.callBusinessMessageHandlers(ctx, bot, update, data)
+		found, err := callHandlers(ctx, bot, current.handlers.businessMessage.handlers, update, data)
 
 		if found {
 			return found, err
+		}
+
+		if len(current.children) > 0 {
+			queue = append(queue, current.children...)
 		}
 	}
 
@@ -570,23 +600,28 @@ func (r *Router) callBusinessMessageHandlers(ctx context.Context, bot *goram.Bot
 }
 
 func (r *Router) callEditedBusinessMessageHandlers(ctx context.Context, bot *goram.Bot, update *goram.Message, data Data) (bool, error) {
-	for _, filter := range r.handlers.editedBusinessMessage.filters {
-		if !filter(ctx, bot, update, data) {
-			return false, nil
+	queue := make([]*Router, 0, len(r.children)+1)
+	queue = append(queue, r)
+
+queueLoop:
+	for len(queue) > 0 {
+		current := queue[0]
+		queue = queue[1:]
+
+		for _, filter := range current.handlers.editedBusinessMessage.filters {
+			if !filter(ctx, bot, update, data) {
+				continue queueLoop
+			}
 		}
-	}
 
-	found, err := callHandlers(ctx, bot, r.handlers.editedBusinessMessage.handlers, update, data)
-
-	if found {
-		return found, err
-	}
-
-	for _, child := range r.children {
-		found, err := child.callEditedBusinessMessageHandlers(ctx, bot, update, data)
+		found, err := callHandlers(ctx, bot, current.handlers.editedBusinessMessage.handlers, update, data)
 
 		if found {
 			return found, err
+		}
+
+		if len(current.children) > 0 {
+			queue = append(queue, current.children...)
 		}
 	}
 
@@ -594,23 +629,28 @@ func (r *Router) callEditedBusinessMessageHandlers(ctx context.Context, bot *gor
 }
 
 func (r *Router) callDeletedBusinessMessagesHandlers(ctx context.Context, bot *goram.Bot, update *goram.BusinessMessagesDeleted, data Data) (bool, error) {
-	for _, filter := range r.handlers.deletedBusinessMessages.filters {
-		if !filter(ctx, bot, update, data) {
-			return false, nil
+	queue := make([]*Router, 0, len(r.children)+1)
+	queue = append(queue, r)
+
+queueLoop:
+	for len(queue) > 0 {
+		current := queue[0]
+		queue = queue[1:]
+
+		for _, filter := range current.handlers.deletedBusinessMessages.filters {
+			if !filter(ctx, bot, update, data) {
+				continue queueLoop
+			}
 		}
-	}
 
-	found, err := callHandlers(ctx, bot, r.handlers.deletedBusinessMessages.handlers, update, data)
-
-	if found {
-		return found, err
-	}
-
-	for _, child := range r.children {
-		found, err := child.callDeletedBusinessMessagesHandlers(ctx, bot, update, data)
+		found, err := callHandlers(ctx, bot, current.handlers.deletedBusinessMessages.handlers, update, data)
 
 		if found {
 			return found, err
+		}
+
+		if len(current.children) > 0 {
+			queue = append(queue, current.children...)
 		}
 	}
 
@@ -618,23 +658,28 @@ func (r *Router) callDeletedBusinessMessagesHandlers(ctx context.Context, bot *g
 }
 
 func (r *Router) callMessageReactionHandlers(ctx context.Context, bot *goram.Bot, update *goram.MessageReactionUpdated, data Data) (bool, error) {
-	for _, filter := range r.handlers.messageReaction.filters {
-		if !filter(ctx, bot, update, data) {
-			return false, nil
+	queue := make([]*Router, 0, len(r.children)+1)
+	queue = append(queue, r)
+
+queueLoop:
+	for len(queue) > 0 {
+		current := queue[0]
+		queue = queue[1:]
+
+		for _, filter := range current.handlers.messageReaction.filters {
+			if !filter(ctx, bot, update, data) {
+				continue queueLoop
+			}
 		}
-	}
 
-	found, err := callHandlers(ctx, bot, r.handlers.messageReaction.handlers, update, data)
-
-	if found {
-		return found, err
-	}
-
-	for _, child := range r.children {
-		found, err := child.callMessageReactionHandlers(ctx, bot, update, data)
+		found, err := callHandlers(ctx, bot, current.handlers.messageReaction.handlers, update, data)
 
 		if found {
 			return found, err
+		}
+
+		if len(current.children) > 0 {
+			queue = append(queue, current.children...)
 		}
 	}
 
@@ -642,23 +687,28 @@ func (r *Router) callMessageReactionHandlers(ctx context.Context, bot *goram.Bot
 }
 
 func (r *Router) callMessageReactionCountHandlers(ctx context.Context, bot *goram.Bot, update *goram.MessageReactionCountUpdated, data Data) (bool, error) {
-	for _, filter := range r.handlers.messageReactionCount.filters {
-		if !filter(ctx, bot, update, data) {
-			return false, nil
+	queue := make([]*Router, 0, len(r.children)+1)
+	queue = append(queue, r)
+
+queueLoop:
+	for len(queue) > 0 {
+		current := queue[0]
+		queue = queue[1:]
+
+		for _, filter := range current.handlers.messageReactionCount.filters {
+			if !filter(ctx, bot, update, data) {
+				continue queueLoop
+			}
 		}
-	}
 
-	found, err := callHandlers(ctx, bot, r.handlers.messageReactionCount.handlers, update, data)
-
-	if found {
-		return found, err
-	}
-
-	for _, child := range r.children {
-		found, err := child.callMessageReactionCountHandlers(ctx, bot, update, data)
+		found, err := callHandlers(ctx, bot, current.handlers.messageReactionCount.handlers, update, data)
 
 		if found {
 			return found, err
+		}
+
+		if len(current.children) > 0 {
+			queue = append(queue, current.children...)
 		}
 	}
 
@@ -666,23 +716,28 @@ func (r *Router) callMessageReactionCountHandlers(ctx context.Context, bot *gora
 }
 
 func (r *Router) callInlineQueryHandlers(ctx context.Context, bot *goram.Bot, update *goram.InlineQuery, data Data) (bool, error) {
-	for _, filter := range r.handlers.inlineQuery.filters {
-		if !filter(ctx, bot, update, data) {
-			return false, nil
+	queue := make([]*Router, 0, len(r.children)+1)
+	queue = append(queue, r)
+
+queueLoop:
+	for len(queue) > 0 {
+		current := queue[0]
+		queue = queue[1:]
+
+		for _, filter := range current.handlers.inlineQuery.filters {
+			if !filter(ctx, bot, update, data) {
+				continue queueLoop
+			}
 		}
-	}
 
-	found, err := callHandlers(ctx, bot, r.handlers.inlineQuery.handlers, update, data)
-
-	if found {
-		return found, err
-	}
-
-	for _, child := range r.children {
-		found, err := child.callInlineQueryHandlers(ctx, bot, update, data)
+		found, err := callHandlers(ctx, bot, current.handlers.inlineQuery.handlers, update, data)
 
 		if found {
 			return found, err
+		}
+
+		if len(current.children) > 0 {
+			queue = append(queue, current.children...)
 		}
 	}
 
@@ -690,23 +745,28 @@ func (r *Router) callInlineQueryHandlers(ctx context.Context, bot *goram.Bot, up
 }
 
 func (r *Router) callChosenInlineResultHandlers(ctx context.Context, bot *goram.Bot, update *goram.ChosenInlineResult, data Data) (bool, error) {
-	for _, filter := range r.handlers.chosenInlineResult.filters {
-		if !filter(ctx, bot, update, data) {
-			return false, nil
+	queue := make([]*Router, 0, len(r.children)+1)
+	queue = append(queue, r)
+
+queueLoop:
+	for len(queue) > 0 {
+		current := queue[0]
+		queue = queue[1:]
+
+		for _, filter := range current.handlers.chosenInlineResult.filters {
+			if !filter(ctx, bot, update, data) {
+				continue queueLoop
+			}
 		}
-	}
 
-	found, err := callHandlers(ctx, bot, r.handlers.chosenInlineResult.handlers, update, data)
-
-	if found {
-		return found, err
-	}
-
-	for _, child := range r.children {
-		found, err := child.callChosenInlineResultHandlers(ctx, bot, update, data)
+		found, err := callHandlers(ctx, bot, current.handlers.chosenInlineResult.handlers, update, data)
 
 		if found {
 			return found, err
+		}
+
+		if len(current.children) > 0 {
+			queue = append(queue, current.children...)
 		}
 	}
 
@@ -714,23 +774,28 @@ func (r *Router) callChosenInlineResultHandlers(ctx context.Context, bot *goram.
 }
 
 func (r *Router) callCallbackQueryHandlers(ctx context.Context, bot *goram.Bot, update *goram.CallbackQuery, data Data) (bool, error) {
-	for _, filter := range r.handlers.callbackQuery.filters {
-		if !filter(ctx, bot, update, data) {
-			return false, nil
+	queue := make([]*Router, 0, len(r.children)+1)
+	queue = append(queue, r)
+
+queueLoop:
+	for len(queue) > 0 {
+		current := queue[0]
+		queue = queue[1:]
+
+		for _, filter := range current.handlers.callbackQuery.filters {
+			if !filter(ctx, bot, update, data) {
+				continue queueLoop
+			}
 		}
-	}
 
-	found, err := callHandlers(ctx, bot, r.handlers.callbackQuery.handlers, update, data)
-
-	if found {
-		return found, err
-	}
-
-	for _, child := range r.children {
-		found, err := child.callCallbackQueryHandlers(ctx, bot, update, data)
+		found, err := callHandlers(ctx, bot, current.handlers.callbackQuery.handlers, update, data)
 
 		if found {
 			return found, err
+		}
+
+		if len(current.children) > 0 {
+			queue = append(queue, current.children...)
 		}
 	}
 
@@ -738,23 +803,28 @@ func (r *Router) callCallbackQueryHandlers(ctx context.Context, bot *goram.Bot, 
 }
 
 func (r *Router) callShippingQueryHandlers(ctx context.Context, bot *goram.Bot, update *goram.ShippingQuery, data Data) (bool, error) {
-	for _, filter := range r.handlers.shippingQuery.filters {
-		if !filter(ctx, bot, update, data) {
-			return false, nil
+	queue := make([]*Router, 0, len(r.children)+1)
+	queue = append(queue, r)
+
+queueLoop:
+	for len(queue) > 0 {
+		current := queue[0]
+		queue = queue[1:]
+
+		for _, filter := range current.handlers.shippingQuery.filters {
+			if !filter(ctx, bot, update, data) {
+				continue queueLoop
+			}
 		}
-	}
 
-	found, err := callHandlers(ctx, bot, r.handlers.shippingQuery.handlers, update, data)
-
-	if found {
-		return found, err
-	}
-
-	for _, child := range r.children {
-		found, err := child.callShippingQueryHandlers(ctx, bot, update, data)
+		found, err := callHandlers(ctx, bot, current.handlers.shippingQuery.handlers, update, data)
 
 		if found {
 			return found, err
+		}
+
+		if len(current.children) > 0 {
+			queue = append(queue, current.children...)
 		}
 	}
 
@@ -762,23 +832,28 @@ func (r *Router) callShippingQueryHandlers(ctx context.Context, bot *goram.Bot, 
 }
 
 func (r *Router) callPreCheckoutQueryHandlers(ctx context.Context, bot *goram.Bot, update *goram.PreCheckoutQuery, data Data) (bool, error) {
-	for _, filter := range r.handlers.preCheckoutQuery.filters {
-		if !filter(ctx, bot, update, data) {
-			return false, nil
+	queue := make([]*Router, 0, len(r.children)+1)
+	queue = append(queue, r)
+
+queueLoop:
+	for len(queue) > 0 {
+		current := queue[0]
+		queue = queue[1:]
+
+		for _, filter := range current.handlers.preCheckoutQuery.filters {
+			if !filter(ctx, bot, update, data) {
+				continue queueLoop
+			}
 		}
-	}
 
-	found, err := callHandlers(ctx, bot, r.handlers.preCheckoutQuery.handlers, update, data)
-
-	if found {
-		return found, err
-	}
-
-	for _, child := range r.children {
-		found, err := child.callPreCheckoutQueryHandlers(ctx, bot, update, data)
+		found, err := callHandlers(ctx, bot, current.handlers.preCheckoutQuery.handlers, update, data)
 
 		if found {
 			return found, err
+		}
+
+		if len(current.children) > 0 {
+			queue = append(queue, current.children...)
 		}
 	}
 
@@ -786,23 +861,28 @@ func (r *Router) callPreCheckoutQueryHandlers(ctx context.Context, bot *goram.Bo
 }
 
 func (r *Router) callPurchasedPaidMediaHandlers(ctx context.Context, bot *goram.Bot, update *goram.PaidMediaPurchased, data Data) (bool, error) {
-	for _, filter := range r.handlers.purchasedPaidMedia.filters {
-		if !filter(ctx, bot, update, data) {
-			return false, nil
+	queue := make([]*Router, 0, len(r.children)+1)
+	queue = append(queue, r)
+
+queueLoop:
+	for len(queue) > 0 {
+		current := queue[0]
+		queue = queue[1:]
+
+		for _, filter := range current.handlers.purchasedPaidMedia.filters {
+			if !filter(ctx, bot, update, data) {
+				continue queueLoop
+			}
 		}
-	}
 
-	found, err := callHandlers(ctx, bot, r.handlers.purchasedPaidMedia.handlers, update, data)
-
-	if found {
-		return found, err
-	}
-
-	for _, child := range r.children {
-		found, err := child.callPurchasedPaidMediaHandlers(ctx, bot, update, data)
+		found, err := callHandlers(ctx, bot, current.handlers.purchasedPaidMedia.handlers, update, data)
 
 		if found {
 			return found, err
+		}
+
+		if len(current.children) > 0 {
+			queue = append(queue, current.children...)
 		}
 	}
 
@@ -810,23 +890,28 @@ func (r *Router) callPurchasedPaidMediaHandlers(ctx context.Context, bot *goram.
 }
 
 func (r *Router) callPollHandlers(ctx context.Context, bot *goram.Bot, update *goram.Poll, data Data) (bool, error) {
-	for _, filter := range r.handlers.poll.filters {
-		if !filter(ctx, bot, update, data) {
-			return false, nil
+	queue := make([]*Router, 0, len(r.children)+1)
+	queue = append(queue, r)
+
+queueLoop:
+	for len(queue) > 0 {
+		current := queue[0]
+		queue = queue[1:]
+
+		for _, filter := range current.handlers.poll.filters {
+			if !filter(ctx, bot, update, data) {
+				continue queueLoop
+			}
 		}
-	}
 
-	found, err := callHandlers(ctx, bot, r.handlers.poll.handlers, update, data)
-
-	if found {
-		return found, err
-	}
-
-	for _, child := range r.children {
-		found, err := child.callPollHandlers(ctx, bot, update, data)
+		found, err := callHandlers(ctx, bot, current.handlers.poll.handlers, update, data)
 
 		if found {
 			return found, err
+		}
+
+		if len(current.children) > 0 {
+			queue = append(queue, current.children...)
 		}
 	}
 
@@ -834,23 +919,28 @@ func (r *Router) callPollHandlers(ctx context.Context, bot *goram.Bot, update *g
 }
 
 func (r *Router) callPollAnswerHandlers(ctx context.Context, bot *goram.Bot, update *goram.PollAnswer, data Data) (bool, error) {
-	for _, filter := range r.handlers.pollAnswer.filters {
-		if !filter(ctx, bot, update, data) {
-			return false, nil
+	queue := make([]*Router, 0, len(r.children)+1)
+	queue = append(queue, r)
+
+queueLoop:
+	for len(queue) > 0 {
+		current := queue[0]
+		queue = queue[1:]
+
+		for _, filter := range current.handlers.pollAnswer.filters {
+			if !filter(ctx, bot, update, data) {
+				continue queueLoop
+			}
 		}
-	}
 
-	found, err := callHandlers(ctx, bot, r.handlers.pollAnswer.handlers, update, data)
-
-	if found {
-		return found, err
-	}
-
-	for _, child := range r.children {
-		found, err := child.callPollAnswerHandlers(ctx, bot, update, data)
+		found, err := callHandlers(ctx, bot, current.handlers.pollAnswer.handlers, update, data)
 
 		if found {
 			return found, err
+		}
+
+		if len(current.children) > 0 {
+			queue = append(queue, current.children...)
 		}
 	}
 
@@ -858,23 +948,28 @@ func (r *Router) callPollAnswerHandlers(ctx context.Context, bot *goram.Bot, upd
 }
 
 func (r *Router) callMyChatMemberHandlers(ctx context.Context, bot *goram.Bot, update *goram.ChatMemberUpdated, data Data) (bool, error) {
-	for _, filter := range r.handlers.myChatMember.filters {
-		if !filter(ctx, bot, update, data) {
-			return false, nil
+	queue := make([]*Router, 0, len(r.children)+1)
+	queue = append(queue, r)
+
+queueLoop:
+	for len(queue) > 0 {
+		current := queue[0]
+		queue = queue[1:]
+
+		for _, filter := range current.handlers.myChatMember.filters {
+			if !filter(ctx, bot, update, data) {
+				continue queueLoop
+			}
 		}
-	}
 
-	found, err := callHandlers(ctx, bot, r.handlers.myChatMember.handlers, update, data)
-
-	if found {
-		return found, err
-	}
-
-	for _, child := range r.children {
-		found, err := child.callMyChatMemberHandlers(ctx, bot, update, data)
+		found, err := callHandlers(ctx, bot, current.handlers.myChatMember.handlers, update, data)
 
 		if found {
 			return found, err
+		}
+
+		if len(current.children) > 0 {
+			queue = append(queue, current.children...)
 		}
 	}
 
@@ -882,23 +977,28 @@ func (r *Router) callMyChatMemberHandlers(ctx context.Context, bot *goram.Bot, u
 }
 
 func (r *Router) callChatMemberHandlers(ctx context.Context, bot *goram.Bot, update *goram.ChatMemberUpdated, data Data) (bool, error) {
-	for _, filter := range r.handlers.chatMember.filters {
-		if !filter(ctx, bot, update, data) {
-			return false, nil
+	queue := make([]*Router, 0, len(r.children)+1)
+	queue = append(queue, r)
+
+queueLoop:
+	for len(queue) > 0 {
+		current := queue[0]
+		queue = queue[1:]
+
+		for _, filter := range current.handlers.chatMember.filters {
+			if !filter(ctx, bot, update, data) {
+				continue queueLoop
+			}
 		}
-	}
 
-	found, err := callHandlers(ctx, bot, r.handlers.chatMember.handlers, update, data)
-
-	if found {
-		return found, err
-	}
-
-	for _, child := range r.children {
-		found, err := child.callChatMemberHandlers(ctx, bot, update, data)
+		found, err := callHandlers(ctx, bot, current.handlers.chatMember.handlers, update, data)
 
 		if found {
 			return found, err
+		}
+
+		if len(current.children) > 0 {
+			queue = append(queue, current.children...)
 		}
 	}
 
@@ -906,23 +1006,28 @@ func (r *Router) callChatMemberHandlers(ctx context.Context, bot *goram.Bot, upd
 }
 
 func (r *Router) callChatJoinRequestHandlers(ctx context.Context, bot *goram.Bot, update *goram.ChatJoinRequest, data Data) (bool, error) {
-	for _, filter := range r.handlers.chatJoinRequest.filters {
-		if !filter(ctx, bot, update, data) {
-			return false, nil
+	queue := make([]*Router, 0, len(r.children)+1)
+	queue = append(queue, r)
+
+queueLoop:
+	for len(queue) > 0 {
+		current := queue[0]
+		queue = queue[1:]
+
+		for _, filter := range current.handlers.chatJoinRequest.filters {
+			if !filter(ctx, bot, update, data) {
+				continue queueLoop
+			}
 		}
-	}
 
-	found, err := callHandlers(ctx, bot, r.handlers.chatJoinRequest.handlers, update, data)
-
-	if found {
-		return found, err
-	}
-
-	for _, child := range r.children {
-		found, err := child.callChatJoinRequestHandlers(ctx, bot, update, data)
+		found, err := callHandlers(ctx, bot, current.handlers.chatJoinRequest.handlers, update, data)
 
 		if found {
 			return found, err
+		}
+
+		if len(current.children) > 0 {
+			queue = append(queue, current.children...)
 		}
 	}
 
@@ -930,23 +1035,28 @@ func (r *Router) callChatJoinRequestHandlers(ctx context.Context, bot *goram.Bot
 }
 
 func (r *Router) callChatBoostHandlers(ctx context.Context, bot *goram.Bot, update *goram.ChatBoostUpdated, data Data) (bool, error) {
-	for _, filter := range r.handlers.chatBoost.filters {
-		if !filter(ctx, bot, update, data) {
-			return false, nil
+	queue := make([]*Router, 0, len(r.children)+1)
+	queue = append(queue, r)
+
+queueLoop:
+	for len(queue) > 0 {
+		current := queue[0]
+		queue = queue[1:]
+
+		for _, filter := range current.handlers.chatBoost.filters {
+			if !filter(ctx, bot, update, data) {
+				continue queueLoop
+			}
 		}
-	}
 
-	found, err := callHandlers(ctx, bot, r.handlers.chatBoost.handlers, update, data)
-
-	if found {
-		return found, err
-	}
-
-	for _, child := range r.children {
-		found, err := child.callChatBoostHandlers(ctx, bot, update, data)
+		found, err := callHandlers(ctx, bot, current.handlers.chatBoost.handlers, update, data)
 
 		if found {
 			return found, err
+		}
+
+		if len(current.children) > 0 {
+			queue = append(queue, current.children...)
 		}
 	}
 
@@ -954,29 +1064,33 @@ func (r *Router) callChatBoostHandlers(ctx context.Context, bot *goram.Bot, upda
 }
 
 func (r *Router) callRemovedChatBoostHandlers(ctx context.Context, bot *goram.Bot, update *goram.ChatBoostRemoved, data Data) (bool, error) {
-	for _, filter := range r.handlers.removedChatBoost.filters {
-		if !filter(ctx, bot, update, data) {
-			return false, nil
+	queue := make([]*Router, 0, len(r.children)+1)
+	queue = append(queue, r)
+
+queueLoop:
+	for len(queue) > 0 {
+		current := queue[0]
+		queue = queue[1:]
+
+		for _, filter := range current.handlers.removedChatBoost.filters {
+			if !filter(ctx, bot, update, data) {
+				continue queueLoop
+			}
 		}
-	}
 
-	found, err := callHandlers(ctx, bot, r.handlers.removedChatBoost.handlers, update, data)
-
-	if found {
-		return found, err
-	}
-
-	for _, child := range r.children {
-		found, err := child.callRemovedChatBoostHandlers(ctx, bot, update, data)
+		found, err := callHandlers(ctx, bot, current.handlers.removedChatBoost.handlers, update, data)
 
 		if found {
 			return found, err
+		}
+
+		if len(current.children) > 0 {
+			queue = append(queue, current.children...)
 		}
 	}
 
 	return false, nil
 }
-
 func (r *Router) feedUpdate(ctx context.Context, bot *goram.Bot, update *goram.Update, data Data) (bool, error) {
 	if update.Message != nil {
 		return r.callMessageHandlers(ctx, bot, update.Message, data)

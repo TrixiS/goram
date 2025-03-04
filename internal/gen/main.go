@@ -163,46 +163,43 @@ func generateHandlers(updateType Type) {
 
 	for _, u := range updateType.Fields[1:] {
 		pascalName := toPascalCase(u.Name, true)
-		def := fmt.Sprintf(
-			"func (r *Router) call%sHandlers(ctx context.Context, bot *goram.Bot, update *goram.%s, data Data) (bool, error) {",
-			pascalName,
-			u.Types[0],
-		)
-
-		f.WriteString(def)
-
 		handlersFieldName := toPascalCase(u.Name, false)
 
-		body := fmt.Sprintf(`
-			for _, filter := range r.handlers.%s.filters {
-				if !filter(ctx, bot, update, data) {
-					return false, nil
+		f.WriteString(fmt.Sprintf(`
+			func (r *Router) call%sHandlers(ctx context.Context, bot *goram.Bot, update *goram.%s, data Data) (bool, error) {
+				queue := make([]*Router, 0, len(r.children) + 1)			
+				queue = append(queue, r)
+
+			queueLoop:
+				for len(queue) > 0 {
+					current := queue[0]
+					queue = queue[1:]
+
+					for _, filter := range current.handlers.%s.filters {
+						if !filter(ctx, bot, update, data) {
+							continue queueLoop
+						}
+					}
+
+					found, err := callHandlers(ctx, bot, current.handlers.%s.handlers, update, data)
+
+					if found {
+						return found, err
+					}
+
+					if len(current.children) > 0 {
+						queue = append(queue, current.children...)
+					}
 				}
+
+				return false, nil
 			}
-
-			found, err := callHandlers(ctx, bot, r.handlers.%s.handlers, update, data)
-
-			if found {
-				return found, err
-			}
-
-			for _, child := range r.children {
-				found, err := child.call%sHandlers(ctx, bot, update, data)
-
-				if found {
-					return found, err
-				}
-			}
-
-			return false, nil
 		`,
-			handlersFieldName,
-			handlersFieldName,
 			pascalName,
-		)
-
-		f.WriteString(body)
-		f.WriteString("}\n\n")
+			u.Types[0],
+			handlersFieldName,
+			handlersFieldName,
+		))
 	}
 
 	f.WriteString(
