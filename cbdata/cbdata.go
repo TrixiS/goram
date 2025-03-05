@@ -3,6 +3,7 @@ package cbdata
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/binary"
 	"errors"
 
@@ -22,16 +23,19 @@ var ErrInvalidPrefix = errors.New("invalid prefix")
 // Prefix should not contain ':' since it is used as a delimiter.
 //
 // Returns packed callback data string. Panics if T can't be binary encoded.
-// The returned string len will be len(prefix) + 1 + sizeof(T). It is *not* checked to fit 64 bytes.
+// The returned string is *not* checked to fit 64 bytes.
 func Pack[T any](prefix string, value T) string {
 	buf := &bytes.Buffer{}
-	buf.WriteString(prefix)
-	buf.WriteByte(delim)
+	buf.Write([]byte(prefix))
+	buf.Write([]byte{delim})
 
-	if err := binary.Write(buf, binary.LittleEndian, value); err != nil {
+	encoder := base64.NewEncoder(base64.RawStdEncoding, buf)
+
+	if err := binary.Write(encoder, binary.LittleEndian, value); err != nil {
 		panic(err)
 	}
 
+	encoder.Close()
 	return buf.String()
 }
 
@@ -55,9 +59,12 @@ func Unpack[T any](prefix string, callbackData string) (T, error) {
 		return value, ErrInvalidPrefix
 	}
 
-	err := binary.Read(buf, binary.LittleEndian, &value)
+	decoder := base64.NewDecoder(base64.RawStdEncoding, buf)
+	err := binary.Read(decoder, binary.LittleEndian, &value)
 	return value, err
 }
+
+const HandlersDataKey = "callbackData"
 
 // Creates callback query filter for callback data. Unpacks callback data and check the prefix.
 // If a query has no data, the created filter returns false.
@@ -80,7 +87,7 @@ func Filter[T any](prefix string) handlers.Filter[*goram.CallbackQuery] {
 			return false
 		}
 
-		data["callbackData"] = value
+		data[HandlersDataKey] = value
 		return true
 	}
 }
@@ -95,7 +102,7 @@ func FilterFunc[T any](
 			return false
 		}
 
-		storedValue, exists := data["callbackData"]
+		storedValue, exists := data[HandlersDataKey]
 
 		if exists {
 			if data, ok := storedValue.(T); ok {
@@ -113,7 +120,7 @@ func FilterFunc[T any](
 			return false
 		}
 
-		data["callbackData"] = value
+		data[HandlersDataKey] = value
 		return predicate(value)
 	}
 }
