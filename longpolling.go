@@ -2,6 +2,7 @@ package goram
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"time"
 )
@@ -17,7 +18,7 @@ type LongPollUpdatesOptions struct {
 // Polls updates via calling Bot.GetUpdates() in a loop.
 // Streams []Update instead of just Update because it enables better media group handling.
 //
-// This function will panic if webhook is set.
+// This function will panic on conflict (webhook set or another instance calling getUpdates).
 func LongPollUpdates(
 	ctx context.Context,
 	bot *Bot,
@@ -42,6 +43,11 @@ func LongPollUpdates(
 				options.RequestOptions.Offset = updates[len(updates)-1].UpdateId + 1
 				c <- updates
 				continue
+			}
+
+			// TODO: test this
+			if errors.Is(err, context.Canceled) {
+				break
 			}
 
 			if !checkedForConflict {
