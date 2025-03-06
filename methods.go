@@ -769,8 +769,8 @@ func (b *Bot) GetChatMemberCount(ctx context.Context, request *GetChatMemberCoun
 // Use this method to get information about a member of a chat. The method is only guaranteed to work for other users if the bot is an administrator in the chat. Returns a ChatMember object on success.
 //
 // https://core.telegram.org/bots/api#getchatmember
-func (b *Bot) GetChatMember(ctx context.Context, request *GetChatMemberRequest) (r ChatMember, err error) {
-	res, err := makeRequest[ChatMember](ctx, b.options.Client, b.baseUrl, "getChatMember", b.options.FloodHandler, request)
+func (b *Bot) GetChatMember(ctx context.Context, request *GetChatMemberRequest) (r *ChatMember, err error) {
+	res, err := makeRequest[*ChatMember](ctx, b.options.Client, b.baseUrl, "getChatMember", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -1146,8 +1146,8 @@ func (b *Bot) SetChatMenuButton(ctx context.Context, request *SetChatMenuButtonR
 // Use this method to get the current value of the bot's menu button in a private chat, or the default menu button. Returns MenuButton on success.
 //
 // https://core.telegram.org/bots/api#getchatmenubutton
-func (b *Bot) GetChatMenuButton(ctx context.Context, request *GetChatMenuButtonRequest) (r MenuButton, err error) {
-	res, err := makeRequest[MenuButton](ctx, b.options.Client, b.baseUrl, "getChatMenuButton", b.options.FloodHandler, request)
+func (b *Bot) GetChatMenuButton(ctx context.Context, request *GetChatMenuButtonRequest) (r *MenuButton, err error) {
+	res, err := makeRequest[*MenuButton](ctx, b.options.Client, b.baseUrl, "getChatMenuButton", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err

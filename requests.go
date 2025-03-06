@@ -2776,9 +2776,9 @@ func (r *GetBusinessConnectionRequest) writeMultipart(w *multipart.Writer) {
 
 // see Bot.SetMyCommands(ctx, &SetMyCommandsRequest{})
 type SetMyCommandsRequest struct {
-	Commands     []BotCommand    // A JSON-serialized list of bot commands to be set as the list of the bot's commands. At most 100 commands can be specified.
-	Scope        BotCommandScope // A JSON-serialized object, describing scope of users for which the commands are relevant. Defaults to BotCommandScopeDefault.
-	LanguageCode string          // A two-letter ISO 639-1 language code. If empty, commands will be applied to all users from the given scope, for whose language there are no dedicated commands
+	Commands     []BotCommand     // A JSON-serialized list of bot commands to be set as the list of the bot's commands. At most 100 commands can be specified.
+	Scope        *BotCommandScope // A JSON-serialized object, describing scope of users for which the commands are relevant. Defaults to BotCommandScopeDefault.
+	LanguageCode string           // A two-letter ISO 639-1 language code. If empty, commands will be applied to all users from the given scope, for whose language there are no dedicated commands
 }
 
 func (r *SetMyCommandsRequest) writeMultipart(w *multipart.Writer) {
@@ -2801,8 +2801,8 @@ func (r *SetMyCommandsRequest) writeMultipart(w *multipart.Writer) {
 
 // see Bot.DeleteMyCommands(ctx, &DeleteMyCommandsRequest{})
 type DeleteMyCommandsRequest struct {
-	Scope        BotCommandScope // A JSON-serialized object, describing scope of users for which the commands are relevant. Defaults to BotCommandScopeDefault.
-	LanguageCode string          // A two-letter ISO 639-1 language code. If empty, commands will be applied to all users from the given scope, for whose language there are no dedicated commands
+	Scope        *BotCommandScope // A JSON-serialized object, describing scope of users for which the commands are relevant. Defaults to BotCommandScopeDefault.
+	LanguageCode string           // A two-letter ISO 639-1 language code. If empty, commands will be applied to all users from the given scope, for whose language there are no dedicated commands
 }
 
 func (r *DeleteMyCommandsRequest) writeMultipart(w *multipart.Writer) {
@@ -2820,8 +2820,8 @@ func (r *DeleteMyCommandsRequest) writeMultipart(w *multipart.Writer) {
 
 // see Bot.GetMyCommands(ctx, &GetMyCommandsRequest{})
 type GetMyCommandsRequest struct {
-	Scope        BotCommandScope // A JSON-serialized object, describing scope of users. Defaults to BotCommandScopeDefault.
-	LanguageCode string          // A two-letter ISO 639-1 language code or an empty string
+	Scope        *BotCommandScope // A JSON-serialized object, describing scope of users. Defaults to BotCommandScopeDefault.
+	LanguageCode string           // A two-letter ISO 639-1 language code or an empty string
 }
 
 func (r *GetMyCommandsRequest) writeMultipart(w *multipart.Writer) {
@@ -2917,8 +2917,8 @@ func (r *GetMyShortDescriptionRequest) writeMultipart(w *multipart.Writer) {
 
 // see Bot.SetChatMenuButton(ctx, &SetChatMenuButtonRequest{})
 type SetChatMenuButtonRequest struct {
-	ChatId     int64      // Unique identifier for the target private chat. If not specified, default bot's menu button will be changed
-	MenuButton MenuButton // A JSON-serialized object for the bot's new menu button. Defaults to MenuButtonDefault
+	ChatId     int64       // Unique identifier for the target private chat. If not specified, default bot's menu button will be changed
+	MenuButton *MenuButton // A JSON-serialized object for the bot's new menu button. Defaults to MenuButtonDefault
 }
 
 func (r *SetChatMenuButtonRequest) writeMultipart(w *multipart.Writer) {

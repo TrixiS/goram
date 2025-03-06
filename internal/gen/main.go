@@ -28,6 +28,8 @@ type Type struct {
 	Href        string      `json:"href"`
 	Description []string    `json:"description"`
 	Fields      []TypeField `json:"fields"`
+	SubTypes    []string    `json:"subtypes"`
+	SubTypeOf   []string    `json:"subtype_of"`
 }
 
 type Method struct {
@@ -72,11 +74,13 @@ func main() {
 
 	updateType := spec.Types[0]
 
+	// TODO: also generate enums for sum types
 	generateEnums(updateType, spec.Enums)
+	generateHandlers(updateType)
+
 	generateTypes(parser, spec.Types)
 	generateRequests(parser, spec.Methods)
 	generateMethods(parser, spec.Methods)
-	generateHandlers(updateType)
 
 	exec.Command("gofmt", "-s", "-w", ".").Run()
 }
@@ -107,15 +111,15 @@ func generateHandlers(updateType Type) {
 	f.WriteString("\n\ntype handlers struct {\n")
 
 	for _, update := range updateType.Fields[1:] {
-		fieldName := toPascalCase(update.Name, false)
+		fieldName := camelCase(update.Name, false)
 		f.WriteString(fmt.Sprintf("%s routerHandlers[*goram.%s]\n", fieldName, update.Types[0]))
 	}
 
 	f.WriteString("}\n")
 
 	for _, update := range updateType.Fields[1:] {
-		updatePascalName := toPascalCase(update.Name, true)
-		structFieldName := toPascalCase(update.Name, false)
+		updatePascalName := camelCase(update.Name, true)
+		structFieldName := camelCase(update.Name, false)
 		typeVar := "goram." + update.Types[0]
 
 		f.WriteString(fmt.Sprintf(`
@@ -141,8 +145,8 @@ func generateHandlers(updateType Type) {
 	}
 
 	for _, u := range updateType.Fields[1:] {
-		handlersFieldName := toPascalCase(u.Name, false)
-		updatePascalName := toPascalCase(u.Name, true)
+		handlersFieldName := camelCase(u.Name, false)
+		updatePascalName := camelCase(u.Name, true)
 
 		f.WriteString(fmt.Sprintf(`
 			// Add router-level filter(s) to %s update
@@ -162,8 +166,8 @@ func generateHandlers(updateType Type) {
 	f.WriteString("\n")
 
 	for _, u := range updateType.Fields[1:] {
-		pascalName := toPascalCase(u.Name, true)
-		handlersFieldName := toPascalCase(u.Name, false)
+		pascalName := camelCase(u.Name, true)
+		handlersFieldName := camelCase(u.Name, false)
 
 		f.WriteString(fmt.Sprintf(`
 			func (r *Router) call%sHandlers(ctx context.Context, bot *goram.Bot, update *goram.%s, data Data) (bool, error) {
@@ -207,7 +211,7 @@ func generateHandlers(updateType Type) {
 	)
 
 	for _, u := range updateType.Fields[1:] {
-		fieldName := toPascalCase(u.Name, true)
+		fieldName := camelCase(u.Name, true)
 
 		f.WriteString(fmt.Sprintf("if update.%s != nil {\n", fieldName))
 		f.WriteString(fmt.Sprintf(
@@ -241,7 +245,7 @@ func generateEnums(updateType Type, enums []Enum) {
 		f.WriteString("const (\n")
 
 		for _, v := range e.Values {
-			name := e.Name + toPascalCase(v, true)
+			name := e.Name + camelCase(v, true)
 			assig := fmt.Sprintf("%s %s = \"%s\"\n", name, e.Name, v)
 			f.WriteString(assig)
 		}
@@ -253,7 +257,7 @@ func generateEnums(updateType Type, enums []Enum) {
 	f.WriteString("const (\n")
 
 	for _, field := range updateType.Fields[1:] { // skip update_id
-		name := "Update" + toPascalCase(field.Name, true)
+		name := "Update" + camelCase(field.Name, true)
 		f.WriteString(fmt.Sprintf("// %s\n", field.Description[len("Optional. "):]))
 		f.WriteString(fmt.Sprintf(`%s UpdateType = "%s"`, name, field.Name))
 		f.WriteString("\n\n")
@@ -280,7 +284,7 @@ func generateMethods(parser *Parser, methods []Method) {
 	`)
 
 	for _, m := range methods {
-		pascalName := toPascalCase(m.Name, true)
+		pascalName := camelCase(m.Name, true)
 		structName := pascalName
 
 		if !strings.HasSuffix(structName, "Request") {
@@ -354,7 +358,7 @@ func generateRequests(parser *Parser, methods []Method) {
 			continue
 		}
 
-		pascalName := toPascalCase(m.Type.Name, true)
+		pascalName := camelCase(m.Type.Name, true)
 		structName := pascalName
 		suffix := ""
 
@@ -364,8 +368,7 @@ func generateRequests(parser *Parser, methods []Method) {
 		}
 
 		f.WriteString(fmt.Sprintf("// see Bot.%s(ctx, &%s{})\n", pascalName, structName))
-		typeString := generateTypeString(parser, &m.Type, suffix, false, false)
-		f.WriteString(typeString)
+		generateTypeStruct(f, parser.ParseType(&m.Type), suffix, false, false)
 		f.WriteString("\n")
 		generateRequestWriteMultipart(f, parser, &m, structName)
 	}
@@ -512,7 +515,12 @@ func generateRequestWriteMultipart(
 	w.WriteString("}\n")
 }
 
-var builtinTypes = []string{"InputMedia", "InputFile"}
+var builtinTypes = []string{
+	"InputMedia",
+	"InputFile",
+	"InaccessibleMessage",
+	"MaybeInaccessibleMessage",
+}
 
 func generateTypes(parser *Parser, types []Type) {
 	f, err := os.OpenFile("./types.go", genFileMode, genFilePerm)
@@ -528,7 +536,26 @@ func generateTypes(parser *Parser, types []Type) {
 			continue
 		}
 
-		f.WriteString(generateTypeString(parser, &t, "", true, true))
+		parseResult := parser.ParsedTypes[t.Name]
+
+		if len(t.SubTypeOf) > 0 {
+			if len(t.SubTypeOf) > 1 {
+				panic(t)
+			}
+
+			parentParseResult := parser.ParsedTypes[t.SubTypeOf[0]]
+
+			if checkSumType(parentParseResult.Type) {
+				continue
+			}
+		}
+
+		if checkSumType(&t) {
+			generateSumTypeStruct(f, parser.ParsedTypes, parseResult)
+			continue
+		}
+
+		generateTypeStruct(f, parseResult, "", true, true)
 
 		const inputMediaPrefix = "InputMedia"
 		const inputPaidMediaPrefix = "InputPaidMedia"
@@ -540,6 +567,64 @@ func generateTypes(parser *Parser, types []Type) {
 	}
 
 	f.Close()
+}
+
+var ignoredSumTypes = []string{
+	"InputMedia",
+	"InputPaidMedia",
+	"InlineQueryResult",
+	"MaybeInaccessibleMessage",
+	"InputMessageContent",
+}
+
+func checkSumType(t *Type) bool {
+	return len(t.SubTypes) > 0 && !slices.Contains(ignoredSumTypes, t.Name)
+}
+
+func generateSumTypeStruct(
+	w io.StringWriter,
+	parsedTypes map[string]TypeParseResult,
+	t TypeParseResult,
+) {
+	fields := []*ParsedTypeField{}
+
+	for _, s := range t.Type.SubTypes {
+		parsedType := parsedTypes[s]
+
+	parsedFieldsLoop:
+		for _, parsedField := range parsedType.Fields {
+			for _, field := range fields {
+				if field.Field.Name == parsedField.Field.Name {
+					continue parsedFieldsLoop
+				}
+			}
+
+			fields = append(fields, parsedField)
+		}
+	}
+
+	w.WriteString("\n")
+
+	for _, d := range t.Type.Description {
+		w.WriteString("//\n//")
+		w.WriteString(d)
+		w.WriteString("\n")
+	}
+
+	w.WriteString("//\n// ")
+	w.WriteString(t.Type.Href)
+	w.WriteString("\n")
+
+	w.WriteString("type ")
+	w.WriteString(t.Type.Name)
+	w.WriteString(" struct {")
+
+	for i, field := range fields {
+		w.WriteString("\n")
+		w.WriteString(field.StructField(true, i > 0))
+	}
+
+	w.WriteString("\n}\n\n")
 }
 
 func generateInputMediaMethods(w io.StringWriter, t *Type) {
@@ -556,44 +641,51 @@ func generateInputMediaMethods(w io.StringWriter, t *Type) {
 	`, t.Name))
 }
 
-func generateTypeString(parser *Parser, t *Type, suffix string, doc bool, tagJSON bool) string {
-	builder := strings.Builder{}
-
+func generateTypeStruct(
+	w io.StringWriter,
+	t TypeParseResult,
+	suffix string,
+	doc bool,
+	tagJSON bool,
+) {
 	if doc {
-		for _, d := range t.Description {
+		for _, d := range t.Type.Description {
 			comment := fmt.Sprintf("// %s\n//\n", d)
-			builder.WriteString(comment)
+			w.WriteString(comment)
 		}
 
-		builder.WriteString(fmt.Sprintf("// %s\n", t.Href))
+		w.WriteString(fmt.Sprintf("// %s\n", t.Type.Href))
 	}
 
-	pascalName := toPascalCase(t.Name, true)
+	camelName := camelCase(t.Type.Name, true)
 
 	if suffix != "" {
-		pascalName += suffix
+		camelName += suffix
 	}
 
 	if len(t.Fields) == 0 {
-		decl := fmt.Sprintf("type %s interface{}\n", pascalName)
-		builder.WriteString(decl)
-		return builder.String()
+		decl := fmt.Sprintf("type %s interface{}\n", camelName)
+		w.WriteString(decl)
+		return
 	}
 
-	decl := fmt.Sprintf("type %s struct {\n", pascalName)
-	builder.WriteString(decl)
+	decl := fmt.Sprintf("type %s struct {\n", camelName)
+	w.WriteString(decl)
 
 	for i, field := range t.Fields {
-		parsedTypeField := parser.ParseTypeField(&field)
-		builder.WriteString(parsedTypeField.StructField(tagJSON))
+		w.WriteString(field.StructField(tagJSON, true))
 
 		if i < len(t.Fields)-1 {
-			builder.WriteString("\n")
+			w.WriteString("\n")
 		}
 	}
 
-	builder.WriteString("\n}\n")
-	return builder.String()
+	w.WriteString("\n}\n")
+}
+
+type TypeParseResult struct {
+	Type   *Type
+	Fields []*ParsedTypeField
 }
 
 type ParsedType int
@@ -633,7 +725,7 @@ type ParsedTypeField struct {
 	ParsedSpecType ParsedSpecType
 }
 
-func (p *ParsedTypeField) StructField(tagJSON bool) string {
+func (p *ParsedTypeField) StructField(tagJSON bool, doc bool) string {
 	builder := strings.Builder{}
 
 	builder.WriteString(p.GoName)
@@ -653,8 +745,10 @@ func (p *ParsedTypeField) StructField(tagJSON bool) string {
 		builder.WriteString("\"`")
 	}
 
-	builder.WriteString(" // ")
-	builder.WriteString(p.Field.Description)
+	if doc {
+		builder.WriteString(" // ")
+		builder.WriteString(p.Field.Description)
+	}
 
 	return builder.String()
 }
@@ -662,47 +756,13 @@ func (p *ParsedTypeField) StructField(tagJSON bool) string {
 type Parser struct {
 	EnumNames      []string
 	InterfaceNames []string
-}
-
-func NewParser(spec *Spec) *Parser {
-	p := Parser{}
-
-	for _, e := range spec.Enums {
-		p.EnumNames = append(p.EnumNames, e.Name)
-	}
-
-	for _, t := range spec.Types {
-		if len(t.Fields) == 0 {
-			p.InterfaceNames = append(p.InterfaceNames, t.Name)
-		}
-	}
-
-	return &p
-}
-
-func (p *Parser) ParseSpecTypes(types []string) ParsedSpecType {
-	psc := ParsedSpecType{}
-
-	if len(types) == 1 && slices.Contains(p.EnumNames, types[0]) {
-		psc.GoType = types[0]
-		psc.ParsedType = ParsedTypeEnum
-	} else if len(types) == 1 && slices.Contains(p.InterfaceNames, types[0]) {
-		psc.GoType = types[0]
-		psc.ParsedType = ParsedTypeInterface
-	} else if len(types) == 2 && types[0] == "InputFile" {
-		psc.GoType = "InputFile"
-		psc.ParsedType = ParsedTypeInterface
-	} else {
-		p.parseSpecType(&psc, types[0])
-	}
-
-	return psc
+	ParsedTypes    map[string]TypeParseResult
 }
 
 func (p *Parser) ParseTypeField(t *TypeField) *ParsedTypeField {
 	ptf := &ParsedTypeField{
 		Field:  t,
-		GoName: toPascalCase(t.Name, true),
+		GoName: camelCase(t.Name, true),
 	}
 
 	if t.Name == "reply_markup" && len(t.Types) == 4 {
@@ -729,11 +789,68 @@ func (p *Parser) ParseTypeField(t *TypeField) *ParsedTypeField {
 	} else if t.Name == "media" && t.Types[0] == "String" {
 		ptf.ParsedSpecType.GoType = "InputFile"
 		ptf.ParsedSpecType.ParsedType = ParsedTypeInterface
+	} else if len(t.Types) > 0 && t.Types[0] == "MaybeInaccessibleMessage" {
+		ptf.ParsedSpecType.GoType = "Message"
+		ptf.ParsedSpecType.ParsedType = ParsedTypeStruct
 	} else {
 		ptf.ParsedSpecType = p.ParseSpecTypes(t.Types)
 	}
 
 	return ptf
+}
+
+func NewParser(spec *Spec) *Parser {
+	p := &Parser{
+		ParsedTypes: make(map[string]TypeParseResult, len(spec.Types)),
+	}
+
+	for _, e := range spec.Enums {
+		p.EnumNames = append(p.EnumNames, e.Name)
+	}
+
+	for _, t := range spec.Types {
+		if len(t.Fields) == 0 && !checkSumType(&t) {
+			p.InterfaceNames = append(p.InterfaceNames, t.Name)
+		}
+	}
+
+	for _, t := range spec.Types {
+		p.ParsedTypes[t.Name] = p.ParseType(&t)
+	}
+
+	return p
+}
+
+func (p *Parser) ParseType(t *Type) TypeParseResult {
+	fields := make([]*ParsedTypeField, len(t.Fields))
+
+	for i, field := range t.Fields {
+		fields[i] = p.ParseTypeField(&field)
+	}
+
+	return TypeParseResult{
+		Type:   t,
+		Fields: fields,
+	}
+}
+
+func (p *Parser) ParseSpecTypes(types []string) ParsedSpecType {
+	psc := ParsedSpecType{}
+
+	if len(types) == 1 && slices.Contains(p.EnumNames, types[0]) {
+		psc.GoType = types[0]
+		psc.ParsedType = ParsedTypeEnum
+	} else if len(types) == 1 && slices.Contains(p.InterfaceNames, types[0]) {
+		psc.GoType = types[0]
+		psc.ParsedType = ParsedTypeInterface
+	} else if len(types) == 2 && types[0] == "InputFile" {
+		psc.GoType = "InputFile"
+		psc.ParsedType = ParsedTypeInterface
+	} else {
+		p.parseSpecType(&psc, types[0])
+	}
+
+	return psc
 }
 
 func (g *Parser) parseSpecType(p *ParsedSpecType, fieldType string) {
@@ -764,10 +881,10 @@ func (g *Parser) parseSpecType(p *ParsedSpecType, fieldType string) {
 		p.ParsedType = ParsedTypeStruct
 	}
 
-	p.GoType = toPascalCase(fieldType, true)
+	p.GoType = camelCase(fieldType, true)
 }
 
-func toPascalCase(v string, title bool) string {
+func camelCase(v string, title bool) string {
 	runes := []rune(v)
 	builder := strings.Builder{}
 	upper := false

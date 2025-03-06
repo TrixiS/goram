@@ -143,7 +143,7 @@ type Message struct {
 	Date                          int                            `json:"date"`                                        // Date the message was sent in Unix time. It is always a positive number, representing a valid date.
 	BusinessConnectionId          string                         `json:"business_connection_id,omitempty"`            // Optional. Unique identifier of the business connection from which the message was received. If non-empty, the message belongs to a chat of the corresponding business account that is independent from any potential bot chat which might share the same identifier.
 	Chat                          *Chat                          `json:"chat"`                                        // Chat the message belongs to
-	ForwardOrigin                 MessageOrigin                  `json:"forward_origin,omitempty"`                    // Optional. Information about the original message for forwarded messages
+	ForwardOrigin                 *MessageOrigin                 `json:"forward_origin,omitempty"`                    // Optional. Information about the original message for forwarded messages
 	IsTopicMessage                bool                           `json:"is_topic_message,omitempty"`                  // Optional. True, if the message is sent to a forum topic
 	IsAutomaticForward            bool                           `json:"is_automatic_forward,omitempty"`              // Optional. True, if the message is a channel post that was automatically forwarded to the connected discussion group
 	ReplyToMessage                *Message                       `json:"reply_to_message,omitempty"`                  // Optional. For replies in the same chat and message thread, the original message. Note that the Message object in this field will not contain further reply_to_message fields even if it itself is a reply.
@@ -191,7 +191,7 @@ type Message struct {
 	MessageAutoDeleteTimerChanged *MessageAutoDeleteTimerChanged `json:"message_auto_delete_timer_changed,omitempty"` // Optional. Service message: auto-delete timer settings changed in the chat
 	MigrateToChatId               int64                          `json:"migrate_to_chat_id,omitempty"`                // Optional. The group has been migrated to a supergroup with the specified identifier. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a signed 64-bit integer or double-precision float type are safe for storing this identifier.
 	MigrateFromChatId             int64                          `json:"migrate_from_chat_id,omitempty"`              // Optional. The supergroup has been migrated from a group with the specified identifier. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a signed 64-bit integer or double-precision float type are safe for storing this identifier.
-	PinnedMessage                 MaybeInaccessibleMessage       `json:"pinned_message,omitempty"`                    // Optional. Specified message was pinned. Note that the Message object in this field will not contain further reply_to_message fields even if it itself is a reply.
+	PinnedMessage                 *Message                       `json:"pinned_message,omitempty"`                    // Optional. Specified message was pinned. Note that the Message object in this field will not contain further reply_to_message fields even if it itself is a reply.
 	Invoice                       *Invoice                       `json:"invoice,omitempty"`                           // Optional. Message is an invoice for a payment, information about the invoice. More about payments: https://core.telegram.org/bots/api#payments
 	SuccessfulPayment             *SuccessfulPayment             `json:"successful_payment,omitempty"`                // Optional. Message is a service message about a successful payment, information about the payment. More about payments: https://core.telegram.org/bots/api#payments
 	RefundedPayment               *RefundedPayment               `json:"refunded_payment,omitempty"`                  // Optional. Message is a service message about a refunded payment, information about the payment. More about payments: https://core.telegram.org/bots/api#payments
@@ -228,24 +228,6 @@ type MessageId struct {
 	MessageId int `json:"message_id"` // Unique message identifier. In specific instances (e.g., message containing a video sent to a big chat), the server might automatically schedule a message instead of sending it immediately. In such cases, this field will be 0 and the relevant message will be unusable until it is actually sent
 }
 
-// This object describes a message that was deleted or is otherwise inaccessible to the bot.
-//
-// https://core.telegram.org/bots/api#inaccessiblemessage
-type InaccessibleMessage struct {
-	Chat      *Chat `json:"chat"`       // Chat the message belonged to
-	MessageId int   `json:"message_id"` // Unique message identifier inside the chat
-	Date      int   `json:"date"`       // Always 0. The field can be used to differentiate regular and inaccessible messages.
-}
-
-// This object describes a message that can be inaccessible to the bot. It can be one of
-//
-// - Message
-//
-// - InaccessibleMessage
-//
-// https://core.telegram.org/bots/api#maybeinaccessiblemessage
-type MaybeInaccessibleMessage interface{}
-
 // This object represents one special entity in a text message. For example, hashtags, usernames, URLs, etc.
 //
 // https://core.telegram.org/bots/api#messageentity
@@ -273,7 +255,7 @@ type TextQuote struct {
 //
 // https://core.telegram.org/bots/api#externalreplyinfo
 type ExternalReplyInfo struct {
-	Origin             MessageOrigin       `json:"origin"`                         // Origin of the message replied to by the given message
+	Origin             *MessageOrigin      `json:"origin"`                         // Origin of the message replied to by the given message
 	Chat               *Chat               `json:"chat,omitempty"`                 // Optional. Chat the original message belongs to. Available only if the chat is a supergroup or a channel.
 	MessageId          int                 `json:"message_id,omitempty"`           // Optional. Unique message identifier inside the original chat. Available only if the original chat is a supergroup or a channel.
 	LinkPreviewOptions *LinkPreviewOptions `json:"link_preview_options,omitempty"` // Optional. Options used for link preview generation for the original message, if it is a text message
@@ -323,45 +305,15 @@ type ReplyParameters struct {
 // - MessageOriginChannel
 //
 // https://core.telegram.org/bots/api#messageorigin
-type MessageOrigin interface{}
-
-// The message was originally sent by a known user.
-//
-// https://core.telegram.org/bots/api#messageoriginuser
-type MessageOriginUser struct {
-	Type       string `json:"type"`        // Type of the message origin, always "user"
-	Date       int    `json:"date"`        // Date the message was sent originally in Unix time
-	SenderUser *User  `json:"sender_user"` // User that sent the message originally
-}
-
-// The message was originally sent by an unknown user.
-//
-// https://core.telegram.org/bots/api#messageoriginhiddenuser
-type MessageOriginHiddenUser struct {
-	Type           string `json:"type"`             // Type of the message origin, always "hidden_user"
-	Date           int    `json:"date"`             // Date the message was sent originally in Unix time
-	SenderUserName string `json:"sender_user_name"` // Name of the user that sent the message originally
-}
-
-// The message was originally sent on behalf of a chat to a group chat.
-//
-// https://core.telegram.org/bots/api#messageoriginchat
-type MessageOriginChat struct {
-	Type            string `json:"type"`                       // Type of the message origin, always "chat"
+type MessageOrigin struct {
+	Type            string `json:"type"`
 	Date            int    `json:"date"`                       // Date the message was sent originally in Unix time
+	SenderUser      *User  `json:"sender_user"`                // User that sent the message originally
+	SenderUserName  string `json:"sender_user_name"`           // Name of the user that sent the message originally
 	SenderChat      *Chat  `json:"sender_chat"`                // Chat that sent the message originally
 	AuthorSignature string `json:"author_signature,omitempty"` // Optional. For messages originally sent by an anonymous chat administrator, original message author signature
-}
-
-// The message was originally sent to a channel chat.
-//
-// https://core.telegram.org/bots/api#messageoriginchannel
-type MessageOriginChannel struct {
-	Type            string `json:"type"`                       // Type of the message origin, always "channel"
-	Date            int    `json:"date"`                       // Date the message was sent originally in Unix time
 	Chat            *Chat  `json:"chat"`                       // Channel chat to which the message was originally sent
 	MessageId       int    `json:"message_id"`                 // Unique message identifier inside the chat
-	AuthorSignature string `json:"author_signature,omitempty"` // Optional. Signature of the original post author
 }
 
 // This object represents one size of a photo or a file / sticker thumbnail.
@@ -482,32 +434,13 @@ type PaidMediaInfo struct {
 // - PaidMediaVideo
 //
 // https://core.telegram.org/bots/api#paidmedia
-type PaidMedia interface{}
-
-// The paid media isn't available before the payment.
-//
-// https://core.telegram.org/bots/api#paidmediapreview
-type PaidMediaPreview struct {
-	Type     string `json:"type"`               // Type of the paid media, always "preview"
-	Width    int    `json:"width,omitempty"`    // Optional. Media width as defined by the sender
-	Height   int    `json:"height,omitempty"`   // Optional. Media height as defined by the sender
-	Duration int    `json:"duration,omitempty"` // Optional. Duration of the media in seconds as defined by the sender
-}
-
-// The paid media is a photo.
-//
-// https://core.telegram.org/bots/api#paidmediaphoto
-type PaidMediaPhoto struct {
-	Type  string      `json:"type"`  // Type of the paid media, always "photo"
-	Photo []PhotoSize `json:"photo"` // The photo
-}
-
-// The paid media is a video.
-//
-// https://core.telegram.org/bots/api#paidmediavideo
-type PaidMediaVideo struct {
-	Type  string `json:"type"`  // Type of the paid media, always "video"
-	Video *Video `json:"video"` // The video
+type PaidMedia struct {
+	Type     string      `json:"type"`
+	Width    int         `json:"width,omitempty"`    // Optional. Media width as defined by the sender
+	Height   int         `json:"height,omitempty"`   // Optional. Media height as defined by the sender
+	Duration int         `json:"duration,omitempty"` // Optional. Duration of the media in seconds as defined by the sender
+	Photo    []PhotoSize `json:"photo"`              // The photo
+	Video    *Video      `json:"video"`              // The video
 }
 
 // This object represents a phone contact.
@@ -642,32 +575,13 @@ type ChatBoostAdded struct {
 // - BackgroundFillFreeformGradient
 //
 // https://core.telegram.org/bots/api#backgroundfill
-type BackgroundFill interface{}
-
-// The background is filled using the selected color.
-//
-// https://core.telegram.org/bots/api#backgroundfillsolid
-type BackgroundFillSolid struct {
-	Type  string `json:"type"`  // Type of the background fill, always "solid"
-	Color int    `json:"color"` // The color of the background fill in the RGB24 format
-}
-
-// The background is a gradient fill.
-//
-// https://core.telegram.org/bots/api#backgroundfillgradient
-type BackgroundFillGradient struct {
-	Type          string `json:"type"`           // Type of the background fill, always "gradient"
+type BackgroundFill struct {
+	Type          string `json:"type"`
+	Color         int    `json:"color"`          // The color of the background fill in the RGB24 format
 	TopColor      int    `json:"top_color"`      // Top color of the gradient in the RGB24 format
 	BottomColor   int    `json:"bottom_color"`   // Bottom color of the gradient in the RGB24 format
 	RotationAngle int    `json:"rotation_angle"` // Clockwise rotation angle of the background fill in degrees; 0-359
-}
-
-// The background is a freeform gradient that rotates after every message in the chat.
-//
-// https://core.telegram.org/bots/api#backgroundfillfreeformgradient
-type BackgroundFillFreeformGradient struct {
-	Type   string `json:"type"`   // Type of the background fill, always "freeform_gradient"
-	Colors []int  `json:"colors"` // A list of the 3 or 4 base colors that are used to generate the freeform gradient in the RGB24 format
+	Colors        []int  `json:"colors"`         // A list of the 3 or 4 base colors that are used to generate the freeform gradient in the RGB24 format
 }
 
 // This object describes the type of a background. Currently, it can be one of
@@ -681,53 +595,23 @@ type BackgroundFillFreeformGradient struct {
 // - BackgroundTypeChatTheme
 //
 // https://core.telegram.org/bots/api#backgroundtype
-type BackgroundType interface{}
-
-// The background is automatically filled based on the selected colors.
-//
-// https://core.telegram.org/bots/api#backgroundtypefill
-type BackgroundTypeFill struct {
-	Type             string         `json:"type"`               // Type of the background, always "fill"
-	Fill             BackgroundFill `json:"fill"`               // The background fill
-	DarkThemeDimming int            `json:"dark_theme_dimming"` // Dimming of the background in dark themes, as a percentage; 0-100
-}
-
-// The background is a wallpaper in the JPEG format.
-//
-// https://core.telegram.org/bots/api#backgroundtypewallpaper
-type BackgroundTypeWallpaper struct {
-	Type             string    `json:"type"`                 // Type of the background, always "wallpaper"
-	Document         *Document `json:"document"`             // Document with the wallpaper
-	DarkThemeDimming int       `json:"dark_theme_dimming"`   // Dimming of the background in dark themes, as a percentage; 0-100
-	IsBlurred        bool      `json:"is_blurred,omitempty"` // Optional. True, if the wallpaper is downscaled to fit in a 450x450 square and then box-blurred with radius 12
-	IsMoving         bool      `json:"is_moving,omitempty"`  // Optional. True, if the background moves slightly when the device is tilted
-}
-
-// The background is a .PNG or .TGV (gzipped subset of SVG with MIME type "application/x-tgwallpattern") pattern to be combined with the background fill chosen by the user.
-//
-// https://core.telegram.org/bots/api#backgroundtypepattern
-type BackgroundTypePattern struct {
-	Type       string         `json:"type"`                  // Type of the background, always "pattern"
-	Document   *Document      `json:"document"`              // Document with the pattern
-	Fill       BackgroundFill `json:"fill"`                  // The background fill that is combined with the pattern
-	Intensity  int            `json:"intensity"`             // Intensity of the pattern when it is shown above the filled background; 0-100
-	IsInverted bool           `json:"is_inverted,omitempty"` // Optional. True, if the background fill must be applied only to the pattern itself. All other pixels are black in this case. For dark themes only
-	IsMoving   bool           `json:"is_moving,omitempty"`   // Optional. True, if the background moves slightly when the device is tilted
-}
-
-// The background is taken directly from a built-in chat theme.
-//
-// https://core.telegram.org/bots/api#backgroundtypechattheme
-type BackgroundTypeChatTheme struct {
-	Type      string `json:"type"`       // Type of the background, always "chat_theme"
-	ThemeName string `json:"theme_name"` // Name of the chat theme, which is usually an emoji
+type BackgroundType struct {
+	Type             string          `json:"type"`
+	Fill             *BackgroundFill `json:"fill"`                  // The background fill
+	DarkThemeDimming int             `json:"dark_theme_dimming"`    // Dimming of the background in dark themes, as a percentage; 0-100
+	Document         *Document       `json:"document"`              // Document with the wallpaper
+	IsBlurred        bool            `json:"is_blurred,omitempty"`  // Optional. True, if the wallpaper is downscaled to fit in a 450x450 square and then box-blurred with radius 12
+	IsMoving         bool            `json:"is_moving,omitempty"`   // Optional. True, if the background moves slightly when the device is tilted
+	Intensity        int             `json:"intensity"`             // Intensity of the pattern when it is shown above the filled background; 0-100
+	IsInverted       bool            `json:"is_inverted,omitempty"` // Optional. True, if the background fill must be applied only to the pattern itself. All other pixels are black in this case. For dark themes only
+	ThemeName        string          `json:"theme_name"`            // Name of the chat theme, which is usually an emoji
 }
 
 // This object represents a chat background.
 //
 // https://core.telegram.org/bots/api#chatbackground
 type ChatBackground struct {
-	Type BackgroundType `json:"type"` // Type of the background
+	Type *BackgroundType `json:"type"` // Type of the background
 }
 
 // This object represents a service message about a new forum topic created in the chat.
@@ -1048,13 +932,13 @@ type CopyTextButton struct {
 //
 // https://core.telegram.org/bots/api#callbackquery
 type CallbackQuery struct {
-	Id              string                   `json:"id"`                          // Unique identifier for this query
-	From            *User                    `json:"from"`                        // Sender
-	Message         MaybeInaccessibleMessage `json:"message,omitempty"`           // Optional. Message sent by the bot with the callback button that originated the query
-	InlineMessageId string                   `json:"inline_message_id,omitempty"` // Optional. Identifier of the message sent via the bot in inline mode, that originated the query.
-	ChatInstance    string                   `json:"chat_instance"`               // Global identifier, uniquely corresponding to the chat to which the message with the callback button was sent. Useful for high scores in games.
-	Data            string                   `json:"data,omitempty"`              // Optional. Data associated with the callback button. Be aware that the message originated the query can contain no callback buttons with this data.
-	GameShortName   string                   `json:"game_short_name,omitempty"`   // Optional. Short name of a Game to be returned, serves as the unique identifier for the game
+	Id              string   `json:"id"`                          // Unique identifier for this query
+	From            *User    `json:"from"`                        // Sender
+	Message         *Message `json:"message,omitempty"`           // Optional. Message sent by the bot with the callback button that originated the query
+	InlineMessageId string   `json:"inline_message_id,omitempty"` // Optional. Identifier of the message sent via the bot in inline mode, that originated the query.
+	ChatInstance    string   `json:"chat_instance"`               // Global identifier, uniquely corresponding to the chat to which the message with the callback button was sent. Useful for high scores in games.
+	Data            string   `json:"data,omitempty"`              // Optional. Data associated with the callback button. Be aware that the message originated the query can contain no callback buttons with this data.
+	GameShortName   string   `json:"game_short_name,omitempty"`   // Optional. Short name of a Game to be returned, serves as the unique identifier for the game
 }
 
 // Upon receiving a message with this object, Telegram clients will display a reply interface to the user (act as if the user has selected the bot's message and tapped 'Reply'). This can be extremely useful if you want to create user-friendly step-by-step interfaces without having to sacrifice privacy mode. Not supported in channels and for messages sent on behalf of a Telegram Business account.
@@ -1121,8 +1005,8 @@ type ChatMemberUpdated struct {
 	Chat                    *Chat           `json:"chat"`                                  // Chat the user belongs to
 	From                    *User           `json:"from"`                                  // Performer of the action, which resulted in the change
 	Date                    int             `json:"date"`                                  // Date the change was done in Unix time
-	OldChatMember           ChatMember      `json:"old_chat_member"`                       // Previous information about the chat member
-	NewChatMember           ChatMember      `json:"new_chat_member"`                       // New information about the chat member
+	OldChatMember           *ChatMember     `json:"old_chat_member"`                       // Previous information about the chat member
+	NewChatMember           *ChatMember     `json:"new_chat_member"`                       // New information about the chat member
 	InviteLink              *ChatInviteLink `json:"invite_link,omitempty"`                 // Optional. Chat invite link, which was used by the user to join the chat; for joining by invite link events only.
 	ViaJoinRequest          bool            `json:"via_join_request,omitempty"`            // Optional. True, if the user joined the chat after sending a direct join request without using an invite link and being approved by an administrator
 	ViaChatFolderInviteLink bool            `json:"via_chat_folder_invite_link,omitempty"` // Optional. True, if the user joined the chat via a chat folder invite link
@@ -1143,91 +1027,38 @@ type ChatMemberUpdated struct {
 // - ChatMemberBanned
 //
 // https://core.telegram.org/bots/api#chatmember
-type ChatMember interface{}
-
-// Represents a chat member that owns the chat and has all administrator privileges.
-//
-// https://core.telegram.org/bots/api#chatmemberowner
-type ChatMemberOwner struct {
-	Status      string `json:"status"`                 // The member's status in the chat, always "creator"
-	User        *User  `json:"user"`                   // Information about the user
-	IsAnonymous bool   `json:"is_anonymous"`           // True, if the user's presence in the chat is hidden
-	CustomTitle string `json:"custom_title,omitempty"` // Optional. Custom title for this user
-}
-
-// Represents a chat member that has some additional privileges.
-//
-// https://core.telegram.org/bots/api#chatmemberadministrator
-type ChatMemberAdministrator struct {
-	Status              string `json:"status"`                      // The member's status in the chat, always "administrator"
-	User                *User  `json:"user"`                        // Information about the user
-	CanBeEdited         bool   `json:"can_be_edited"`               // True, if the bot is allowed to edit administrator privileges of that user
-	IsAnonymous         bool   `json:"is_anonymous"`                // True, if the user's presence in the chat is hidden
-	CanManageChat       bool   `json:"can_manage_chat"`             // True, if the administrator can access the chat event log, get boost list, see hidden supergroup and channel members, report spam messages and ignore slow mode. Implied by any other administrator privilege.
-	CanDeleteMessages   bool   `json:"can_delete_messages"`         // True, if the administrator can delete messages of other users
-	CanManageVideoChats bool   `json:"can_manage_video_chats"`      // True, if the administrator can manage video chats
-	CanRestrictMembers  bool   `json:"can_restrict_members"`        // True, if the administrator can restrict, ban or unban chat members, or access supergroup statistics
-	CanPromoteMembers   bool   `json:"can_promote_members"`         // True, if the administrator can add new administrators with a subset of their own privileges or demote administrators that they have promoted, directly or indirectly (promoted by administrators that were appointed by the user)
-	CanChangeInfo       bool   `json:"can_change_info"`             // True, if the user is allowed to change the chat title, photo and other settings
-	CanInviteUsers      bool   `json:"can_invite_users"`            // True, if the user is allowed to invite new users to the chat
-	CanPostStories      bool   `json:"can_post_stories"`            // True, if the administrator can post stories to the chat
-	CanEditStories      bool   `json:"can_edit_stories"`            // True, if the administrator can edit stories posted by other users, post stories to the chat page, pin chat stories, and access the chat's story archive
-	CanDeleteStories    bool   `json:"can_delete_stories"`          // True, if the administrator can delete stories posted by other users
-	CanPostMessages     bool   `json:"can_post_messages,omitempty"` // Optional. True, if the administrator can post messages in the channel, or access channel statistics; for channels only
-	CanEditMessages     bool   `json:"can_edit_messages,omitempty"` // Optional. True, if the administrator can edit messages of other users and can pin messages; for channels only
-	CanPinMessages      bool   `json:"can_pin_messages,omitempty"`  // Optional. True, if the user is allowed to pin messages; for groups and supergroups only
-	CanManageTopics     bool   `json:"can_manage_topics,omitempty"` // Optional. True, if the user is allowed to create, rename, close, and reopen forum topics; for supergroups only
-	CustomTitle         string `json:"custom_title,omitempty"`      // Optional. Custom title for this user
-}
-
-// Represents a chat member that has no additional privileges or restrictions.
-//
-// https://core.telegram.org/bots/api#chatmembermember
-type ChatMemberMember struct {
-	Status    string `json:"status"`               // The member's status in the chat, always "member"
-	User      *User  `json:"user"`                 // Information about the user
-	UntilDate int    `json:"until_date,omitempty"` // Optional. Date when the user's subscription will expire; Unix time
-}
-
-// Represents a chat member that is under certain restrictions in the chat. Supergroups only.
-//
-// https://core.telegram.org/bots/api#chatmemberrestricted
-type ChatMemberRestricted struct {
-	Status                string `json:"status"`                    // The member's status in the chat, always "restricted"
-	User                  *User  `json:"user"`                      // Information about the user
-	IsMember              bool   `json:"is_member"`                 // True, if the user is a member of the chat at the moment of the request
-	CanSendMessages       bool   `json:"can_send_messages"`         // True, if the user is allowed to send text messages, contacts, giveaways, giveaway winners, invoices, locations and venues
-	CanSendAudios         bool   `json:"can_send_audios"`           // True, if the user is allowed to send audios
-	CanSendDocuments      bool   `json:"can_send_documents"`        // True, if the user is allowed to send documents
-	CanSendPhotos         bool   `json:"can_send_photos"`           // True, if the user is allowed to send photos
-	CanSendVideos         bool   `json:"can_send_videos"`           // True, if the user is allowed to send videos
-	CanSendVideoNotes     bool   `json:"can_send_video_notes"`      // True, if the user is allowed to send video notes
-	CanSendVoiceNotes     bool   `json:"can_send_voice_notes"`      // True, if the user is allowed to send voice notes
-	CanSendPolls          bool   `json:"can_send_polls"`            // True, if the user is allowed to send polls
-	CanSendOtherMessages  bool   `json:"can_send_other_messages"`   // True, if the user is allowed to send animations, games, stickers and use inline bots
-	CanAddWebPagePreviews bool   `json:"can_add_web_page_previews"` // True, if the user is allowed to add web page previews to their messages
-	CanChangeInfo         bool   `json:"can_change_info"`           // True, if the user is allowed to change the chat title, photo and other settings
-	CanInviteUsers        bool   `json:"can_invite_users"`          // True, if the user is allowed to invite new users to the chat
-	CanPinMessages        bool   `json:"can_pin_messages"`          // True, if the user is allowed to pin messages
-	CanManageTopics       bool   `json:"can_manage_topics"`         // True, if the user is allowed to create forum topics
-	UntilDate             int    `json:"until_date"`                // Date when restrictions will be lifted for this user; Unix time. If 0, then the user is restricted forever
-}
-
-// Represents a chat member that isn't currently a member of the chat, but may join it themselves.
-//
-// https://core.telegram.org/bots/api#chatmemberleft
-type ChatMemberLeft struct {
-	Status string `json:"status"` // The member's status in the chat, always "left"
-	User   *User  `json:"user"`   // Information about the user
-}
-
-// Represents a chat member that was banned in the chat and can't return to the chat or view chat messages.
-//
-// https://core.telegram.org/bots/api#chatmemberbanned
-type ChatMemberBanned struct {
-	Status    string `json:"status"`     // The member's status in the chat, always "kicked"
-	User      *User  `json:"user"`       // Information about the user
-	UntilDate int    `json:"until_date"` // Date when restrictions will be lifted for this user; Unix time. If 0, then the user is banned forever
+type ChatMember struct {
+	Status                string `json:"status"`
+	User                  *User  `json:"user"`                        // Information about the user
+	IsAnonymous           bool   `json:"is_anonymous"`                // True, if the user's presence in the chat is hidden
+	CustomTitle           string `json:"custom_title,omitempty"`      // Optional. Custom title for this user
+	CanBeEdited           bool   `json:"can_be_edited"`               // True, if the bot is allowed to edit administrator privileges of that user
+	CanManageChat         bool   `json:"can_manage_chat"`             // True, if the administrator can access the chat event log, get boost list, see hidden supergroup and channel members, report spam messages and ignore slow mode. Implied by any other administrator privilege.
+	CanDeleteMessages     bool   `json:"can_delete_messages"`         // True, if the administrator can delete messages of other users
+	CanManageVideoChats   bool   `json:"can_manage_video_chats"`      // True, if the administrator can manage video chats
+	CanRestrictMembers    bool   `json:"can_restrict_members"`        // True, if the administrator can restrict, ban or unban chat members, or access supergroup statistics
+	CanPromoteMembers     bool   `json:"can_promote_members"`         // True, if the administrator can add new administrators with a subset of their own privileges or demote administrators that they have promoted, directly or indirectly (promoted by administrators that were appointed by the user)
+	CanChangeInfo         bool   `json:"can_change_info"`             // True, if the user is allowed to change the chat title, photo and other settings
+	CanInviteUsers        bool   `json:"can_invite_users"`            // True, if the user is allowed to invite new users to the chat
+	CanPostStories        bool   `json:"can_post_stories"`            // True, if the administrator can post stories to the chat
+	CanEditStories        bool   `json:"can_edit_stories"`            // True, if the administrator can edit stories posted by other users, post stories to the chat page, pin chat stories, and access the chat's story archive
+	CanDeleteStories      bool   `json:"can_delete_stories"`          // True, if the administrator can delete stories posted by other users
+	CanPostMessages       bool   `json:"can_post_messages,omitempty"` // Optional. True, if the administrator can post messages in the channel, or access channel statistics; for channels only
+	CanEditMessages       bool   `json:"can_edit_messages,omitempty"` // Optional. True, if the administrator can edit messages of other users and can pin messages; for channels only
+	CanPinMessages        bool   `json:"can_pin_messages,omitempty"`  // Optional. True, if the user is allowed to pin messages; for groups and supergroups only
+	CanManageTopics       bool   `json:"can_manage_topics,omitempty"` // Optional. True, if the user is allowed to create, rename, close, and reopen forum topics; for supergroups only
+	UntilDate             int    `json:"until_date,omitempty"`        // Optional. Date when the user's subscription will expire; Unix time
+	IsMember              bool   `json:"is_member"`                   // True, if the user is a member of the chat at the moment of the request
+	CanSendMessages       bool   `json:"can_send_messages"`           // True, if the user is allowed to send text messages, contacts, giveaways, giveaway winners, invoices, locations and venues
+	CanSendAudios         bool   `json:"can_send_audios"`             // True, if the user is allowed to send audios
+	CanSendDocuments      bool   `json:"can_send_documents"`          // True, if the user is allowed to send documents
+	CanSendPhotos         bool   `json:"can_send_photos"`             // True, if the user is allowed to send photos
+	CanSendVideos         bool   `json:"can_send_videos"`             // True, if the user is allowed to send videos
+	CanSendVideoNotes     bool   `json:"can_send_video_notes"`        // True, if the user is allowed to send video notes
+	CanSendVoiceNotes     bool   `json:"can_send_voice_notes"`        // True, if the user is allowed to send voice notes
+	CanSendPolls          bool   `json:"can_send_polls"`              // True, if the user is allowed to send polls
+	CanSendOtherMessages  bool   `json:"can_send_other_messages"`     // True, if the user is allowed to send animations, games, stickers and use inline bots
+	CanAddWebPagePreviews bool   `json:"can_add_web_page_previews"`   // True, if the user is allowed to add web page previews to their messages
 }
 
 // Represents a join request sent to a chat.
@@ -1321,37 +1152,18 @@ type ChatLocation struct {
 // - ReactionTypePaid
 //
 // https://core.telegram.org/bots/api#reactiontype
-type ReactionType interface{}
-
-// The reaction is based on an emoji.
-//
-// https://core.telegram.org/bots/api#reactiontypeemoji
-type ReactionTypeEmoji struct {
-	Type  string `json:"type"`  // Type of the reaction, always "emoji"
-	Emoji string `json:"emoji"` // Reaction emoji. Currently, it can be one of "👍", "👎", "❤", "🔥", "🥰", "👏", "😁", "🤔", "🤯", "😱", "🤬", "😢", "🎉", "🤩", "🤮", "💩", "🙏", "👌", "🕊", "🤡", "🥱", "🥴", "😍", "🐳", "❤‍🔥", "🌚", "🌭", "💯", "🤣", "⚡", "🍌", "🏆", "💔", "🤨", "😐", "🍓", "🍾", "💋", "🖕", "😈", "😴", "😭", "🤓", "👻", "👨‍💻", "👀", "🎃", "🙈", "😇", "😨", "🤝", "✍", "🤗", "🫡", "🎅", "🎄", "☃", "💅", "🤪", "🗿", "🆒", "💘", "🙉", "🦄", "😘", "💊", "🙊", "😎", "👾", "🤷‍♂", "🤷", "🤷‍♀", "😡"
-}
-
-// The reaction is based on a custom emoji.
-//
-// https://core.telegram.org/bots/api#reactiontypecustomemoji
-type ReactionTypeCustomEmoji struct {
-	Type          string `json:"type"`            // Type of the reaction, always "custom_emoji"
+type ReactionType struct {
+	Type          string `json:"type"`
+	Emoji         string `json:"emoji"`           // Reaction emoji. Currently, it can be one of "👍", "👎", "❤", "🔥", "🥰", "👏", "😁", "🤔", "🤯", "😱", "🤬", "😢", "🎉", "🤩", "🤮", "💩", "🙏", "👌", "🕊", "🤡", "🥱", "🥴", "😍", "🐳", "❤‍🔥", "🌚", "🌭", "💯", "🤣", "⚡", "🍌", "🏆", "💔", "🤨", "😐", "🍓", "🍾", "💋", "🖕", "😈", "😴", "😭", "🤓", "👻", "👨‍💻", "👀", "🎃", "🙈", "😇", "😨", "🤝", "✍", "🤗", "🫡", "🎅", "🎄", "☃", "💅", "🤪", "🗿", "🆒", "💘", "🙉", "🦄", "😘", "💊", "🙊", "😎", "👾", "🤷‍♂", "🤷", "🤷‍♀", "😡"
 	CustomEmojiId string `json:"custom_emoji_id"` // Custom emoji identifier
-}
-
-// The reaction is paid.
-//
-// https://core.telegram.org/bots/api#reactiontypepaid
-type ReactionTypePaid struct {
-	Type string `json:"type"` // Type of the reaction, always "paid"
 }
 
 // Represents a reaction added to a message along with the number of times it was added.
 //
 // https://core.telegram.org/bots/api#reactioncount
 type ReactionCount struct {
-	Type       ReactionType `json:"type"`        // Type of the reaction
-	TotalCount int          `json:"total_count"` // Number of times the reaction was added
+	Type       *ReactionType `json:"type"`        // Type of the reaction
+	TotalCount int           `json:"total_count"` // Number of times the reaction was added
 }
 
 // This object represents a change of a reaction on a message performed by a user.
@@ -1412,57 +1224,8 @@ type BotCommand struct {
 // - BotCommandScopeChatMember
 //
 // https://core.telegram.org/bots/api#botcommandscope
-type BotCommandScope interface{}
-
-// Represents the default scope of bot commands. Default commands are used if no commands with a narrower scope are specified for the user.
-//
-// https://core.telegram.org/bots/api#botcommandscopedefault
-type BotCommandScopeDefault struct {
-	Type string `json:"type"` // Scope type, must be default
-}
-
-// Represents the scope of bot commands, covering all private chats.
-//
-// https://core.telegram.org/bots/api#botcommandscopeallprivatechats
-type BotCommandScopeAllPrivateChats struct {
-	Type string `json:"type"` // Scope type, must be all_private_chats
-}
-
-// Represents the scope of bot commands, covering all group and supergroup chats.
-//
-// https://core.telegram.org/bots/api#botcommandscopeallgroupchats
-type BotCommandScopeAllGroupChats struct {
-	Type string `json:"type"` // Scope type, must be all_group_chats
-}
-
-// Represents the scope of bot commands, covering all group and supergroup chat administrators.
-//
-// https://core.telegram.org/bots/api#botcommandscopeallchatadministrators
-type BotCommandScopeAllChatAdministrators struct {
-	Type string `json:"type"` // Scope type, must be all_chat_administrators
-}
-
-// Represents the scope of bot commands, covering a specific chat.
-//
-// https://core.telegram.org/bots/api#botcommandscopechat
-type BotCommandScopeChat struct {
-	Type   string `json:"type"`    // Scope type, must be chat
-	ChatId ChatId `json:"chat_id"` // Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
-}
-
-// Represents the scope of bot commands, covering all administrators of a specific group or supergroup chat.
-//
-// https://core.telegram.org/bots/api#botcommandscopechatadministrators
-type BotCommandScopeChatAdministrators struct {
-	Type   string `json:"type"`    // Scope type, must be chat_administrators
-	ChatId ChatId `json:"chat_id"` // Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
-}
-
-// Represents the scope of bot commands, covering a specific member of a group or supergroup chat.
-//
-// https://core.telegram.org/bots/api#botcommandscopechatmember
-type BotCommandScopeChatMember struct {
-	Type   string `json:"type"`    // Scope type, must be chat_member
+type BotCommandScope struct {
+	Type   string `json:"type"`
 	ChatId ChatId `json:"chat_id"` // Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 	UserId int64  `json:"user_id"` // Unique identifier of the target user
 }
@@ -1499,29 +1262,10 @@ type BotShortDescription struct {
 // If a menu button other than MenuButtonDefault is set for a private chat, then it is applied in the chat. Otherwise the default menu button is applied. By default, the menu button opens the list of bot commands.
 //
 // https://core.telegram.org/bots/api#menubutton
-type MenuButton interface{}
-
-// Represents a menu button, which opens the bot's list of commands.
-//
-// https://core.telegram.org/bots/api#menubuttoncommands
-type MenuButtonCommands struct {
-	Type string `json:"type"` // Type of the button, must be commands
-}
-
-// Represents a menu button, which launches a Web App.
-//
-// https://core.telegram.org/bots/api#menubuttonwebapp
-type MenuButtonWebApp struct {
-	Type   string      `json:"type"`    // Type of the button, must be web_app
+type MenuButton struct {
+	Type   string      `json:"type"`
 	Text   string      `json:"text"`    // Text on the button
 	WebApp *WebAppInfo `json:"web_app"` // Description of the Web App that will be launched when the user presses the button. The Web App will be able to send an arbitrary message on behalf of the user using the method answerWebAppQuery. Alternatively, a t.me link to a Web App of the bot can be specified in the object instead of the Web App's URL, in which case the Web App will be opened as if the user pressed the link.
-}
-
-// Describes that no specific value for the menu button was set.
-//
-// https://core.telegram.org/bots/api#menubuttondefault
-type MenuButtonDefault struct {
-	Type string `json:"type"` // Type of the button, must be default
 }
 
 // This object describes the source of a chat boost. It can be one of
@@ -1533,31 +1277,10 @@ type MenuButtonDefault struct {
 // - ChatBoostSourceGiveaway
 //
 // https://core.telegram.org/bots/api#chatboostsource
-type ChatBoostSource interface{}
-
-// The boost was obtained by subscribing to Telegram Premium or by gifting a Telegram Premium subscription to another user.
-//
-// https://core.telegram.org/bots/api#chatboostsourcepremium
-type ChatBoostSourcePremium struct {
-	Source string `json:"source"` // Source of the boost, always "premium"
-	User   *User  `json:"user"`   // User that boosted the chat
-}
-
-// The boost was obtained by the creation of Telegram Premium gift codes to boost a chat. Each such code boosts the chat 4 times for the duration of the corresponding Telegram Premium subscription.
-//
-// https://core.telegram.org/bots/api#chatboostsourcegiftcode
-type ChatBoostSourceGiftCode struct {
-	Source string `json:"source"` // Source of the boost, always "gift_code"
-	User   *User  `json:"user"`   // User for which the gift code was created
-}
-
-// The boost was obtained by the creation of a Telegram Premium or a Telegram Star giveaway. This boosts the chat 4 times for the duration of the corresponding Telegram Premium subscription for Telegram Premium giveaways and prize_star_count / 500 times for one year for Telegram Star giveaways.
-//
-// https://core.telegram.org/bots/api#chatboostsourcegiveaway
-type ChatBoostSourceGiveaway struct {
-	Source            string `json:"source"`                     // Source of the boost, always "giveaway"
+type ChatBoostSource struct {
+	Source            string `json:"source"`
+	User              *User  `json:"user"`                       // User that boosted the chat
 	GiveawayMessageId int64  `json:"giveaway_message_id"`        // Identifier of a message in the chat with the giveaway; the message could have been deleted already. May be 0 if the message isn't sent yet.
-	User              *User  `json:"user,omitempty"`             // Optional. User that won the prize in the giveaway if any; for Telegram Premium giveaways only
 	PrizeStarCount    int    `json:"prize_star_count,omitempty"` // Optional. The number of Telegram Stars to be split between giveaway winners; for Telegram Star giveaways only
 	IsUnclaimed       bool   `json:"is_unclaimed,omitempty"`     // Optional. True, if the giveaway was completed, but there was no user to win the prize
 }
@@ -1566,10 +1289,10 @@ type ChatBoostSourceGiveaway struct {
 //
 // https://core.telegram.org/bots/api#chatboost
 type ChatBoost struct {
-	BoostId        string          `json:"boost_id"`        // Unique identifier of the boost
-	AddDate        int             `json:"add_date"`        // Point in time (Unix timestamp) when the chat was boosted
-	ExpirationDate int             `json:"expiration_date"` // Point in time (Unix timestamp) when the boost will automatically expire, unless the booster's Telegram Premium subscription is prolonged
-	Source         ChatBoostSource `json:"source"`          // Source of the added boost
+	BoostId        string           `json:"boost_id"`        // Unique identifier of the boost
+	AddDate        int              `json:"add_date"`        // Point in time (Unix timestamp) when the chat was boosted
+	ExpirationDate int              `json:"expiration_date"` // Point in time (Unix timestamp) when the boost will automatically expire, unless the booster's Telegram Premium subscription is prolonged
+	Source         *ChatBoostSource `json:"source"`          // Source of the added boost
 }
 
 // This object represents a boost added to a chat or changed.
@@ -1584,10 +1307,10 @@ type ChatBoostUpdated struct {
 //
 // https://core.telegram.org/bots/api#chatboostremoved
 type ChatBoostRemoved struct {
-	Chat       *Chat           `json:"chat"`        // Chat which was boosted
-	BoostId    string          `json:"boost_id"`    // Unique identifier of the boost
-	RemoveDate int             `json:"remove_date"` // Point in time (Unix timestamp) when the boost was removed
-	Source     ChatBoostSource `json:"source"`      // Source of the removed boost
+	Chat       *Chat            `json:"chat"`        // Chat which was boosted
+	BoostId    string           `json:"boost_id"`    // Unique identifier of the boost
+	RemoveDate int              `json:"remove_date"` // Point in time (Unix timestamp) when the boost was removed
+	Source     *ChatBoostSource `json:"source"`      // Source of the removed boost
 }
 
 // This object represents a list of boosts added to a chat by a user.
@@ -2507,29 +2230,10 @@ type PaidMediaPurchased struct {
 // - RevenueWithdrawalStateFailed
 //
 // https://core.telegram.org/bots/api#revenuewithdrawalstate
-type RevenueWithdrawalState interface{}
-
-// The withdrawal is in progress.
-//
-// https://core.telegram.org/bots/api#revenuewithdrawalstatepending
-type RevenueWithdrawalStatePending struct {
-	Type string `json:"type"` // Type of the state, always "pending"
-}
-
-// The withdrawal succeeded.
-//
-// https://core.telegram.org/bots/api#revenuewithdrawalstatesucceeded
-type RevenueWithdrawalStateSucceeded struct {
-	Type string `json:"type"` // Type of the state, always "succeeded"
+type RevenueWithdrawalState struct {
+	Type string `json:"type"`
 	Date int    `json:"date"` // Date the withdrawal was completed in Unix time
 	Url  string `json:"url"`  // An HTTPS URL that can be used to see transaction details
-}
-
-// The withdrawal failed and the transaction was refunded.
-//
-// https://core.telegram.org/bots/api#revenuewithdrawalstatefailed
-type RevenueWithdrawalStateFailed struct {
-	Type string `json:"type"` // Type of the state, always "failed"
 }
 
 // Contains information about the affiliate that received a commission via this transaction.
@@ -2560,80 +2264,32 @@ type AffiliateInfo struct {
 // - TransactionPartnerOther
 //
 // https://core.telegram.org/bots/api#transactionpartner
-type TransactionPartner interface{}
-
-// Describes a transaction with a user.
-//
-// https://core.telegram.org/bots/api#transactionpartneruser
-type TransactionPartnerUser struct {
-	Type               string         `json:"type"`                          // Type of the transaction partner, always "user"
-	User               *User          `json:"user"`                          // Information about the user
-	Affiliate          *AffiliateInfo `json:"affiliate,omitempty"`           // Optional. Information about the affiliate that received a commission via this transaction
-	InvoicePayload     string         `json:"invoice_payload,omitempty"`     // Optional. Bot-specified invoice payload
-	SubscriptionPeriod int            `json:"subscription_period,omitempty"` // Optional. The duration of the paid subscription
-	PaidMedia          []PaidMedia    `json:"paid_media,omitempty"`          // Optional. Information about the paid media bought by the user
-	PaidMediaPayload   string         `json:"paid_media_payload,omitempty"`  // Optional. Bot-specified paid media payload
-	Gift               *Gift          `json:"gift,omitempty"`                // Optional. The gift sent to the user by the bot
-}
-
-// Describes a transaction with a chat.
-//
-// https://core.telegram.org/bots/api#transactionpartnerchat
-type TransactionPartnerChat struct {
-	Type string `json:"type"`           // Type of the transaction partner, always "chat"
-	Chat *Chat  `json:"chat"`           // Information about the chat
-	Gift *Gift  `json:"gift,omitempty"` // Optional. The gift sent to the chat by the bot
-}
-
-// Describes the affiliate program that issued the affiliate commission received via this transaction.
-//
-// https://core.telegram.org/bots/api#transactionpartneraffiliateprogram
-type TransactionPartnerAffiliateProgram struct {
-	Type               string `json:"type"`                   // Type of the transaction partner, always "affiliate_program"
-	SponsorUser        *User  `json:"sponsor_user,omitempty"` // Optional. Information about the bot that sponsored the affiliate program
-	CommissionPerMille int    `json:"commission_per_mille"`   // The number of Telegram Stars received by the bot for each 1000 Telegram Stars received by the affiliate program sponsor from referred users
-}
-
-// Describes a withdrawal transaction with Fragment.
-//
-// https://core.telegram.org/bots/api#transactionpartnerfragment
-type TransactionPartnerFragment struct {
-	Type            string                 `json:"type"`                       // Type of the transaction partner, always "fragment"
-	WithdrawalState RevenueWithdrawalState `json:"withdrawal_state,omitempty"` // Optional. State of the transaction if the transaction is outgoing
-}
-
-// Describes a withdrawal transaction to the Telegram Ads platform.
-//
-// https://core.telegram.org/bots/api#transactionpartnertelegramads
-type TransactionPartnerTelegramAds struct {
-	Type string `json:"type"` // Type of the transaction partner, always "telegram_ads"
-}
-
-// Describes a transaction with payment for paid broadcasting.
-//
-// https://core.telegram.org/bots/api#transactionpartnertelegramapi
-type TransactionPartnerTelegramApi struct {
-	Type         string `json:"type"`          // Type of the transaction partner, always "telegram_api"
-	RequestCount int    `json:"request_count"` // The number of successful requests that exceeded regular limits and were therefore billed
-}
-
-// Describes a transaction with an unknown source or recipient.
-//
-// https://core.telegram.org/bots/api#transactionpartnerother
-type TransactionPartnerOther struct {
-	Type string `json:"type"` // Type of the transaction partner, always "other"
+type TransactionPartner struct {
+	Type               string                  `json:"type"`
+	User               *User                   `json:"user"`                          // Information about the user
+	Affiliate          *AffiliateInfo          `json:"affiliate,omitempty"`           // Optional. Information about the affiliate that received a commission via this transaction
+	InvoicePayload     string                  `json:"invoice_payload,omitempty"`     // Optional. Bot-specified invoice payload
+	SubscriptionPeriod int                     `json:"subscription_period,omitempty"` // Optional. The duration of the paid subscription
+	PaidMedia          []PaidMedia             `json:"paid_media,omitempty"`          // Optional. Information about the paid media bought by the user
+	PaidMediaPayload   string                  `json:"paid_media_payload,omitempty"`  // Optional. Bot-specified paid media payload
+	Gift               *Gift                   `json:"gift,omitempty"`                // Optional. The gift sent to the user by the bot
+	Chat               *Chat                   `json:"chat"`                          // Information about the chat
+	SponsorUser        *User                   `json:"sponsor_user,omitempty"`        // Optional. Information about the bot that sponsored the affiliate program
+	CommissionPerMille int                     `json:"commission_per_mille"`          // The number of Telegram Stars received by the bot for each 1000 Telegram Stars received by the affiliate program sponsor from referred users
+	WithdrawalState    *RevenueWithdrawalState `json:"withdrawal_state,omitempty"`    // Optional. State of the transaction if the transaction is outgoing
+	RequestCount       int                     `json:"request_count"`                 // The number of successful requests that exceeded regular limits and were therefore billed
 }
 
 // Describes a Telegram Star transaction. Note that if the buyer initiates a chargeback with the payment provider from whom they acquired Stars (e.g., Apple, Google) following this transaction, the refunded Stars will be deducted from the bot's balance. This is outside of Telegram's control.
 //
 // https://core.telegram.org/bots/api#startransaction
 type StarTransaction struct {
-	Id             string             `json:"id"`                        // Unique identifier of the transaction. Coincides with the identifier of the original transaction for refund transactions. Coincides with SuccessfulPayment.telegram_payment_charge_id for successful incoming payments from users.
-	Amount         int                `json:"amount"`                    // Integer amount of Telegram Stars transferred by the transaction
-	NanostarAmount int                `json:"nanostar_amount,omitempty"` // Optional. The number of 1/1000000000 shares of Telegram Stars transferred by the transaction; from 0 to 999999999
-	Date           int                `json:"date"`                      // Date the transaction was created in Unix time
-	Source         TransactionPartner `json:"source,omitempty"`          // Optional. Source of an incoming transaction (e.g., a user purchasing goods or services, Fragment refunding a failed withdrawal). Only for incoming transactions
-	Receiver       TransactionPartner `json:"receiver,omitempty"`        // Optional. Receiver of an outgoing transaction (e.g., a user for a purchase refund, Fragment for a withdrawal). Only for outgoing transactions
+	Id             string              `json:"id"`                        // Unique identifier of the transaction. Coincides with the identifier of the original transaction for refund transactions. Coincides with SuccessfulPayment.telegram_payment_charge_id for successful incoming payments from users.
+	Amount         int                 `json:"amount"`                    // Integer amount of Telegram Stars transferred by the transaction
+	NanostarAmount int                 `json:"nanostar_amount,omitempty"` // Optional. The number of 1/1000000000 shares of Telegram Stars transferred by the transaction; from 0 to 999999999
+	Date           int                 `json:"date"`                      // Date the transaction was created in Unix time
+	Source         *TransactionPartner `json:"source,omitempty"`          // Optional. Source of an incoming transaction (e.g., a user purchasing goods or services, Fragment refunding a failed withdrawal). Only for incoming transactions
+	Receiver       *TransactionPartner `json:"receiver,omitempty"`        // Optional. Receiver of an outgoing transaction (e.g., a user for a purchase refund, Fragment for a withdrawal). Only for outgoing transactions
 }
 
 // Contains a list of Telegram Star transactions.
@@ -2707,97 +2363,15 @@ type EncryptedCredentials struct {
 // - PassportElementErrorUnspecified
 //
 // https://core.telegram.org/bots/api#passportelementerror
-type PassportElementError interface{}
-
-// Represents an issue in one of the data fields that was provided by the user. The error is considered resolved when the field's value changes.
-//
-// https://core.telegram.org/bots/api#passportelementerrordatafield
-type PassportElementErrorDataField struct {
-	Source    string `json:"source"`     // Error source, must be data
-	Type      string `json:"type"`       // The section of the user's Telegram Passport which has the error, one of "personal_details", "passport", "driver_license", "identity_card", "internal_passport", "address"
-	FieldName string `json:"field_name"` // Name of the data field which has the error
-	DataHash  string `json:"data_hash"`  // Base64-encoded data hash
-	Message   string `json:"message"`    // Error message
-}
-
-// Represents an issue with the front side of a document. The error is considered resolved when the file with the front side of the document changes.
-//
-// https://core.telegram.org/bots/api#passportelementerrorfrontside
-type PassportElementErrorFrontSide struct {
-	Source   string `json:"source"`    // Error source, must be front_side
-	Type     string `json:"type"`      // The section of the user's Telegram Passport which has the issue, one of "passport", "driver_license", "identity_card", "internal_passport"
-	FileHash string `json:"file_hash"` // Base64-encoded hash of the file with the front side of the document
-	Message  string `json:"message"`   // Error message
-}
-
-// Represents an issue with the reverse side of a document. The error is considered resolved when the file with reverse side of the document changes.
-//
-// https://core.telegram.org/bots/api#passportelementerrorreverseside
-type PassportElementErrorReverseSide struct {
-	Source   string `json:"source"`    // Error source, must be reverse_side
-	Type     string `json:"type"`      // The section of the user's Telegram Passport which has the issue, one of "driver_license", "identity_card"
-	FileHash string `json:"file_hash"` // Base64-encoded hash of the file with the reverse side of the document
-	Message  string `json:"message"`   // Error message
-}
-
-// Represents an issue with the selfie with a document. The error is considered resolved when the file with the selfie changes.
-//
-// https://core.telegram.org/bots/api#passportelementerrorselfie
-type PassportElementErrorSelfie struct {
-	Source   string `json:"source"`    // Error source, must be selfie
-	Type     string `json:"type"`      // The section of the user's Telegram Passport which has the issue, one of "passport", "driver_license", "identity_card", "internal_passport"
-	FileHash string `json:"file_hash"` // Base64-encoded hash of the file with the selfie
-	Message  string `json:"message"`   // Error message
-}
-
-// Represents an issue with a document scan. The error is considered resolved when the file with the document scan changes.
-//
-// https://core.telegram.org/bots/api#passportelementerrorfile
-type PassportElementErrorFile struct {
-	Source   string `json:"source"`    // Error source, must be file
-	Type     string `json:"type"`      // The section of the user's Telegram Passport which has the issue, one of "utility_bill", "bank_statement", "rental_agreement", "passport_registration", "temporary_registration"
-	FileHash string `json:"file_hash"` // Base64-encoded file hash
-	Message  string `json:"message"`   // Error message
-}
-
-// Represents an issue with a list of scans. The error is considered resolved when the list of files containing the scans changes.
-//
-// https://core.telegram.org/bots/api#passportelementerrorfiles
-type PassportElementErrorFiles struct {
-	Source     string   `json:"source"`      // Error source, must be files
-	Type       string   `json:"type"`        // The section of the user's Telegram Passport which has the issue, one of "utility_bill", "bank_statement", "rental_agreement", "passport_registration", "temporary_registration"
-	FileHashes []string `json:"file_hashes"` // List of base64-encoded file hashes
-	Message    string   `json:"message"`     // Error message
-}
-
-// Represents an issue with one of the files that constitute the translation of a document. The error is considered resolved when the file changes.
-//
-// https://core.telegram.org/bots/api#passportelementerrortranslationfile
-type PassportElementErrorTranslationFile struct {
-	Source   string `json:"source"`    // Error source, must be translation_file
-	Type     string `json:"type"`      // Type of element of the user's Telegram Passport which has the issue, one of "passport", "driver_license", "identity_card", "internal_passport", "utility_bill", "bank_statement", "rental_agreement", "passport_registration", "temporary_registration"
-	FileHash string `json:"file_hash"` // Base64-encoded file hash
-	Message  string `json:"message"`   // Error message
-}
-
-// Represents an issue with the translated version of a document. The error is considered resolved when a file with the document translation change.
-//
-// https://core.telegram.org/bots/api#passportelementerrortranslationfiles
-type PassportElementErrorTranslationFiles struct {
-	Source     string   `json:"source"`      // Error source, must be translation_files
-	Type       string   `json:"type"`        // Type of element of the user's Telegram Passport which has the issue, one of "passport", "driver_license", "identity_card", "internal_passport", "utility_bill", "bank_statement", "rental_agreement", "passport_registration", "temporary_registration"
-	FileHashes []string `json:"file_hashes"` // List of base64-encoded file hashes
-	Message    string   `json:"message"`     // Error message
-}
-
-// Represents an issue in an unspecified place. The error is considered resolved when new data is added.
-//
-// https://core.telegram.org/bots/api#passportelementerrorunspecified
-type PassportElementErrorUnspecified struct {
-	Source      string `json:"source"`       // Error source, must be unspecified
-	Type        string `json:"type"`         // Type of element of the user's Telegram Passport which has the issue
-	ElementHash string `json:"element_hash"` // Base64-encoded element hash
-	Message     string `json:"message"`      // Error message
+type PassportElementError struct {
+	Source      string   `json:"source"`
+	Type        string   `json:"type"`         // The section of the user's Telegram Passport which has the error, one of "personal_details", "passport", "driver_license", "identity_card", "internal_passport", "address"
+	FieldName   string   `json:"field_name"`   // Name of the data field which has the error
+	DataHash    string   `json:"data_hash"`    // Base64-encoded data hash
+	Message     string   `json:"message"`      // Error message
+	FileHash    string   `json:"file_hash"`    // Base64-encoded hash of the file with the front side of the document
+	FileHashes  []string `json:"file_hashes"`  // List of base64-encoded file hashes
+	ElementHash string   `json:"element_hash"` // Base64-encoded element hash
 }
 
 // This object represents a game. Use BotFather to create and edit games, their short names will act as unique identifiers.
