@@ -45,7 +45,6 @@ func LongPollUpdates(
 				continue
 			}
 
-			// TODO: test this
 			if errors.Is(err, context.Canceled) {
 				break
 			}
