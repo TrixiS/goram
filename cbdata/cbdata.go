@@ -64,7 +64,8 @@ func Unpack[T any](prefix string, callbackData string) (T, error) {
 	return value, err
 }
 
-const HandlersDataKey = "callbackData"
+// handlers.Data key for unpacked callback data
+const Key = "callbackData"
 
 // Creates callback query filter for callback data. Unpacks callback data and check the prefix.
 // If a query has no data, the created filter returns false.
@@ -82,7 +83,7 @@ func Filter[T any](prefix string) handlers.Filter[*goram.CallbackQuery] {
 			return false, err
 		}
 
-		data[HandlersDataKey] = value
+		data[Key] = value
 		return true, nil
 	}
 }
@@ -97,7 +98,7 @@ func FilterFunc[T any](
 			return false, nil
 		}
 
-		storedValue, exists := data[HandlersDataKey]
+		storedValue, exists := data[Key]
 
 		if exists {
 			if data, ok := storedValue.(T); ok {
@@ -111,7 +112,7 @@ func FilterFunc[T any](
 			return false, err
 		}
 
-		data[HandlersDataKey] = value
+		data[Key] = value
 		return predicate(value), nil
 	}
 }
