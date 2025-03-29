@@ -96,3 +96,23 @@ func (n NameReader) Name() string {
 func (n NameReader) Read(b []byte) (int, error) {
 	return n.Reader.Read(b)
 }
+
+func (m *Message) ChatId() ChatId {
+	return ChatId{Id: m.Chat.Id}
+}
+
+func (u *User) ChatId() ChatId {
+	return ChatId{Id: u.Id}
+}
+
+func (c *CallbackQuery) ChatId() ChatId {
+	if c.Message != nil && c.Message.Chat != nil {
+		return ChatId{Id: c.Message.Chat.Id}
+	}
+
+	return ChatId{Id: c.From.Id}
+}
+
+func (c *Chat) ChatId() ChatId {
+	return ChatId{Id: c.Id}
+}
