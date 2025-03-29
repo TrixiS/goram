@@ -435,14 +435,20 @@ queueLoop:
 		queue = queue[1:]
 
 		for _, filter := range current.handlers.message.filters {
-			if !filter(ctx, bot, update, data) {
+			ok, err := filter(ctx, bot, update, data)
+
+			if err != nil {
+				return ok, err
+			}
+
+			if !ok {
 				continue queueLoop
 			}
 		}
 
 		found, err := callHandlers(ctx, bot, current.handlers.message.handlers, update, data)
 
-		if found {
+		if err != nil || found {
 			return found, err
 		}
 
@@ -464,14 +470,20 @@ queueLoop:
 		queue = queue[1:]
 
 		for _, filter := range current.handlers.editedMessage.filters {
-			if !filter(ctx, bot, update, data) {
+			ok, err := filter(ctx, bot, update, data)
+
+			if err != nil {
+				return ok, err
+			}
+
+			if !ok {
 				continue queueLoop
 			}
 		}
 
 		found, err := callHandlers(ctx, bot, current.handlers.editedMessage.handlers, update, data)
 
-		if found {
+		if err != nil || found {
 			return found, err
 		}
 
@@ -493,14 +505,20 @@ queueLoop:
 		queue = queue[1:]
 
 		for _, filter := range current.handlers.channelPost.filters {
-			if !filter(ctx, bot, update, data) {
+			ok, err := filter(ctx, bot, update, data)
+
+			if err != nil {
+				return ok, err
+			}
+
+			if !ok {
 				continue queueLoop
 			}
 		}
 
 		found, err := callHandlers(ctx, bot, current.handlers.channelPost.handlers, update, data)
 
-		if found {
+		if err != nil || found {
 			return found, err
 		}
 
@@ -522,14 +540,20 @@ queueLoop:
 		queue = queue[1:]
 
 		for _, filter := range current.handlers.editedChannelPost.filters {
-			if !filter(ctx, bot, update, data) {
+			ok, err := filter(ctx, bot, update, data)
+
+			if err != nil {
+				return ok, err
+			}
+
+			if !ok {
 				continue queueLoop
 			}
 		}
 
 		found, err := callHandlers(ctx, bot, current.handlers.editedChannelPost.handlers, update, data)
 
-		if found {
+		if err != nil || found {
 			return found, err
 		}
 
@@ -551,14 +575,20 @@ queueLoop:
 		queue = queue[1:]
 
 		for _, filter := range current.handlers.businessConnection.filters {
-			if !filter(ctx, bot, update, data) {
+			ok, err := filter(ctx, bot, update, data)
+
+			if err != nil {
+				return ok, err
+			}
+
+			if !ok {
 				continue queueLoop
 			}
 		}
 
 		found, err := callHandlers(ctx, bot, current.handlers.businessConnection.handlers, update, data)
 
-		if found {
+		if err != nil || found {
 			return found, err
 		}
 
@@ -580,14 +610,20 @@ queueLoop:
 		queue = queue[1:]
 
 		for _, filter := range current.handlers.businessMessage.filters {
-			if !filter(ctx, bot, update, data) {
+			ok, err := filter(ctx, bot, update, data)
+
+			if err != nil {
+				return ok, err
+			}
+
+			if !ok {
 				continue queueLoop
 			}
 		}
 
 		found, err := callHandlers(ctx, bot, current.handlers.businessMessage.handlers, update, data)
 
-		if found {
+		if err != nil || found {
 			return found, err
 		}
 
@@ -609,14 +645,20 @@ queueLoop:
 		queue = queue[1:]
 
 		for _, filter := range current.handlers.editedBusinessMessage.filters {
-			if !filter(ctx, bot, update, data) {
+			ok, err := filter(ctx, bot, update, data)
+
+			if err != nil {
+				return ok, err
+			}
+
+			if !ok {
 				continue queueLoop
 			}
 		}
 
 		found, err := callHandlers(ctx, bot, current.handlers.editedBusinessMessage.handlers, update, data)
 
-		if found {
+		if err != nil || found {
 			return found, err
 		}
 
@@ -638,14 +680,20 @@ queueLoop:
 		queue = queue[1:]
 
 		for _, filter := range current.handlers.deletedBusinessMessages.filters {
-			if !filter(ctx, bot, update, data) {
+			ok, err := filter(ctx, bot, update, data)
+
+			if err != nil {
+				return ok, err
+			}
+
+			if !ok {
 				continue queueLoop
 			}
 		}
 
 		found, err := callHandlers(ctx, bot, current.handlers.deletedBusinessMessages.handlers, update, data)
 
-		if found {
+		if err != nil || found {
 			return found, err
 		}
 
@@ -667,14 +715,20 @@ queueLoop:
 		queue = queue[1:]
 
 		for _, filter := range current.handlers.messageReaction.filters {
-			if !filter(ctx, bot, update, data) {
+			ok, err := filter(ctx, bot, update, data)
+
+			if err != nil {
+				return ok, err
+			}
+
+			if !ok {
 				continue queueLoop
 			}
 		}
 
 		found, err := callHandlers(ctx, bot, current.handlers.messageReaction.handlers, update, data)
 
-		if found {
+		if err != nil || found {
 			return found, err
 		}
 
@@ -696,14 +750,20 @@ queueLoop:
 		queue = queue[1:]
 
 		for _, filter := range current.handlers.messageReactionCount.filters {
-			if !filter(ctx, bot, update, data) {
+			ok, err := filter(ctx, bot, update, data)
+
+			if err != nil {
+				return ok, err
+			}
+
+			if !ok {
 				continue queueLoop
 			}
 		}
 
 		found, err := callHandlers(ctx, bot, current.handlers.messageReactionCount.handlers, update, data)
 
-		if found {
+		if err != nil || found {
 			return found, err
 		}
 
@@ -725,14 +785,20 @@ queueLoop:
 		queue = queue[1:]
 
 		for _, filter := range current.handlers.inlineQuery.filters {
-			if !filter(ctx, bot, update, data) {
+			ok, err := filter(ctx, bot, update, data)
+
+			if err != nil {
+				return ok, err
+			}
+
+			if !ok {
 				continue queueLoop
 			}
 		}
 
 		found, err := callHandlers(ctx, bot, current.handlers.inlineQuery.handlers, update, data)
 
-		if found {
+		if err != nil || found {
 			return found, err
 		}
 
@@ -754,14 +820,20 @@ queueLoop:
 		queue = queue[1:]
 
 		for _, filter := range current.handlers.chosenInlineResult.filters {
-			if !filter(ctx, bot, update, data) {
+			ok, err := filter(ctx, bot, update, data)
+
+			if err != nil {
+				return ok, err
+			}
+
+			if !ok {
 				continue queueLoop
 			}
 		}
 
 		found, err := callHandlers(ctx, bot, current.handlers.chosenInlineResult.handlers, update, data)
 
-		if found {
+		if err != nil || found {
 			return found, err
 		}
 
@@ -783,14 +855,20 @@ queueLoop:
 		queue = queue[1:]
 
 		for _, filter := range current.handlers.callbackQuery.filters {
-			if !filter(ctx, bot, update, data) {
+			ok, err := filter(ctx, bot, update, data)
+
+			if err != nil {
+				return ok, err
+			}
+
+			if !ok {
 				continue queueLoop
 			}
 		}
 
 		found, err := callHandlers(ctx, bot, current.handlers.callbackQuery.handlers, update, data)
 
-		if found {
+		if err != nil || found {
 			return found, err
 		}
 
@@ -812,14 +890,20 @@ queueLoop:
 		queue = queue[1:]
 
 		for _, filter := range current.handlers.shippingQuery.filters {
-			if !filter(ctx, bot, update, data) {
+			ok, err := filter(ctx, bot, update, data)
+
+			if err != nil {
+				return ok, err
+			}
+
+			if !ok {
 				continue queueLoop
 			}
 		}
 
 		found, err := callHandlers(ctx, bot, current.handlers.shippingQuery.handlers, update, data)
 
-		if found {
+		if err != nil || found {
 			return found, err
 		}
 
@@ -841,14 +925,20 @@ queueLoop:
 		queue = queue[1:]
 
 		for _, filter := range current.handlers.preCheckoutQuery.filters {
-			if !filter(ctx, bot, update, data) {
+			ok, err := filter(ctx, bot, update, data)
+
+			if err != nil {
+				return ok, err
+			}
+
+			if !ok {
 				continue queueLoop
 			}
 		}
 
 		found, err := callHandlers(ctx, bot, current.handlers.preCheckoutQuery.handlers, update, data)
 
-		if found {
+		if err != nil || found {
 			return found, err
 		}
 
@@ -870,14 +960,20 @@ queueLoop:
 		queue = queue[1:]
 
 		for _, filter := range current.handlers.purchasedPaidMedia.filters {
-			if !filter(ctx, bot, update, data) {
+			ok, err := filter(ctx, bot, update, data)
+
+			if err != nil {
+				return ok, err
+			}
+
+			if !ok {
 				continue queueLoop
 			}
 		}
 
 		found, err := callHandlers(ctx, bot, current.handlers.purchasedPaidMedia.handlers, update, data)
 
-		if found {
+		if err != nil || found {
 			return found, err
 		}
 
@@ -899,14 +995,20 @@ queueLoop:
 		queue = queue[1:]
 
 		for _, filter := range current.handlers.poll.filters {
-			if !filter(ctx, bot, update, data) {
+			ok, err := filter(ctx, bot, update, data)
+
+			if err != nil {
+				return ok, err
+			}
+
+			if !ok {
 				continue queueLoop
 			}
 		}
 
 		found, err := callHandlers(ctx, bot, current.handlers.poll.handlers, update, data)
 
-		if found {
+		if err != nil || found {
 			return found, err
 		}
 
@@ -928,14 +1030,20 @@ queueLoop:
 		queue = queue[1:]
 
 		for _, filter := range current.handlers.pollAnswer.filters {
-			if !filter(ctx, bot, update, data) {
+			ok, err := filter(ctx, bot, update, data)
+
+			if err != nil {
+				return ok, err
+			}
+
+			if !ok {
 				continue queueLoop
 			}
 		}
 
 		found, err := callHandlers(ctx, bot, current.handlers.pollAnswer.handlers, update, data)
 
-		if found {
+		if err != nil || found {
 			return found, err
 		}
 
@@ -957,14 +1065,20 @@ queueLoop:
 		queue = queue[1:]
 
 		for _, filter := range current.handlers.myChatMember.filters {
-			if !filter(ctx, bot, update, data) {
+			ok, err := filter(ctx, bot, update, data)
+
+			if err != nil {
+				return ok, err
+			}
+
+			if !ok {
 				continue queueLoop
 			}
 		}
 
 		found, err := callHandlers(ctx, bot, current.handlers.myChatMember.handlers, update, data)
 
-		if found {
+		if err != nil || found {
 			return found, err
 		}
 
@@ -986,14 +1100,20 @@ queueLoop:
 		queue = queue[1:]
 
 		for _, filter := range current.handlers.chatMember.filters {
-			if !filter(ctx, bot, update, data) {
+			ok, err := filter(ctx, bot, update, data)
+
+			if err != nil {
+				return ok, err
+			}
+
+			if !ok {
 				continue queueLoop
 			}
 		}
 
 		found, err := callHandlers(ctx, bot, current.handlers.chatMember.handlers, update, data)
 
-		if found {
+		if err != nil || found {
 			return found, err
 		}
 
@@ -1015,14 +1135,20 @@ queueLoop:
 		queue = queue[1:]
 
 		for _, filter := range current.handlers.chatJoinRequest.filters {
-			if !filter(ctx, bot, update, data) {
+			ok, err := filter(ctx, bot, update, data)
+
+			if err != nil {
+				return ok, err
+			}
+
+			if !ok {
 				continue queueLoop
 			}
 		}
 
 		found, err := callHandlers(ctx, bot, current.handlers.chatJoinRequest.handlers, update, data)
 
-		if found {
+		if err != nil || found {
 			return found, err
 		}
 
@@ -1044,14 +1170,20 @@ queueLoop:
 		queue = queue[1:]
 
 		for _, filter := range current.handlers.chatBoost.filters {
-			if !filter(ctx, bot, update, data) {
+			ok, err := filter(ctx, bot, update, data)
+
+			if err != nil {
+				return ok, err
+			}
+
+			if !ok {
 				continue queueLoop
 			}
 		}
 
 		found, err := callHandlers(ctx, bot, current.handlers.chatBoost.handlers, update, data)
 
-		if found {
+		if err != nil || found {
 			return found, err
 		}
 
@@ -1073,14 +1205,20 @@ queueLoop:
 		queue = queue[1:]
 
 		for _, filter := range current.handlers.removedChatBoost.filters {
-			if !filter(ctx, bot, update, data) {
+			ok, err := filter(ctx, bot, update, data)
+
+			if err != nil {
+				return ok, err
+			}
+
+			if !ok {
 				continue queueLoop
 			}
 		}
 
 		found, err := callHandlers(ctx, bot, current.handlers.removedChatBoost.handlers, update, data)
 
-		if found {
+		if err != nil || found {
 			return found, err
 		}
 

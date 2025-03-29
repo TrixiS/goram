@@ -52,13 +52,13 @@ func createRouter() *handlers.Router {
 	return handlers.
 		NewRouter(handlers.RouterOptions{Name: "root"}).
 		FilterMessage(
-			func(ctx context.Context, bot *goram.Bot, message *goram.Message, data handlers.Data) bool {
-				return message.From.Id == *adminUserId
+			func(ctx context.Context, bot *goram.Bot, message *goram.Message, data handlers.Data) (bool, error) {
+				return message.From.Id == *adminUserId, nil
 			},
 		).
 		FilterCallbackQuery(
-			func(ctx context.Context, bot *goram.Bot, query *goram.CallbackQuery, data handlers.Data) bool {
-				return query.From.Id == *adminUserId
+			func(ctx context.Context, bot *goram.Bot, query *goram.CallbackQuery, data handlers.Data) (bool, error) {
+				return query.From.Id == *adminUserId, nil
 			},
 		).
 		Message(routes.Start, text("/start")).
@@ -79,7 +79,7 @@ func createRouter() *handlers.Router {
 }
 
 func text(t string) handlers.Filter[*goram.Message] {
-	return func(ctx context.Context, bot *goram.Bot, message *goram.Message, data handlers.Data) bool {
-		return message.Text == t
+	return func(ctx context.Context, bot *goram.Bot, message *goram.Message, data handlers.Data) (bool, error) {
+		return message.Text == t, nil
 	}
 }

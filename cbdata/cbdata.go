@@ -70,25 +70,20 @@ const HandlersDataKey = "callbackData"
 // If a query has no data, the created filter returns false.
 // If the prefix matches, the created filter puts unpacked callback data to handler data
 // with "callbackData" key and returns true. Othersise returns false.
-// Panics if the error returned from .Unpack() != ErrInvalidPrefix.
 func Filter[T any](prefix string) handlers.Filter[*goram.CallbackQuery] {
-	return func(ctx context.Context, bot *goram.Bot, query *goram.CallbackQuery, data handlers.Data) bool {
+	return func(ctx context.Context, bot *goram.Bot, query *goram.CallbackQuery, data handlers.Data) (bool, error) {
 		if query.Data == "" {
-			return false
+			return false, nil
 		}
 
 		value, err := Unpack[T](prefix, query.Data)
 
 		if err != nil {
-			if err != ErrInvalidPrefix {
-				panic(err)
-			}
-
-			return false
+			return false, err
 		}
 
 		data[HandlersDataKey] = value
-		return true
+		return true, nil
 	}
 }
 
@@ -97,30 +92,26 @@ func FilterFunc[T any](
 	prefix string,
 	predicate func(data T) bool,
 ) handlers.Filter[*goram.CallbackQuery] {
-	return func(ctx context.Context, bot *goram.Bot, query *goram.CallbackQuery, data handlers.Data) bool {
+	return func(ctx context.Context, bot *goram.Bot, query *goram.CallbackQuery, data handlers.Data) (bool, error) {
 		if query.Data == "" {
-			return false
+			return false, nil
 		}
 
 		storedValue, exists := data[HandlersDataKey]
 
 		if exists {
 			if data, ok := storedValue.(T); ok {
-				return predicate(data)
+				return predicate(data), nil
 			}
 		}
 
 		value, err := Unpack[T](prefix, query.Data)
 
 		if err != nil {
-			if err != ErrInvalidPrefix {
-				panic(err)
-			}
-
-			return false
+			return false, err
 		}
 
 		data[HandlersDataKey] = value
-		return predicate(value)
+		return predicate(value), nil
 	}
 }

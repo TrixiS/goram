@@ -14,7 +14,7 @@ type Data map[string]any
 type Func[U any] func(ctx context.Context, bot *goram.Bot, update U, data Data) error
 
 // Update handler filter function.
-type Filter[U any] func(ctx context.Context, bot *goram.Bot, update U, data Data) bool
+type Filter[U any] func(ctx context.Context, bot *goram.Bot, update U, data Data) (bool, error)
 
 type handler[U any] struct {
 	cb      Func[U]
@@ -71,7 +71,7 @@ func (r *Router) FeedUpdates(
 	for _, u := range updates {
 		found, err := r.feedUpdate(ctx, bot, &u, data)
 
-		if found {
+		if err != nil || found {
 			return found, err
 		}
 	}
@@ -89,7 +89,13 @@ func callHandlers[T any](
 handlersLoop:
 	for _, handler := range handlers {
 		for _, filter := range handler.filters {
-			if !filter(ctx, bot, update, data) {
+			ok, err := filter(ctx, bot, update, data)
+
+			if err != nil {
+				return false, err
+			}
+
+			if !ok {
 				continue handlersLoop
 			}
 		}

@@ -169,7 +169,7 @@ func generateHandlers(updateType Type) {
 		pascalName := camelCase(u.Name, true)
 		handlersFieldName := camelCase(u.Name, false)
 
-		f.WriteString(fmt.Sprintf(`
+		fmt.Fprintf(f, `
 			func (r *Router) call%sHandlers(ctx context.Context, bot *goram.Bot, update *goram.%s, data Data) (bool, error) {
 				queue := make([]*Router, 0, len(r.children) + 1)			
 				queue = append(queue, r)
@@ -180,14 +180,20 @@ func generateHandlers(updateType Type) {
 					queue = queue[1:]
 
 					for _, filter := range current.handlers.%s.filters {
-						if !filter(ctx, bot, update, data) {
+						ok, err := filter(ctx, bot, update, data)
+
+						if err != nil {
+							return ok, err
+						}
+
+						if !ok {
 							continue queueLoop
 						}
 					}
 
 					found, err := callHandlers(ctx, bot, current.handlers.%s.handlers, update, data)
 
-					if found {
+					if err != nil || found {
 						return found, err
 					}
 
@@ -203,7 +209,7 @@ func generateHandlers(updateType Type) {
 			u.Types[0],
 			handlersFieldName,
 			handlersFieldName,
-		))
+		)
 	}
 
 	f.WriteString(
