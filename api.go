@@ -114,7 +114,8 @@ func makeRequest[R any](
 	}
 }
 
-func makeVoidRequest(ctx context.Context,
+func makeVoidRequest(
+	ctx context.Context,
 	client *http.Client,
 	baseUrl string,
 	apiMethod string,
