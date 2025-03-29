@@ -113,3 +113,71 @@ func makeRequest[R any](
 		}
 	}
 }
+
+func makeVoidRequest(ctx context.Context,
+	client *http.Client,
+	baseUrl string,
+	apiMethod string,
+	floodHandler flood.Handler,
+	data apiRequest,
+) error {
+	url := baseUrl + apiMethod
+
+	buf := &bytes.Buffer{}
+	w := multipart.NewWriter(buf)
+	data.writeMultipart(w)
+	w.Close()
+
+	contentType := w.FormDataContentType()
+	body := bytes.NewReader(buf.Bytes())
+
+	for {
+		req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, body)
+
+		if err != nil {
+			return err
+		}
+
+		req.Header.Set("Content-Type", contentType)
+
+		if floodHandler != nil {
+			floodHandler.Enter(ctx, apiMethod, data)
+		}
+
+		res, err := client.Do(req)
+
+		if err != nil {
+			return err
+		}
+
+		if res.StatusCode == http.StatusOK {
+			return nil
+		}
+
+		response := &apiResponse[json.RawMessage]{}
+		err = json.NewDecoder(res.Body).Decode(response)
+		res.Body.Close()
+
+		if err != nil {
+			return err
+		}
+
+		if response.OK {
+			return nil
+		}
+
+		if response.ErrorCode != http.StatusTooManyRequests ||
+			response.Parameters == nil ||
+			floodHandler == nil {
+
+			return response.error(apiMethod)
+		}
+
+		duration := time.Second * time.Duration(response.Parameters.RetryAfter)
+		floodHandler.Handle(ctx, apiMethod, data, duration)
+
+		if body != nil {
+			body.Seek(0, io.SeekStart)
+		}
+	}
+}

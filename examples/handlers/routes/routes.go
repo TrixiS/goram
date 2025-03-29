@@ -15,7 +15,7 @@ func Start(
 	data handlers.Data,
 ) error {
 	_, err := bot.SendMessage(ctx, &goram.SendMessageRequest{
-		ChatId:      goram.ChatId{Id: message.Chat.Id},
+		ChatId:      message.ChatId(),
 		Text:        "Hello world!",
 		ReplyMarkup: markups.Start,
 	})

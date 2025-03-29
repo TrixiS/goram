@@ -337,6 +337,24 @@ func generateMethods(parser *Parser, methods []Method) {
 				data,
 			),
 		)
+
+		if len(m.Fields) == 0 || strings.HasPrefix(pascalName, "Get") {
+			continue
+		}
+
+		fmt.Fprintf(f, `
+			// Does the same as Bot.%s, but parses response body only in case of an error. 
+			// Therefore works faster if you dont need the response value.
+			func (b *Bot) %sVoid%s error {
+				return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "%s", b.options.FloodHandler, %s)
+			}
+		`,
+			pascalName,
+			pascalName,
+			args,
+			m.Name,
+			data,
+		)
 	}
 
 	f.Close()
