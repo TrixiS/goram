@@ -175,9 +175,6 @@ func makeVoidRequest(ctx context.Context,
 
 		duration := time.Second * time.Duration(response.Parameters.RetryAfter)
 		floodHandler.Handle(ctx, apiMethod, data, duration)
-
-		if body != nil {
-			body.Seek(0, io.SeekStart)
-		}
+		body.Seek(0, io.SeekStart)
 	}
 }
