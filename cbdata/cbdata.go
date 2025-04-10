@@ -26,8 +26,8 @@ var ErrInvalidPrefix = errors.New("invalid prefix")
 // The returned string is *not* checked to fit 64 bytes.
 func Pack[T any](prefix string, value T) string {
 	buf := &bytes.Buffer{}
-	buf.Write([]byte(prefix))
-	buf.Write([]byte{delim})
+	buf.WriteString(prefix)
+	buf.WriteByte(delim)
 
 	encoder := base64.NewEncoder(base64.RawStdEncoding, buf)
 
@@ -44,22 +44,19 @@ func Pack[T any](prefix string, value T) string {
 // If prefixes do not match, returns ErrInvalidPrefix.
 // Otherwise returns encoded value and a binary read error, if occured.
 func Unpack[T any](prefix string, callbackData string) (T, error) {
-	buf := bytes.NewBufferString(callbackData)
-	prefixOffset := len(prefix)
-	metaLen := prefixOffset + 1 // +1 for delim
-	metaBuf := make([]byte, metaLen)
-
 	var value T
 
-	n, _ := buf.Read(metaBuf)
+	prefixOffset := len(prefix)
+	metaLen := prefixOffset + 1 // +1 for delim
 
-	if n != metaLen || metaBuf[prefixOffset] != delim ||
-		string(metaBuf[:prefixOffset]) != prefix {
+	b := []byte(callbackData)
 
+	if len(b) <= metaLen || b[prefixOffset] != delim || string(b[:prefixOffset]) != prefix {
 		return value, ErrInvalidPrefix
 	}
 
-	decoder := base64.NewDecoder(base64.RawStdEncoding, buf)
+	reader := bytes.NewReader(b[metaLen:])
+	decoder := base64.NewDecoder(base64.RawStdEncoding, reader)
 	err := binary.Read(decoder, binary.LittleEndian, &value)
 	return value, err
 }
