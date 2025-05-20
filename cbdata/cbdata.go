@@ -77,6 +77,10 @@ func Filter[T any](prefix string) handlers.Filter[*goram.CallbackQuery] {
 		value, err := Unpack[T](prefix, query.Data)
 
 		if err != nil {
+			if errors.Is(err, ErrInvalidPrefix) {
+				return false, nil
+			}
+
 			return false, err
 		}
 
@@ -106,6 +110,10 @@ func FilterFunc[T any](
 		value, err := Unpack[T](prefix, query.Data)
 
 		if err != nil {
+			if errors.Is(err, ErrInvalidPrefix) {
+				return false, nil
+			}
+
 			return false, err
 		}
 
