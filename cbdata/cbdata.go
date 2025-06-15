@@ -55,8 +55,7 @@ func Unpack[T any](prefix string, callbackData string) (T, error) {
 		return value, ErrInvalidPrefix
 	}
 
-	reader := bytes.NewReader(b[metaLen:])
-	decoder := base64.NewDecoder(base64.RawStdEncoding, reader)
+	decoder := base64.NewDecoder(base64.RawStdEncoding, bytes.NewReader(b[metaLen:]))
 	err := binary.Read(decoder, binary.LittleEndian, &value)
 	return value, err
 }
@@ -70,10 +69,6 @@ const Key = "callbackData"
 // with "callbackData" key and returns true. Otherwise returns false.
 func Filter[T any](prefix string) handlers.Filter[*goram.CallbackQuery] {
 	return func(ctx context.Context, bot *goram.Bot, query *goram.CallbackQuery, data handlers.Data) (bool, error) {
-		if query.Data == "" {
-			return false, nil
-		}
-
 		value, err := Unpack[T](prefix, query.Data)
 
 		if err != nil {
@@ -95,16 +90,14 @@ func FilterFunc[T any](
 	predicate func(data T) bool,
 ) handlers.Filter[*goram.CallbackQuery] {
 	return func(ctx context.Context, bot *goram.Bot, query *goram.CallbackQuery, data handlers.Data) (bool, error) {
-		if query.Data == "" {
-			return false, nil
-		}
-
 		storedValue, exists := data[Key]
 
 		if exists {
 			if data, ok := storedValue.(T); ok {
 				return predicate(data), nil
 			}
+
+			return false, nil
 		}
 
 		value, err := Unpack[T](prefix, query.Data)
