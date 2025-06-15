@@ -17,7 +17,7 @@
       "type": "go",
       "request": "launch",
       "mode": "auto",
-      "program": "cmd/test/main.go",
+      "program": "${workspaceFolder}/examples/handlers/main.go",
       "cwd": "${workspaceFolder}"
     }
   ]

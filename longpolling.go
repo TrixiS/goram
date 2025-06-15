@@ -40,7 +40,7 @@ func LongPollUpdates(
 					continue
 				}
 
-				options.RequestOptions.Offset = updates[len(updates)-1].UpdateId + 1
+				options.RequestOptions.Offset = updates[len(updates)-1].UpdateID + 1
 				c <- updates
 				continue
 			}

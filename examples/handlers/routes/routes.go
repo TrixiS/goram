@@ -15,7 +15,7 @@ func Start(
 	data handlers.Data,
 ) error {
 	_, err := bot.SendMessage(ctx, &goram.SendMessageRequest{
-		ChatId:      message.ChatId(),
+		ChatID:      message.ChatID(),
 		Text:        "Hello world!",
 		ReplyMarkup: markups.Start,
 	})
@@ -30,7 +30,7 @@ func HelloQuery(
 	data handlers.Data,
 ) error {
 	_, err := bot.AnswerCallbackQuery(ctx, &goram.AnswerCallbackQueryRequest{
-		CallbackQueryId: query.Id,
+		CallbackQueryID: query.ID,
 		Text:            "Hello",
 		ShowAlert:       true,
 	})
@@ -45,7 +45,7 @@ func WorldQuery(
 	data handlers.Data,
 ) error {
 	_, err := bot.AnswerCallbackQuery(ctx, &goram.AnswerCallbackQueryRequest{
-		CallbackQueryId: query.Id,
+		CallbackQueryID: query.ID,
 		Text:            "World",
 		ShowAlert:       true,
 	})

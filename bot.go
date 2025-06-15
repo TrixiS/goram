@@ -59,8 +59,8 @@ func (e ErrDownloadFile) Error() string {
 // This function does not close or seek the provided writer.
 //
 // If download http response status != 200, returns ErrDownloadFile
-func (b *Bot) DownloadFile(ctx context.Context, fileId string, dst io.Writer) (int64, error) {
-	file, err := b.GetFile(ctx, &GetFileRequest{FileId: fileId})
+func (b *Bot) DownloadFile(ctx context.Context, fileID string, dst io.Writer) (int64, error) {
+	file, err := b.GetFile(ctx, &GetFileRequest{FileID: fileID})
 
 	if err != nil {
 		return 0, err

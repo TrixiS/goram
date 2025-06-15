@@ -96,8 +96,6 @@ func FilterFunc[T any](
 			if data, ok := storedValue.(T); ok {
 				return predicate(data), nil
 			}
-
-			return false, nil
 		}
 
 		value, err := Unpack[T](prefix, query.Data)

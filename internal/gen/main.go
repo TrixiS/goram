@@ -392,7 +392,7 @@ func generateRequests(parser *Parser, methods []Method) {
 		}
 
 		f.WriteString(fmt.Sprintf("// see Bot.%s(ctx, &%s{})\n", pascalName, structName))
-		generateTypeStruct(f, parser.ParseType(&m.Type), suffix, false, false)
+		generateTypeStruct(f, parser.ParseType(&m.Type), suffix, false, true)
 		f.WriteString("\n")
 		generateRequestWriteMultipart(f, parser, &m, structName)
 	}
@@ -415,8 +415,8 @@ func generateRequestWriteMultipart(
 
 		if parsedTypeField.ParsedSpecType.GoType == "InputFile" {
 			w.WriteString(fmt.Sprintf(`
-				if r.%s.FileId != "" {
-					w.WriteField("%s", r.%s.FileId)
+				if r.%s.FileID != "" {
+					w.WriteField("%s", r.%s.FileID)
 				} else if r.%s.Reader != nil {
 					fw, _ := w.CreateFormFile("%s", r.%s.Reader.Name()) 
 					io.Copy(fw, r.%s.Reader)
@@ -482,7 +482,7 @@ func generateRequestWriteMultipart(
 				parsedTypeField.GoName,
 				field.Name,
 			))
-		} else if parsedTypeField.ParsedSpecType.GoType == "ChatId" {
+		} else if parsedTypeField.ParsedSpecType.GoType == "ChatID" {
 			w.WriteString(fmt.Sprintf(
 				`w.WriteField("%s", r.%s.String())
 				`,
@@ -653,8 +653,8 @@ func generateSumTypeStruct(
 
 func generateInputMediaMethods(w io.StringWriter, t *Type) {
 	w.WriteString(fmt.Sprintf(`
-		func (i *%s) setMedia(fileId string) {
-			i.Media.FileId = fileId
+		func (i *%s) setMedia(fileID string) {
+			i.Media.FileID = fileID
 		}
 	`, t.Name))
 
@@ -797,7 +797,7 @@ func (p *Parser) ParseTypeField(t *TypeField) *ParsedTypeField {
 		ptf.ParsedSpecType.ParsedType = ParsedTypeArray
 		ptf.ParsedSpecType.Levels = 1
 	} else if len(t.Types) == 2 && (t.Name == "id" || t.Name == "chat_id" || t.Name == "from_chat_id") {
-		ptf.ParsedSpecType.GoType = "ChatId"
+		ptf.ParsedSpecType.GoType = "ChatID"
 	} else if t.Types[0] == "Integer" &&
 		(strings.HasSuffix(t.Name, "id") || t.Name == "offset") &&
 		t.Name != "message_id" {
@@ -909,11 +909,20 @@ func (g *Parser) parseSpecType(p *ParsedSpecType, fieldType string) {
 }
 
 func camelCase(v string, title bool) string {
+	if v == "id" {
+		return "ID"
+	}
+
 	runes := []rune(v)
 	builder := strings.Builder{}
 	upper := false
 
 	for i, r := range runes {
+		if i == len(runes)-3 && r == '_' && runes[i+1] == 'i' && runes[i+2] == 'd' {
+			builder.WriteString("ID")
+			break
+		}
+
 		if r == '_' {
 			upper = true
 			continue

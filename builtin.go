@@ -6,16 +6,16 @@ import (
 )
 
 // Use this struct to specify a chat id or username
-type ChatId struct {
-	Id       int64  // Negative int64 (-100...) for channel and some group ids, positive for user ids
+type ChatID struct {
+	ID       int64  // Negative int64 (-100...) for channel and some group ids, positive for user ids
 	Username string // Plain username, without leading @
 }
 
 // For json encoding ChatId inside structs
-func (c ChatId) MarshalJSON() ([]byte, error) {
-	if c.Id != 0 {
-		stringId := strconv.FormatInt(c.Id, 10)
-		return []byte(stringId), nil
+func (c ChatID) MarshalJSON() ([]byte, error) {
+	if c.ID != 0 {
+		stringID := strconv.FormatInt(c.ID, 10)
+		return []byte(stringID), nil
 	}
 
 	if c.Username != "" {
@@ -25,9 +25,9 @@ func (c ChatId) MarshalJSON() ([]byte, error) {
 	return nil, nil
 }
 
-func (c ChatId) String() string {
-	if c.Id != 0 {
-		stringID := strconv.FormatInt(c.Id, 10)
+func (c ChatID) String() string {
+	if c.ID != 0 {
+		stringID := strconv.FormatInt(c.ID, 10)
 		return stringID
 	}
 
@@ -54,12 +54,12 @@ type NamedReader interface {
 //
 // See goram.NameReader also.
 type InputFile struct {
-	FileId string
+	FileID string
 	Reader NamedReader
 }
 
 func (i InputFile) MarshalJSON() ([]byte, error) {
-	return []byte(`"` + i.FileId + `"`), nil
+	return []byte(`"` + i.FileID + `"`), nil
 }
 
 // This object represents the content of a media message to be sent. It should be one of
@@ -97,22 +97,22 @@ func (n NameReader) Read(b []byte) (int, error) {
 	return n.Reader.Read(b)
 }
 
-func (m *Message) ChatId() ChatId {
-	return ChatId{Id: m.Chat.Id}
+func (c *Chat) ChatID() ChatID {
+	return ChatID{ID: c.ID}
 }
 
-func (u *User) ChatId() ChatId {
-	return ChatId{Id: u.Id}
+func (m *Message) ChatID() ChatID {
+	return m.Chat.ChatID()
 }
 
-func (c *CallbackQuery) ChatId() ChatId {
+func (u *User) ChatID() ChatID {
+	return ChatID{ID: u.ID}
+}
+
+func (c *CallbackQuery) ChatID() ChatID {
 	if c.Message != nil && c.Message.Chat != nil {
-		return ChatId{Id: c.Message.Chat.Id}
+		return c.Message.Chat.ChatID()
 	}
 
-	return ChatId{Id: c.From.Id}
-}
-
-func (c *Chat) ChatId() ChatId {
-	return ChatId{Id: c.Id}
+	return ChatID{ID: c.From.ID}
 }

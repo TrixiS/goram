@@ -25,9 +25,9 @@ func main() {
 	for updates := range updatesChan {
 		for _, u := range updates {
 			if u.Message != nil {
-				fmt.Println("new message", u.Message.Chat.Id, u.Message.Text, u.Message.MessageId)
+				fmt.Println("new message", u.Message.Chat.ID, u.Message.Text, u.Message.MessageID)
 			} else if u.EditedMessage != nil {
-				fmt.Println("edited message", u.EditedMessage.Chat.Id, u.EditedMessage.MessageId)
+				fmt.Println("edited message", u.EditedMessage.Chat.ID, u.EditedMessage.MessageID)
 			}
 		}
 	}

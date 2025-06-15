@@ -37,22 +37,22 @@ func main() {
 	fmt.Println("me", me)
 
 	message, _ := bot.SendMessage(ctx, &goram.SendMessageRequest{
-		ChatId:      goram.ChatId{Username: "somecoolchannel"},
+		ChatID:      goram.ChatID{Username: "somecoolchannel"},
 		Text:        "Hello world",
 		ReplyMarkup: markup,
 	})
 
-	fmt.Println("sent", message.MessageId)
+	fmt.Println("sent", message.MessageID)
 
 	// sending files
 	// you can use goram.NameReader struct to send buffered files
 	photoFile, _ := os.Open("./photo.jpeg")
 	message, _ = bot.SendPhoto(ctx, &goram.SendPhotoRequest{
-		ChatId: goram.ChatId{Id: -100123123123123},
+		ChatID: goram.ChatID{ID: -100123123123123},
 		Photo:  goram.InputFile{Reader: photoFile},
 	})
 
 	// downloading files by file ids
 	downloadedFile, _ := os.OpenFile("./downloaded.jpeg", os.O_CREATE|os.O_WRONLY, 0o660)
-	bot.DownloadFile(ctx, message.Photo[0].FileId, downloadedFile) // takes io.Writer
+	bot.DownloadFile(ctx, message.Photo[0].FileID, downloadedFile) // takes io.Writer
 }
