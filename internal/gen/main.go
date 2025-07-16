@@ -8,7 +8,6 @@ import (
 	"os/exec"
 	"slices"
 	"strings"
-	"unicode"
 )
 
 type Enum struct {
@@ -291,11 +290,6 @@ func generateMethods(parser *Parser, methods []Method) {
 
 	for _, m := range methods {
 		pascalName := camelCase(m.Name, true)
-		structName := pascalName
-
-		if !strings.HasSuffix(structName, "Request") {
-			structName += "Request"
-		}
 
 		parsedSpecType := parser.ParseSpecTypes(m.Returns)
 		typeString := parsedSpecType.TypeString()
@@ -306,7 +300,7 @@ func generateMethods(parser *Parser, methods []Method) {
 		if len(m.Fields) == 0 {
 			args = "(ctx context.Context)"
 		} else {
-			args = fmt.Sprintf("(ctx context.Context, request *%s)", structName)
+			args = "(ctx context.Context, request RequestBuilder)"
 			data = "request"
 		}
 
@@ -315,15 +309,11 @@ func generateMethods(parser *Parser, methods []Method) {
 			f.WriteString(comment)
 		}
 
-		f.WriteString(fmt.Sprintf("// %s\n", m.Href))
-
-		f.WriteString(
-			fmt.Sprintf("func (b *Bot) %s%s %s {\n", pascalName, args, returnType),
-		)
-
-		f.WriteString(
-			fmt.Sprintf(
-				`res, err := makeRequest[%s](ctx, b.options.Client, b.baseUrl, "%s", b.options.FloodHandler, %s)
+		fmt.Fprintf(f, "// %s\n", m.Href)
+		fmt.Fprintf(f, "func (b *Bot) %s%s %s {\n", pascalName, args, returnType)
+		fmt.Fprintf(
+			f,
+			`res, err := makeRequest[%s](ctx, b.options.Client, b.baseUrl, "%s", b.options.FloodHandler, %s)
 
 				if err != nil {
 					return r, err
@@ -332,23 +322,24 @@ func generateMethods(parser *Parser, methods []Method) {
 				return res.Result, nil
 			}
 				`,
-				typeString,
-				m.Name,
-				data,
-			),
+			typeString,
+			m.Name,
+			data,
 		)
 
 		if len(m.Fields) == 0 || strings.HasPrefix(pascalName, "Get") {
 			continue
 		}
 
-		fmt.Fprintf(f, `
+		fmt.Fprintf(
+			f,
+			`
 			// Does the same as Bot.%s, but parses response body only in case of an error. 
 			// Therefore works faster if you dont need the response value.
 			func (b *Bot) %sVoid%s error {
 				return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "%s", b.options.FloodHandler, %s)
 			}
-		`,
+			`,
 			pascalName,
 			pascalName,
 			args,
@@ -391,8 +382,8 @@ func generateRequests(parser *Parser, methods []Method) {
 			suffix = "Request"
 		}
 
-		f.WriteString(fmt.Sprintf("// see Bot.%s(ctx, &%s{})\n", pascalName, structName))
-		generateTypeStruct(f, parser.ParseType(&m.Type), suffix, false, true)
+		fmt.Fprintf(f, "// see Bot.%s(ctx, &%s{})\n", pascalName, structName)
+		generateTypeStruct(f, parser.ParseType(&m.Type), suffix, false, false)
 		f.WriteString("\n")
 		generateRequestWriteMultipart(f, parser, &m, structName)
 	}
@@ -401,21 +392,18 @@ func generateRequests(parser *Parser, methods []Method) {
 }
 
 func generateRequestWriteMultipart(
-	w io.StringWriter,
+	w io.Writer,
 	parser *Parser,
 	m *Method,
 	structName string,
 ) {
-	w.WriteString(
-		fmt.Sprintf("func (r *%s) writeMultipart(w *multipart.Writer) {", structName),
-	)
+	fmt.Fprintf(w, "func (r *%s) WriteMultipart(w *multipart.Writer) {", structName)
 
 	for _, field := range m.Fields {
 		parsedTypeField := parser.ParseTypeField(&field)
 
 		if parsedTypeField.ParsedSpecType.GoType == "InputFile" {
-			w.WriteString(fmt.Sprintf(`
-				if r.%s.FileID != "" {
+			fmt.Fprintf(w, `if r.%s.FileID != "" {
 					w.WriteField("%s", r.%s.FileID)
 				} else if r.%s.Reader != nil {
 					fw, _ := w.CreateFormFile("%s", r.%s.Reader.Name()) 
@@ -429,24 +417,23 @@ func generateRequestWriteMultipart(
 				field.Name,
 				parsedTypeField.GoName,
 				parsedTypeField.GoName,
-			))
+			)
 		} else if parsedTypeField.ParsedSpecType.GoType == "InputMedia" &&
 			parsedTypeField.ParsedSpecType.ParsedType != ParsedTypeArray {
 
-			w.WriteString(fmt.Sprintf(`
-				{
-					inputFile := r.%s.getMedia()
+			fmt.Fprintf(w, `{
+				inputFile := r.%s.getMedia()
 
-					if inputFile.Reader != nil {
-						fw, _ := w.CreateFormFile("%s", inputFile.Reader.Name())
-						io.Copy(fw, inputFile.Reader)
-						r.%s.setMedia("attach://%s")	
-					}
-
-					b, _ := json.Marshal(r.%s)
-					fw, _ := w.CreateFormField("%s")
-					fw.Write(b)
+				if inputFile.Reader != nil {
+					fw, _ := w.CreateFormFile("%s", inputFile.Reader.Name())
+					io.Copy(fw, inputFile.Reader)
+					r.%s.setMedia("attach://%s")	
 				}
+
+				b, _ := json.Marshal(r.%s)
+				fw, _ := w.CreateFormField("%s")
+				fw.Write(b)
+			}
 			`,
 				parsedTypeField.GoName,
 				field.Name,
@@ -454,89 +441,76 @@ func generateRequestWriteMultipart(
 				field.Name,
 				parsedTypeField.GoName,
 				field.Name,
-			))
+			)
 		} else if parsedTypeField.ParsedSpecType.GoType == "InputMedia" &&
 			parsedTypeField.ParsedSpecType.ParsedType == ParsedTypeArray &&
 			parsedTypeField.ParsedSpecType.Levels == 1 {
 
-			w.WriteString(fmt.Sprintf(`
-				for i := 0; i < len(r.%s); i++ {
-					inputMedia := r.%s[i]
-					fieldName := "%s" + strconv.Itoa(i)
-					inputFile := inputMedia.getMedia()
-					if inputFile.Reader != nil {
-						fw, _ := w.CreateFormFile(fieldName, inputFile.Reader.Name())
-						io.Copy(fw, inputFile.Reader)
-						inputMedia.setMedia("attach://" + fieldName)
-					}					
-				}
-				{
-					b, _ := json.Marshal(r.%s)
-					fw, _ := w.CreateFormField("%s")
-					fw.Write(b)
-				}
+			fmt.Fprintf(w, `for i := 0; i < len(r.%s); i++ {
+				inputMedia := r.%s[i]
+				fieldName := "%s" + strconv.Itoa(i)
+				inputFile := inputMedia.getMedia()
+				if inputFile.Reader != nil {
+					fw, _ := w.CreateFormFile(fieldName, inputFile.Reader.Name())
+					io.Copy(fw, inputFile.Reader)
+					inputMedia.setMedia("attach://" + fieldName)
+				}					
+			}
+			{
+				b, _ := json.Marshal(r.%s)
+				fw, _ := w.CreateFormField("%s")
+				fw.Write(b)
+			}
 			`,
 				parsedTypeField.GoName,
 				parsedTypeField.GoName,
 				field.Name,
 				parsedTypeField.GoName,
 				field.Name,
-			))
+			)
 		} else if parsedTypeField.ParsedSpecType.GoType == "ChatID" {
-			w.WriteString(fmt.Sprintf(
-				`w.WriteField("%s", r.%s.String())
-				`,
+			fmt.Fprintf(w,
+				"w.WriteField(\"%s\", r.%s.String())\n",
 				field.Name,
 				parsedTypeField.GoName,
-			))
+			)
 		} else if parsedTypeField.ParsedSpecType.GoType == "string" &&
 			parsedTypeField.ParsedSpecType.ParsedType == ParsedTypePrimitive {
 
 			if !parsedTypeField.Field.Required {
-				w.WriteString(fmt.Sprintf(`if r.%s != "" {`, parsedTypeField.GoName))
+				fmt.Fprintf(w, "if r.%s != \"\" {", parsedTypeField.GoName)
 			}
 
-			w.WriteString(fmt.Sprintf(`
-				w.WriteField("%s", r.%s)
-				`,
-				field.Name,
-				parsedTypeField.GoName,
-			))
+			fmt.Fprintf(w, "w.WriteField(\"%s\", r.%s)\n", field.Name, parsedTypeField.GoName)
 
 			if !parsedTypeField.Field.Required {
-				w.WriteString("}\n")
+				w.Write([]byte("}\n"))
 			}
 		} else if parsedTypeField.ParsedSpecType.ParsedType == ParsedTypeEnum {
-			w.WriteString(fmt.Sprintf(
-				`w.WriteField("%s", string(r.%s))
-				`,
-				field.Name,
-				parsedTypeField.GoName,
-			))
+			fmt.Fprintf(w, "w.WriteField(\"%s\", string(r.%s))\n", field.Name, parsedTypeField.GoName)
 		} else {
-			checkForNil := !parsedTypeField.Field.Required && (parsedTypeField.ParsedSpecType.ParsedType == ParsedTypeStruct ||
-				parsedTypeField.ParsedSpecType.Levels > 0 ||
-				parsedTypeField.ParsedSpecType.ParsedType == ParsedTypeInterface)
+			checkForNil := !parsedTypeField.Field.Required &&
+				(parsedTypeField.ParsedSpecType.ParsedType == ParsedTypeStruct ||
+					parsedTypeField.ParsedSpecType.Levels > 0 ||
+					parsedTypeField.ParsedSpecType.ParsedType == ParsedTypeInterface)
 
 			if checkForNil {
-				w.WriteString(fmt.Sprintf(`if r.%s != nil {`, parsedTypeField.GoName))
+				fmt.Fprintf(w, "if r.%s != nil ", parsedTypeField.GoName)
 			}
 
-			w.WriteString(fmt.Sprintf(`
-				{
+			fmt.Fprintf(w, `{
 					b, _ := json.Marshal(r.%s)
 					fw, _ := w.CreateFormField("%s")
 					fw.Write(b)
 				}
-			`, parsedTypeField.GoName, field.Name))
-
-			if checkForNil {
-				w.WriteString("}\n")
-			}
+				`,
+				parsedTypeField.GoName,
+				field.Name,
+			)
 		}
 	}
 
-	w.WriteString("}\n")
+	w.Write([]byte("}\n"))
 }
 
 var builtinTypes = []string{
@@ -731,9 +705,10 @@ type ParsedSpecType struct {
 func (p *ParsedSpecType) TypeString() string {
 	builder := strings.Builder{}
 
-	if p.ParsedType == ParsedTypeStruct {
+	switch p.ParsedType {
+	case ParsedTypeStruct:
 		builder.WriteRune('*')
-	} else if p.ParsedType == ParsedTypeArray {
+	case ParsedTypeArray:
 		for i := 0; i < p.Levels; i++ {
 			builder.WriteString("[]")
 		}
@@ -878,16 +853,17 @@ func (p *Parser) ParseSpecTypes(types []string) ParsedSpecType {
 }
 
 func (g *Parser) parseSpecType(p *ParsedSpecType, fieldType string) {
-	if fieldType == "Integer" {
+	switch fieldType {
+	case "Integer":
 		p.GoType = "int"
 		return
-	} else if fieldType == "String" {
+	case "String":
 		p.GoType = "string"
 		return
-	} else if fieldType == "Boolean" {
+	case "Boolean":
 		p.GoType = "bool"
 		return
-	} else if fieldType == "Float" {
+	case "Float":
 		p.GoType = "float64"
 		return
 	}
@@ -928,9 +904,9 @@ func camelCase(v string, title bool) string {
 			continue
 		}
 
-		if upper || (title && i == 0) {
+		if upper || (title && i == 0 && r > 'Z') {
 			upper = false
-			builder.WriteRune(unicode.ToUpper(r))
+			builder.WriteRune(r - 32)
 		} else {
 			builder.WriteRune(r)
 		}
