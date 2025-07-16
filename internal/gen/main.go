@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"slices"
 	"strings"
+	"unicode"
 )
 
 type Enum struct {
@@ -290,6 +291,11 @@ func generateMethods(parser *Parser, methods []Method) {
 
 	for _, m := range methods {
 		pascalName := camelCase(m.Name, true)
+		structName := pascalName
+
+		if !strings.HasSuffix(structName, "Request") {
+			structName += "Request"
+		}
 
 		parsedSpecType := parser.ParseSpecTypes(m.Returns)
 		typeString := parsedSpecType.TypeString()
@@ -300,7 +306,7 @@ func generateMethods(parser *Parser, methods []Method) {
 		if len(m.Fields) == 0 {
 			args = "(ctx context.Context)"
 		} else {
-			args = "(ctx context.Context, request RequestBuilder)"
+			args = fmt.Sprintf("(ctx context.Context, request *%s)", structName)
 			data = "request"
 		}
 
@@ -309,11 +315,15 @@ func generateMethods(parser *Parser, methods []Method) {
 			f.WriteString(comment)
 		}
 
-		fmt.Fprintf(f, "// %s\n", m.Href)
-		fmt.Fprintf(f, "func (b *Bot) %s%s %s {\n", pascalName, args, returnType)
-		fmt.Fprintf(
-			f,
-			`res, err := makeRequest[%s](ctx, b.options.Client, b.baseUrl, "%s", b.options.FloodHandler, %s)
+		f.WriteString(fmt.Sprintf("// %s\n", m.Href))
+
+		f.WriteString(
+			fmt.Sprintf("func (b *Bot) %s%s %s {\n", pascalName, args, returnType),
+		)
+
+		f.WriteString(
+			fmt.Sprintf(
+				`res, err := makeRequest[%s](ctx, b.options.Client, b.baseUrl, "%s", b.options.FloodHandler, %s)
 
 				if err != nil {
 					return r, err
@@ -322,24 +332,23 @@ func generateMethods(parser *Parser, methods []Method) {
 				return res.Result, nil
 			}
 				`,
-			typeString,
-			m.Name,
-			data,
+				typeString,
+				m.Name,
+				data,
+			),
 		)
 
 		if len(m.Fields) == 0 || strings.HasPrefix(pascalName, "Get") {
 			continue
 		}
 
-		fmt.Fprintf(
-			f,
-			`
+		fmt.Fprintf(f, `
 			// Does the same as Bot.%s, but parses response body only in case of an error. 
 			// Therefore works faster if you dont need the response value.
 			func (b *Bot) %sVoid%s error {
 				return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "%s", b.options.FloodHandler, %s)
 			}
-			`,
+		`,
 			pascalName,
 			pascalName,
 			args,
@@ -382,8 +391,8 @@ func generateRequests(parser *Parser, methods []Method) {
 			suffix = "Request"
 		}
 
-		fmt.Fprintf(f, "// see Bot.%s(ctx, &%s{})\n", pascalName, structName)
-		generateTypeStruct(f, parser.ParseType(&m.Type), suffix, false, false)
+		f.WriteString(fmt.Sprintf("// see Bot.%s(ctx, &%s{})\n", pascalName, structName))
+		generateTypeStruct(f, parser.ParseType(&m.Type), suffix, false, true)
 		f.WriteString("\n")
 		generateRequestWriteMultipart(f, parser, &m, structName)
 	}
@@ -392,18 +401,21 @@ func generateRequests(parser *Parser, methods []Method) {
 }
 
 func generateRequestWriteMultipart(
-	w io.Writer,
+	w io.StringWriter,
 	parser *Parser,
 	m *Method,
 	structName string,
 ) {
-	fmt.Fprintf(w, "func (r *%s) WriteMultipart(w *multipart.Writer) {", structName)
+	w.WriteString(
+		fmt.Sprintf("func (r *%s) writeMultipart(w *multipart.Writer) {", structName),
+	)
 
 	for _, field := range m.Fields {
 		parsedTypeField := parser.ParseTypeField(&field)
 
 		if parsedTypeField.ParsedSpecType.GoType == "InputFile" {
-			fmt.Fprintf(w, `if r.%s.FileID != "" {
+			w.WriteString(fmt.Sprintf(`
+				if r.%s.FileID != "" {
 					w.WriteField("%s", r.%s.FileID)
 				} else if r.%s.Reader != nil {
 					fw, _ := w.CreateFormFile("%s", r.%s.Reader.Name()) 
@@ -417,100 +429,114 @@ func generateRequestWriteMultipart(
 				field.Name,
 				parsedTypeField.GoName,
 				parsedTypeField.GoName,
-			)
+			))
 		} else if parsedTypeField.ParsedSpecType.GoType == "InputMedia" &&
 			parsedTypeField.ParsedSpecType.ParsedType != ParsedTypeArray {
 
-			fmt.Fprintf(w, `{
-				inputFile := r.%s.getMedia()
+			w.WriteString(fmt.Sprintf(`
+				{
+					inputFile := r.%s.getMedia()
 
-				if inputFile.Reader != nil {
-					fw, _ := w.CreateFormFile("%s", inputFile.Reader.Name())
-					io.Copy(fw, inputFile.Reader)
-					r.%s.setMedia("attach://%s")	
-				}
+					if inputFile.Reader != nil {
+						fw, _ := w.CreateFormFile("%s", inputFile.Reader.Name())
+						io.Copy(fw, inputFile.Reader)
+						r.%s.setMedia("attach://%s")	
+					}
 
-				b, _ := json.Marshal(r.%s)
-				fw, _ := w.CreateFormField("%s")
-				fw.Write(b)
-			}
-			`,
-				parsedTypeField.GoName,
-				field.Name,
-				parsedTypeField.GoName,
-				field.Name,
-				parsedTypeField.GoName,
-				field.Name,
-			)
-		} else if parsedTypeField.ParsedSpecType.GoType == "InputMedia" &&
-			parsedTypeField.ParsedSpecType.ParsedType == ParsedTypeArray &&
-			parsedTypeField.ParsedSpecType.Levels == 1 {
-
-			fmt.Fprintf(w, `for i := 0; i < len(r.%s); i++ {
-				inputMedia := r.%s[i]
-				fieldName := "%s" + strconv.Itoa(i)
-				inputFile := inputMedia.getMedia()
-				if inputFile.Reader != nil {
-					fw, _ := w.CreateFormFile(fieldName, inputFile.Reader.Name())
-					io.Copy(fw, inputFile.Reader)
-					inputMedia.setMedia("attach://" + fieldName)
-				}					
-			}
-			{
-				b, _ := json.Marshal(r.%s)
-				fw, _ := w.CreateFormField("%s")
-				fw.Write(b)
-			}
-			`,
-				parsedTypeField.GoName,
-				parsedTypeField.GoName,
-				field.Name,
-				parsedTypeField.GoName,
-				field.Name,
-			)
-		} else if parsedTypeField.ParsedSpecType.GoType == "ChatID" {
-			fmt.Fprintf(w,
-				"w.WriteField(\"%s\", r.%s.String())\n",
-				field.Name,
-				parsedTypeField.GoName,
-			)
-		} else if parsedTypeField.ParsedSpecType.GoType == "string" &&
-			parsedTypeField.ParsedSpecType.ParsedType == ParsedTypePrimitive {
-
-			if !parsedTypeField.Field.Required {
-				fmt.Fprintf(w, "if r.%s != \"\" {", parsedTypeField.GoName)
-			}
-
-			fmt.Fprintf(w, "w.WriteField(\"%s\", r.%s)\n", field.Name, parsedTypeField.GoName)
-
-			if !parsedTypeField.Field.Required {
-				w.Write([]byte("}\n"))
-			}
-		} else if parsedTypeField.ParsedSpecType.ParsedType == ParsedTypeEnum {
-			fmt.Fprintf(w, "w.WriteField(\"%s\", string(r.%s))\n", field.Name, parsedTypeField.GoName)
-		} else {
-			checkForNil := !parsedTypeField.Field.Required &&
-				(parsedTypeField.ParsedSpecType.ParsedType == ParsedTypeStruct ||
-					parsedTypeField.ParsedSpecType.Levels > 0 ||
-					parsedTypeField.ParsedSpecType.ParsedType == ParsedTypeInterface)
-
-			if checkForNil {
-				fmt.Fprintf(w, "if r.%s != nil ", parsedTypeField.GoName)
-			}
-
-			fmt.Fprintf(w, `{
 					b, _ := json.Marshal(r.%s)
 					fw, _ := w.CreateFormField("%s")
 					fw.Write(b)
 				}
-				`,
+			`,
 				parsedTypeField.GoName,
 				field.Name,
-			)
+				parsedTypeField.GoName,
+				field.Name,
+				parsedTypeField.GoName,
+				field.Name,
+			))
+		} else if parsedTypeField.ParsedSpecType.GoType == "InputMedia" &&
+			parsedTypeField.ParsedSpecType.ParsedType == ParsedTypeArray &&
+			parsedTypeField.ParsedSpecType.Levels == 1 {
+
+			w.WriteString(fmt.Sprintf(`
+				for i := 0; i < len(r.%s); i++ {
+					inputMedia := r.%s[i]
+					fieldName := "%s" + strconv.Itoa(i)
+					inputFile := inputMedia.getMedia()
+					if inputFile.Reader != nil {
+						fw, _ := w.CreateFormFile(fieldName, inputFile.Reader.Name())
+						io.Copy(fw, inputFile.Reader)
+						inputMedia.setMedia("attach://" + fieldName)
+					}					
+				}
+				{
+					b, _ := json.Marshal(r.%s)
+					fw, _ := w.CreateFormField("%s")
+					fw.Write(b)
+				}
+			`,
+				parsedTypeField.GoName,
+				parsedTypeField.GoName,
+				field.Name,
+				parsedTypeField.GoName,
+				field.Name,
+			))
+		} else if parsedTypeField.ParsedSpecType.GoType == "ChatID" {
+			w.WriteString(fmt.Sprintf(
+				`w.WriteField("%s", r.%s.String())
+				`,
+				field.Name,
+				parsedTypeField.GoName,
+			))
+		} else if parsedTypeField.ParsedSpecType.GoType == "string" &&
+			parsedTypeField.ParsedSpecType.ParsedType == ParsedTypePrimitive {
+
+			if !parsedTypeField.Field.Required {
+				w.WriteString(fmt.Sprintf(`if r.%s != "" {`, parsedTypeField.GoName))
+			}
+
+			w.WriteString(fmt.Sprintf(`
+				w.WriteField("%s", r.%s)
+				`,
+				field.Name,
+				parsedTypeField.GoName,
+			))
+
+			if !parsedTypeField.Field.Required {
+				w.WriteString("}\n")
+			}
+		} else if parsedTypeField.ParsedSpecType.ParsedType == ParsedTypeEnum {
+			w.WriteString(fmt.Sprintf(
+				`w.WriteField("%s", string(r.%s))
+				`,
+				field.Name,
+				parsedTypeField.GoName,
+			))
+		} else {
+			checkForNil := !parsedTypeField.Field.Required && (parsedTypeField.ParsedSpecType.ParsedType == ParsedTypeStruct ||
+				parsedTypeField.ParsedSpecType.Levels > 0 ||
+				parsedTypeField.ParsedSpecType.ParsedType == ParsedTypeInterface)
+
+			if checkForNil {
+				w.WriteString(fmt.Sprintf(`if r.%s != nil {`, parsedTypeField.GoName))
+			}
+
+			w.WriteString(fmt.Sprintf(`
+				{
+					b, _ := json.Marshal(r.%s)
+					fw, _ := w.CreateFormField("%s")
+					fw.Write(b)
+				}
+			`, parsedTypeField.GoName, field.Name))
+
+			if checkForNil {
+				w.WriteString("}\n")
+			}
 		}
 	}
 
-	w.Write([]byte("}\n"))
+	w.WriteString("}\n")
 }
 
 var builtinTypes = []string{
@@ -705,10 +731,9 @@ type ParsedSpecType struct {
 func (p *ParsedSpecType) TypeString() string {
 	builder := strings.Builder{}
 
-	switch p.ParsedType {
-	case ParsedTypeStruct:
+	if p.ParsedType == ParsedTypeStruct {
 		builder.WriteRune('*')
-	case ParsedTypeArray:
+	} else if p.ParsedType == ParsedTypeArray {
 		for i := 0; i < p.Levels; i++ {
 			builder.WriteString("[]")
 		}
@@ -853,17 +878,16 @@ func (p *Parser) ParseSpecTypes(types []string) ParsedSpecType {
 }
 
 func (g *Parser) parseSpecType(p *ParsedSpecType, fieldType string) {
-	switch fieldType {
-	case "Integer":
+	if fieldType == "Integer" {
 		p.GoType = "int"
 		return
-	case "String":
+	} else if fieldType == "String" {
 		p.GoType = "string"
 		return
-	case "Boolean":
+	} else if fieldType == "Boolean" {
 		p.GoType = "bool"
 		return
-	case "Float":
+	} else if fieldType == "Float" {
 		p.GoType = "float64"
 		return
 	}
@@ -904,9 +928,9 @@ func camelCase(v string, title bool) string {
 			continue
 		}
 
-		if upper || (title && i == 0 && r > 'Z') {
+		if upper || (title && i == 0) {
 			upper = false
-			builder.WriteRune(r - 32)
+			builder.WriteRune(unicode.ToUpper(r))
 		} else {
 			builder.WriteRune(r)
 		}

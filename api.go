@@ -42,8 +42,8 @@ func (a *apiResponse[R]) error(method string) *APIError {
 	}
 }
 
-type RequestBuilder interface {
-	WriteMultipart(*multipart.Writer)
+type apiRequest interface {
+	writeMultipart(*multipart.Writer)
 }
 
 func makeRequest[R any](
@@ -52,7 +52,7 @@ func makeRequest[R any](
 	baseUrl string,
 	apiMethod string,
 	floodHandler flood.Handler,
-	data RequestBuilder,
+	data apiRequest,
 ) (*apiResponse[R], error) {
 	url := baseUrl + apiMethod
 	contentType := "multipart/form-data"
@@ -61,7 +61,7 @@ func makeRequest[R any](
 	if data != nil {
 		buf := &bytes.Buffer{}
 		w := multipart.NewWriter(buf)
-		data.WriteMultipart(w)
+		data.writeMultipart(w)
 		w.Close()
 		contentType = w.FormDataContentType()
 		body = bytes.NewReader(buf.Bytes())
@@ -120,13 +120,13 @@ func makeVoidRequest(
 	baseUrl string,
 	apiMethod string,
 	floodHandler flood.Handler,
-	data RequestBuilder,
+	data apiRequest,
 ) error {
 	url := baseUrl + apiMethod
 
 	buf := &bytes.Buffer{}
 	w := multipart.NewWriter(buf)
-	data.WriteMultipart(w)
+	data.writeMultipart(w)
 	w.Close()
 
 	contentType := w.FormDataContentType()

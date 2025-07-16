@@ -116,8 +116,3 @@ func (c *CallbackQuery) ChatID() ChatID {
 
 	return ChatID{ID: c.From.ID}
 }
-
-// TODO: update readme
-// TODO: add support for media groups (fix media group handling)
-// TODO: handle optional values using request builders, do not use structs for requests
-// TODO: use RequestBuilder[T] interface for requests? To allow using structs as well as builders
