@@ -15,7 +15,7 @@ type GetUpdatesRequest struct {
 	AllowedUpdates []UpdateType // A JSON-serialized list of the update types you want your bot to receive. For example, specify ["message", "edited_channel_post", "callback_query"] to only receive updates of these types. See Update for a complete list of available update types. Specify an empty list to receive all update types except chat_member, message_reaction, and message_reaction_count (default). If not specified, the previous setting will be used. Please note that this parameter doesn't affect updates created before the call to getUpdates, so unwanted updates may be received for a short period of time.
 }
 
-func (r *GetUpdatesRequest) WriteMultipart(w *multipart.Writer) {
+func (r *GetUpdatesRequest) writeMultipart(w *multipart.Writer) {
 	{
 		b, _ := json.Marshal(r.Offset)
 		fw, _ := w.CreateFormField("offset")
@@ -49,7 +49,7 @@ type SetWebhookRequest struct {
 	SecretToken        string       // A secret token to be sent in a header "X-Telegram-Bot-Api-Secret-Token" in every webhook request, 1-256 characters. Only characters A-Z, a-z, 0-9, _ and - are allowed. The header is useful to ensure that the request comes from a webhook set by you.
 }
 
-func (r *SetWebhookRequest) WriteMultipart(w *multipart.Writer) {
+func (r *SetWebhookRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("url", r.Url)
 	if r.Certificate.FileID != "" {
 		w.WriteField("certificate", r.Certificate.FileID)
@@ -85,7 +85,7 @@ type DeleteWebhookRequest struct {
 	DropPendingUpdates bool // Pass True to drop all pending updates
 }
 
-func (r *DeleteWebhookRequest) WriteMultipart(w *multipart.Writer) {
+func (r *DeleteWebhookRequest) writeMultipart(w *multipart.Writer) {
 	{
 		b, _ := json.Marshal(r.DropPendingUpdates)
 		fw, _ := w.CreateFormField("drop_pending_updates")
@@ -110,7 +110,7 @@ type SendMessageRequest struct {
 	ReplyMarkup          Markup              // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
-func (r *SendMessageRequest) WriteMultipart(w *multipart.Writer) {
+func (r *SendMessageRequest) writeMultipart(w *multipart.Writer) {
 	if r.BusinessConnectionID != "" {
 		w.WriteField("business_connection_id", r.BusinessConnectionID)
 	}
@@ -173,7 +173,7 @@ type ForwardMessageRequest struct {
 	MessageID           int    // Message identifier in the chat specified in from_chat_id
 }
 
-func (r *ForwardMessageRequest) WriteMultipart(w *multipart.Writer) {
+func (r *ForwardMessageRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 	{
 		b, _ := json.Marshal(r.MessageThreadID)
@@ -213,7 +213,7 @@ type ForwardMessagesRequest struct {
 	ProtectContent      bool   // Protects the contents of the forwarded messages from forwarding and saving
 }
 
-func (r *ForwardMessagesRequest) WriteMultipart(w *multipart.Writer) {
+func (r *ForwardMessagesRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 	{
 		b, _ := json.Marshal(r.MessageThreadID)
@@ -256,7 +256,7 @@ type CopyMessageRequest struct {
 	ReplyMarkup           Markup           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
-func (r *CopyMessageRequest) WriteMultipart(w *multipart.Writer) {
+func (r *CopyMessageRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 	{
 		b, _ := json.Marshal(r.MessageThreadID)
@@ -326,7 +326,7 @@ type CopyMessagesRequest struct {
 	RemoveCaption       bool   // Pass True to copy the messages without their captions
 }
 
-func (r *CopyMessagesRequest) WriteMultipart(w *multipart.Writer) {
+func (r *CopyMessagesRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 	{
 		b, _ := json.Marshal(r.MessageThreadID)
@@ -375,7 +375,7 @@ type SendPhotoRequest struct {
 	ReplyMarkup           Markup           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
-func (r *SendPhotoRequest) WriteMultipart(w *multipart.Writer) {
+func (r *SendPhotoRequest) writeMultipart(w *multipart.Writer) {
 	if r.BusinessConnectionID != "" {
 		w.WriteField("business_connection_id", r.BusinessConnectionID)
 	}
@@ -461,7 +461,7 @@ type SendAudioRequest struct {
 	ReplyMarkup          Markup           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
-func (r *SendAudioRequest) WriteMultipart(w *multipart.Writer) {
+func (r *SendAudioRequest) writeMultipart(w *multipart.Writer) {
 	if r.BusinessConnectionID != "" {
 		w.WriteField("business_connection_id", r.BusinessConnectionID)
 	}
@@ -552,7 +552,7 @@ type SendDocumentRequest struct {
 	ReplyMarkup                 Markup           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
-func (r *SendDocumentRequest) WriteMultipart(w *multipart.Writer) {
+func (r *SendDocumentRequest) writeMultipart(w *multipart.Writer) {
 	if r.BusinessConnectionID != "" {
 		w.WriteField("business_connection_id", r.BusinessConnectionID)
 	}
@@ -644,7 +644,7 @@ type SendVideoRequest struct {
 	ReplyMarkup           Markup           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
-func (r *SendVideoRequest) WriteMultipart(w *multipart.Writer) {
+func (r *SendVideoRequest) writeMultipart(w *multipart.Writer) {
 	if r.BusinessConnectionID != "" {
 		w.WriteField("business_connection_id", r.BusinessConnectionID)
 	}
@@ -769,7 +769,7 @@ type SendAnimationRequest struct {
 	ReplyMarkup           Markup           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
-func (r *SendAnimationRequest) WriteMultipart(w *multipart.Writer) {
+func (r *SendAnimationRequest) writeMultipart(w *multipart.Writer) {
 	if r.BusinessConnectionID != "" {
 		w.WriteField("business_connection_id", r.BusinessConnectionID)
 	}
@@ -873,7 +873,7 @@ type SendVoiceRequest struct {
 	ReplyMarkup          Markup           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
-func (r *SendVoiceRequest) WriteMultipart(w *multipart.Writer) {
+func (r *SendVoiceRequest) writeMultipart(w *multipart.Writer) {
 	if r.BusinessConnectionID != "" {
 		w.WriteField("business_connection_id", r.BusinessConnectionID)
 	}
@@ -950,7 +950,7 @@ type SendVideoNoteRequest struct {
 	ReplyMarkup          Markup           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
-func (r *SendVideoNoteRequest) WriteMultipart(w *multipart.Writer) {
+func (r *SendVideoNoteRequest) writeMultipart(w *multipart.Writer) {
 	if r.BusinessConnectionID != "" {
 		w.WriteField("business_connection_id", r.BusinessConnectionID)
 	}
@@ -1030,7 +1030,7 @@ type SendPaidMediaRequest struct {
 	ReplyMarkup           Markup           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
-func (r *SendPaidMediaRequest) WriteMultipart(w *multipart.Writer) {
+func (r *SendPaidMediaRequest) writeMultipart(w *multipart.Writer) {
 	if r.BusinessConnectionID != "" {
 		w.WriteField("business_connection_id", r.BusinessConnectionID)
 	}
@@ -1102,7 +1102,7 @@ type SendMediaGroupRequest struct {
 	ReplyParameters      *ReplyParameters // Description of the message to reply to
 }
 
-func (r *SendMediaGroupRequest) WriteMultipart(w *multipart.Writer) {
+func (r *SendMediaGroupRequest) writeMultipart(w *multipart.Writer) {
 	if r.BusinessConnectionID != "" {
 		w.WriteField("business_connection_id", r.BusinessConnectionID)
 	}
@@ -1171,7 +1171,7 @@ type SendLocationRequest struct {
 	ReplyMarkup          Markup           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
-func (r *SendLocationRequest) WriteMultipart(w *multipart.Writer) {
+func (r *SendLocationRequest) writeMultipart(w *multipart.Writer) {
 	if r.BusinessConnectionID != "" {
 		w.WriteField("business_connection_id", r.BusinessConnectionID)
 	}
@@ -1262,7 +1262,7 @@ type SendVenueRequest struct {
 	ReplyMarkup          Markup           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
-func (r *SendVenueRequest) WriteMultipart(w *multipart.Writer) {
+func (r *SendVenueRequest) writeMultipart(w *multipart.Writer) {
 	if r.BusinessConnectionID != "" {
 		w.WriteField("business_connection_id", r.BusinessConnectionID)
 	}
@@ -1343,7 +1343,7 @@ type SendContactRequest struct {
 	ReplyMarkup          Markup           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
-func (r *SendContactRequest) WriteMultipart(w *multipart.Writer) {
+func (r *SendContactRequest) writeMultipart(w *multipart.Writer) {
 	if r.BusinessConnectionID != "" {
 		w.WriteField("business_connection_id", r.BusinessConnectionID)
 	}
@@ -1418,7 +1418,7 @@ type SendPollRequest struct {
 	ReplyMarkup           Markup            // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
-func (r *SendPollRequest) WriteMultipart(w *multipart.Writer) {
+func (r *SendPollRequest) writeMultipart(w *multipart.Writer) {
 	if r.BusinessConnectionID != "" {
 		w.WriteField("business_connection_id", r.BusinessConnectionID)
 	}
@@ -1530,7 +1530,7 @@ type SendDiceRequest struct {
 	ReplyMarkup          Markup           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
-func (r *SendDiceRequest) WriteMultipart(w *multipart.Writer) {
+func (r *SendDiceRequest) writeMultipart(w *multipart.Writer) {
 	if r.BusinessConnectionID != "" {
 		w.WriteField("business_connection_id", r.BusinessConnectionID)
 	}
@@ -1581,7 +1581,7 @@ type SendChatActionRequest struct {
 	Action               ChatAction // Type of action to broadcast. Choose one, depending on what the user is about to receive: typing for text messages, upload_photo for photos, record_video or upload_video for videos, record_voice or upload_voice for voice notes, upload_document for general files, choose_sticker for stickers, find_location for location data, record_video_note or upload_video_note for video notes.
 }
 
-func (r *SendChatActionRequest) WriteMultipart(w *multipart.Writer) {
+func (r *SendChatActionRequest) writeMultipart(w *multipart.Writer) {
 	if r.BusinessConnectionID != "" {
 		w.WriteField("business_connection_id", r.BusinessConnectionID)
 	}
@@ -1602,7 +1602,7 @@ type SetMessageReactionRequest struct {
 	IsBig     bool           // Pass True to set the reaction with a big animation
 }
 
-func (r *SetMessageReactionRequest) WriteMultipart(w *multipart.Writer) {
+func (r *SetMessageReactionRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 	{
 		b, _ := json.Marshal(r.MessageID)
@@ -1628,7 +1628,7 @@ type GetUserProfilePhotosRequest struct {
 	Limit  int   // Limits the number of photos to be retrieved. Values between 1-100 are accepted. Defaults to 100.
 }
 
-func (r *GetUserProfilePhotosRequest) WriteMultipart(w *multipart.Writer) {
+func (r *GetUserProfilePhotosRequest) writeMultipart(w *multipart.Writer) {
 	{
 		b, _ := json.Marshal(r.UserID)
 		fw, _ := w.CreateFormField("user_id")
@@ -1653,7 +1653,7 @@ type SetUserEmojiStatusRequest struct {
 	EmojiStatusExpirationDate int    // Expiration date of the emoji status, if any
 }
 
-func (r *SetUserEmojiStatusRequest) WriteMultipart(w *multipart.Writer) {
+func (r *SetUserEmojiStatusRequest) writeMultipart(w *multipart.Writer) {
 	{
 		b, _ := json.Marshal(r.UserID)
 		fw, _ := w.CreateFormField("user_id")
@@ -1674,7 +1674,7 @@ type GetFileRequest struct {
 	FileID string // File identifier to get information about
 }
 
-func (r *GetFileRequest) WriteMultipart(w *multipart.Writer) {
+func (r *GetFileRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("file_id", r.FileID)
 }
 
@@ -1686,7 +1686,7 @@ type BanChatMemberRequest struct {
 	RevokeMessages bool   // Pass True to delete all messages from the chat for the user that is being removed. If False, the user will be able to see messages in the group that were sent before the user was removed. Always True for supergroups and channels.
 }
 
-func (r *BanChatMemberRequest) WriteMultipart(w *multipart.Writer) {
+func (r *BanChatMemberRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 	{
 		b, _ := json.Marshal(r.UserID)
@@ -1712,7 +1712,7 @@ type UnbanChatMemberRequest struct {
 	OnlyIfBanned bool   // Do nothing if the user is not banned
 }
 
-func (r *UnbanChatMemberRequest) WriteMultipart(w *multipart.Writer) {
+func (r *UnbanChatMemberRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 	{
 		b, _ := json.Marshal(r.UserID)
@@ -1735,7 +1735,7 @@ type RestrictChatMemberRequest struct {
 	UntilDate                     int              // Date when restrictions will be lifted for the user; Unix time. If user is restricted for more than 366 days or less than 30 seconds from the current time, they are considered to be restricted forever
 }
 
-func (r *RestrictChatMemberRequest) WriteMultipart(w *multipart.Writer) {
+func (r *RestrictChatMemberRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 	{
 		b, _ := json.Marshal(r.UserID)
@@ -1780,7 +1780,7 @@ type PromoteChatMemberRequest struct {
 	CanManageTopics     bool   // Pass True if the user is allowed to create, rename, close, and reopen forum topics; for supergroups only
 }
 
-func (r *PromoteChatMemberRequest) WriteMultipart(w *multipart.Writer) {
+func (r *PromoteChatMemberRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 	{
 		b, _ := json.Marshal(r.UserID)
@@ -1871,7 +1871,7 @@ type SetChatAdministratorCustomTitleRequest struct {
 	CustomTitle string // New custom title for the administrator; 0-16 characters, emoji are not allowed
 }
 
-func (r *SetChatAdministratorCustomTitleRequest) WriteMultipart(w *multipart.Writer) {
+func (r *SetChatAdministratorCustomTitleRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 	{
 		b, _ := json.Marshal(r.UserID)
@@ -1887,7 +1887,7 @@ type BanChatSenderChatRequest struct {
 	SenderChatID int64  // Unique identifier of the target sender chat
 }
 
-func (r *BanChatSenderChatRequest) WriteMultipart(w *multipart.Writer) {
+func (r *BanChatSenderChatRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 	{
 		b, _ := json.Marshal(r.SenderChatID)
@@ -1902,7 +1902,7 @@ type UnbanChatSenderChatRequest struct {
 	SenderChatID int64  // Unique identifier of the target sender chat
 }
 
-func (r *UnbanChatSenderChatRequest) WriteMultipart(w *multipart.Writer) {
+func (r *UnbanChatSenderChatRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 	{
 		b, _ := json.Marshal(r.SenderChatID)
@@ -1918,7 +1918,7 @@ type SetChatPermissionsRequest struct {
 	UseIndependentChatPermissions bool             // Pass True if chat permissions are set independently. Otherwise, the can_send_other_messages and can_add_web_page_previews permissions will imply the can_send_messages, can_send_audios, can_send_documents, can_send_photos, can_send_videos, can_send_video_notes, and can_send_voice_notes permissions; the can_send_polls permission will imply the can_send_messages permission.
 }
 
-func (r *SetChatPermissionsRequest) WriteMultipart(w *multipart.Writer) {
+func (r *SetChatPermissionsRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 	{
 		b, _ := json.Marshal(r.Permissions)
@@ -1937,7 +1937,7 @@ type ExportChatInviteLinkRequest struct {
 	ChatID ChatID // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 }
 
-func (r *ExportChatInviteLinkRequest) WriteMultipart(w *multipart.Writer) {
+func (r *ExportChatInviteLinkRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 }
 
@@ -1950,7 +1950,7 @@ type CreateChatInviteLinkRequest struct {
 	CreatesJoinRequest bool   // True, if users joining the chat via the link need to be approved by chat administrators. If True, member_limit can't be specified
 }
 
-func (r *CreateChatInviteLinkRequest) WriteMultipart(w *multipart.Writer) {
+func (r *CreateChatInviteLinkRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 	if r.Name != "" {
 		w.WriteField("name", r.Name)
@@ -1982,7 +1982,7 @@ type EditChatInviteLinkRequest struct {
 	CreatesJoinRequest bool   // True, if users joining the chat via the link need to be approved by chat administrators. If True, member_limit can't be specified
 }
 
-func (r *EditChatInviteLinkRequest) WriteMultipart(w *multipart.Writer) {
+func (r *EditChatInviteLinkRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 	w.WriteField("invite_link", r.InviteLink)
 	if r.Name != "" {
@@ -2013,7 +2013,7 @@ type CreateChatSubscriptionInviteLinkRequest struct {
 	SubscriptionPrice  int    // The amount of Telegram Stars a user must pay initially and after each subsequent subscription period to be a member of the chat; 1-2500
 }
 
-func (r *CreateChatSubscriptionInviteLinkRequest) WriteMultipart(w *multipart.Writer) {
+func (r *CreateChatSubscriptionInviteLinkRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 	if r.Name != "" {
 		w.WriteField("name", r.Name)
@@ -2037,7 +2037,7 @@ type EditChatSubscriptionInviteLinkRequest struct {
 	Name       string // Invite link name; 0-32 characters
 }
 
-func (r *EditChatSubscriptionInviteLinkRequest) WriteMultipart(w *multipart.Writer) {
+func (r *EditChatSubscriptionInviteLinkRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 	w.WriteField("invite_link", r.InviteLink)
 	if r.Name != "" {
@@ -2051,7 +2051,7 @@ type RevokeChatInviteLinkRequest struct {
 	InviteLink string // The invite link to revoke
 }
 
-func (r *RevokeChatInviteLinkRequest) WriteMultipart(w *multipart.Writer) {
+func (r *RevokeChatInviteLinkRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 	w.WriteField("invite_link", r.InviteLink)
 }
@@ -2062,7 +2062,7 @@ type ApproveChatJoinRequest struct {
 	UserID int64  // Unique identifier of the target user
 }
 
-func (r *ApproveChatJoinRequest) WriteMultipart(w *multipart.Writer) {
+func (r *ApproveChatJoinRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 	{
 		b, _ := json.Marshal(r.UserID)
@@ -2077,7 +2077,7 @@ type DeclineChatJoinRequest struct {
 	UserID int64  // Unique identifier of the target user
 }
 
-func (r *DeclineChatJoinRequest) WriteMultipart(w *multipart.Writer) {
+func (r *DeclineChatJoinRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 	{
 		b, _ := json.Marshal(r.UserID)
@@ -2092,7 +2092,7 @@ type SetChatPhotoRequest struct {
 	Photo  InputFile // New chat photo, uploaded using multipart/form-data
 }
 
-func (r *SetChatPhotoRequest) WriteMultipart(w *multipart.Writer) {
+func (r *SetChatPhotoRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 	if r.Photo.FileID != "" {
 		w.WriteField("photo", r.Photo.FileID)
@@ -2107,7 +2107,7 @@ type DeleteChatPhotoRequest struct {
 	ChatID ChatID // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 }
 
-func (r *DeleteChatPhotoRequest) WriteMultipart(w *multipart.Writer) {
+func (r *DeleteChatPhotoRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 }
 
@@ -2117,7 +2117,7 @@ type SetChatTitleRequest struct {
 	Title  string // New chat title, 1-128 characters
 }
 
-func (r *SetChatTitleRequest) WriteMultipart(w *multipart.Writer) {
+func (r *SetChatTitleRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 	w.WriteField("title", r.Title)
 }
@@ -2128,7 +2128,7 @@ type SetChatDescriptionRequest struct {
 	Description string // New chat description, 0-255 characters
 }
 
-func (r *SetChatDescriptionRequest) WriteMultipart(w *multipart.Writer) {
+func (r *SetChatDescriptionRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 	if r.Description != "" {
 		w.WriteField("description", r.Description)
@@ -2143,7 +2143,7 @@ type PinChatMessageRequest struct {
 	DisableNotification  bool   // Pass True if it is not necessary to send a notification to all chat members about the new pinned message. Notifications are always disabled in channels and private chats.
 }
 
-func (r *PinChatMessageRequest) WriteMultipart(w *multipart.Writer) {
+func (r *PinChatMessageRequest) writeMultipart(w *multipart.Writer) {
 	if r.BusinessConnectionID != "" {
 		w.WriteField("business_connection_id", r.BusinessConnectionID)
 	}
@@ -2167,7 +2167,7 @@ type UnpinChatMessageRequest struct {
 	MessageID            int    // Identifier of the message to unpin. Required if business_connection_id is specified. If not specified, the most recent pinned message (by sending date) will be unpinned.
 }
 
-func (r *UnpinChatMessageRequest) WriteMultipart(w *multipart.Writer) {
+func (r *UnpinChatMessageRequest) writeMultipart(w *multipart.Writer) {
 	if r.BusinessConnectionID != "" {
 		w.WriteField("business_connection_id", r.BusinessConnectionID)
 	}
@@ -2184,7 +2184,7 @@ type UnpinAllChatMessagesRequest struct {
 	ChatID ChatID // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 }
 
-func (r *UnpinAllChatMessagesRequest) WriteMultipart(w *multipart.Writer) {
+func (r *UnpinAllChatMessagesRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 }
 
@@ -2193,7 +2193,7 @@ type LeaveChatRequest struct {
 	ChatID ChatID // Unique identifier for the target chat or username of the target supergroup or channel (in the format @channelusername)
 }
 
-func (r *LeaveChatRequest) WriteMultipart(w *multipart.Writer) {
+func (r *LeaveChatRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 }
 
@@ -2202,7 +2202,7 @@ type GetChatRequest struct {
 	ChatID ChatID // Unique identifier for the target chat or username of the target supergroup or channel (in the format @channelusername)
 }
 
-func (r *GetChatRequest) WriteMultipart(w *multipart.Writer) {
+func (r *GetChatRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 }
 
@@ -2211,7 +2211,7 @@ type GetChatAdministratorsRequest struct {
 	ChatID ChatID // Unique identifier for the target chat or username of the target supergroup or channel (in the format @channelusername)
 }
 
-func (r *GetChatAdministratorsRequest) WriteMultipart(w *multipart.Writer) {
+func (r *GetChatAdministratorsRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 }
 
@@ -2220,7 +2220,7 @@ type GetChatMemberCountRequest struct {
 	ChatID ChatID // Unique identifier for the target chat or username of the target supergroup or channel (in the format @channelusername)
 }
 
-func (r *GetChatMemberCountRequest) WriteMultipart(w *multipart.Writer) {
+func (r *GetChatMemberCountRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 }
 
@@ -2230,7 +2230,7 @@ type GetChatMemberRequest struct {
 	UserID int64  // Unique identifier of the target user
 }
 
-func (r *GetChatMemberRequest) WriteMultipart(w *multipart.Writer) {
+func (r *GetChatMemberRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 	{
 		b, _ := json.Marshal(r.UserID)
@@ -2245,7 +2245,7 @@ type SetChatStickerSetRequest struct {
 	StickerSetName string // Name of the sticker set to be set as the group sticker set
 }
 
-func (r *SetChatStickerSetRequest) WriteMultipart(w *multipart.Writer) {
+func (r *SetChatStickerSetRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 	w.WriteField("sticker_set_name", r.StickerSetName)
 }
@@ -2255,7 +2255,7 @@ type DeleteChatStickerSetRequest struct {
 	ChatID ChatID // Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 }
 
-func (r *DeleteChatStickerSetRequest) WriteMultipart(w *multipart.Writer) {
+func (r *DeleteChatStickerSetRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 }
 
@@ -2267,7 +2267,7 @@ type CreateForumTopicRequest struct {
 	IconCustomEmojiID string // Unique identifier of the custom emoji shown as the topic icon. Use getForumTopicIconStickers to get all allowed custom emoji identifiers.
 }
 
-func (r *CreateForumTopicRequest) WriteMultipart(w *multipart.Writer) {
+func (r *CreateForumTopicRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 	w.WriteField("name", r.Name)
 	{
@@ -2288,7 +2288,7 @@ type EditForumTopicRequest struct {
 	IconCustomEmojiID string // New unique identifier of the custom emoji shown as the topic icon. Use getForumTopicIconStickers to get all allowed custom emoji identifiers. Pass an empty string to remove the icon. If not specified, the current icon will be kept
 }
 
-func (r *EditForumTopicRequest) WriteMultipart(w *multipart.Writer) {
+func (r *EditForumTopicRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 	{
 		b, _ := json.Marshal(r.MessageThreadID)
@@ -2309,7 +2309,7 @@ type CloseForumTopicRequest struct {
 	MessageThreadID int64  // Unique identifier for the target message thread of the forum topic
 }
 
-func (r *CloseForumTopicRequest) WriteMultipart(w *multipart.Writer) {
+func (r *CloseForumTopicRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 	{
 		b, _ := json.Marshal(r.MessageThreadID)
@@ -2324,7 +2324,7 @@ type ReopenForumTopicRequest struct {
 	MessageThreadID int64  // Unique identifier for the target message thread of the forum topic
 }
 
-func (r *ReopenForumTopicRequest) WriteMultipart(w *multipart.Writer) {
+func (r *ReopenForumTopicRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 	{
 		b, _ := json.Marshal(r.MessageThreadID)
@@ -2339,7 +2339,7 @@ type DeleteForumTopicRequest struct {
 	MessageThreadID int64  // Unique identifier for the target message thread of the forum topic
 }
 
-func (r *DeleteForumTopicRequest) WriteMultipart(w *multipart.Writer) {
+func (r *DeleteForumTopicRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 	{
 		b, _ := json.Marshal(r.MessageThreadID)
@@ -2354,7 +2354,7 @@ type UnpinAllForumTopicMessagesRequest struct {
 	MessageThreadID int64  // Unique identifier for the target message thread of the forum topic
 }
 
-func (r *UnpinAllForumTopicMessagesRequest) WriteMultipart(w *multipart.Writer) {
+func (r *UnpinAllForumTopicMessagesRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 	{
 		b, _ := json.Marshal(r.MessageThreadID)
@@ -2369,7 +2369,7 @@ type EditGeneralForumTopicRequest struct {
 	Name   string // New topic name, 1-128 characters
 }
 
-func (r *EditGeneralForumTopicRequest) WriteMultipart(w *multipart.Writer) {
+func (r *EditGeneralForumTopicRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 	w.WriteField("name", r.Name)
 }
@@ -2379,7 +2379,7 @@ type CloseGeneralForumTopicRequest struct {
 	ChatID ChatID // Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 }
 
-func (r *CloseGeneralForumTopicRequest) WriteMultipart(w *multipart.Writer) {
+func (r *CloseGeneralForumTopicRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 }
 
@@ -2388,7 +2388,7 @@ type ReopenGeneralForumTopicRequest struct {
 	ChatID ChatID // Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 }
 
-func (r *ReopenGeneralForumTopicRequest) WriteMultipart(w *multipart.Writer) {
+func (r *ReopenGeneralForumTopicRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 }
 
@@ -2397,7 +2397,7 @@ type HideGeneralForumTopicRequest struct {
 	ChatID ChatID // Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 }
 
-func (r *HideGeneralForumTopicRequest) WriteMultipart(w *multipart.Writer) {
+func (r *HideGeneralForumTopicRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 }
 
@@ -2406,7 +2406,7 @@ type UnhideGeneralForumTopicRequest struct {
 	ChatID ChatID // Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 }
 
-func (r *UnhideGeneralForumTopicRequest) WriteMultipart(w *multipart.Writer) {
+func (r *UnhideGeneralForumTopicRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 }
 
@@ -2415,7 +2415,7 @@ type UnpinAllGeneralForumTopicMessagesRequest struct {
 	ChatID ChatID // Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
 }
 
-func (r *UnpinAllGeneralForumTopicMessagesRequest) WriteMultipart(w *multipart.Writer) {
+func (r *UnpinAllGeneralForumTopicMessagesRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 }
 
@@ -2428,7 +2428,7 @@ type AnswerCallbackQueryRequest struct {
 	CacheTime       int    // The maximum amount of time in seconds that the result of the callback query may be cached client-side. Telegram apps will support caching starting in version 3.14. Defaults to 0.
 }
 
-func (r *AnswerCallbackQueryRequest) WriteMultipart(w *multipart.Writer) {
+func (r *AnswerCallbackQueryRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("callback_query_id", r.CallbackQueryID)
 	if r.Text != "" {
 		w.WriteField("text", r.Text)
@@ -2454,7 +2454,7 @@ type GetUserChatBoostsRequest struct {
 	UserID int64  // Unique identifier of the target user
 }
 
-func (r *GetUserChatBoostsRequest) WriteMultipart(w *multipart.Writer) {
+func (r *GetUserChatBoostsRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 	{
 		b, _ := json.Marshal(r.UserID)
@@ -2468,7 +2468,7 @@ type GetBusinessConnectionRequest struct {
 	BusinessConnectionID string // Unique identifier of the business connection
 }
 
-func (r *GetBusinessConnectionRequest) WriteMultipart(w *multipart.Writer) {
+func (r *GetBusinessConnectionRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("business_connection_id", r.BusinessConnectionID)
 }
 
@@ -2479,7 +2479,7 @@ type SetMyCommandsRequest struct {
 	LanguageCode string           // A two-letter ISO 639-1 language code. If empty, commands will be applied to all users from the given scope, for whose language there are no dedicated commands
 }
 
-func (r *SetMyCommandsRequest) WriteMultipart(w *multipart.Writer) {
+func (r *SetMyCommandsRequest) writeMultipart(w *multipart.Writer) {
 	{
 		b, _ := json.Marshal(r.Commands)
 		fw, _ := w.CreateFormField("commands")
@@ -2501,7 +2501,7 @@ type DeleteMyCommandsRequest struct {
 	LanguageCode string           // A two-letter ISO 639-1 language code. If empty, commands will be applied to all users from the given scope, for whose language there are no dedicated commands
 }
 
-func (r *DeleteMyCommandsRequest) WriteMultipart(w *multipart.Writer) {
+func (r *DeleteMyCommandsRequest) writeMultipart(w *multipart.Writer) {
 	if r.Scope != nil {
 		b, _ := json.Marshal(r.Scope)
 		fw, _ := w.CreateFormField("scope")
@@ -2518,7 +2518,7 @@ type GetMyCommandsRequest struct {
 	LanguageCode string           // A two-letter ISO 639-1 language code or an empty string
 }
 
-func (r *GetMyCommandsRequest) WriteMultipart(w *multipart.Writer) {
+func (r *GetMyCommandsRequest) writeMultipart(w *multipart.Writer) {
 	if r.Scope != nil {
 		b, _ := json.Marshal(r.Scope)
 		fw, _ := w.CreateFormField("scope")
@@ -2535,7 +2535,7 @@ type SetMyNameRequest struct {
 	LanguageCode string // A two-letter ISO 639-1 language code. If empty, the name will be shown to all users for whose language there is no dedicated name.
 }
 
-func (r *SetMyNameRequest) WriteMultipart(w *multipart.Writer) {
+func (r *SetMyNameRequest) writeMultipart(w *multipart.Writer) {
 	if r.Name != "" {
 		w.WriteField("name", r.Name)
 	}
@@ -2549,7 +2549,7 @@ type GetMyNameRequest struct {
 	LanguageCode string // A two-letter ISO 639-1 language code or an empty string
 }
 
-func (r *GetMyNameRequest) WriteMultipart(w *multipart.Writer) {
+func (r *GetMyNameRequest) writeMultipart(w *multipart.Writer) {
 	if r.LanguageCode != "" {
 		w.WriteField("language_code", r.LanguageCode)
 	}
@@ -2561,7 +2561,7 @@ type SetMyDescriptionRequest struct {
 	LanguageCode string // A two-letter ISO 639-1 language code. If empty, the description will be applied to all users for whose language there is no dedicated description.
 }
 
-func (r *SetMyDescriptionRequest) WriteMultipart(w *multipart.Writer) {
+func (r *SetMyDescriptionRequest) writeMultipart(w *multipart.Writer) {
 	if r.Description != "" {
 		w.WriteField("description", r.Description)
 	}
@@ -2575,7 +2575,7 @@ type GetMyDescriptionRequest struct {
 	LanguageCode string // A two-letter ISO 639-1 language code or an empty string
 }
 
-func (r *GetMyDescriptionRequest) WriteMultipart(w *multipart.Writer) {
+func (r *GetMyDescriptionRequest) writeMultipart(w *multipart.Writer) {
 	if r.LanguageCode != "" {
 		w.WriteField("language_code", r.LanguageCode)
 	}
@@ -2587,7 +2587,7 @@ type SetMyShortDescriptionRequest struct {
 	LanguageCode     string // A two-letter ISO 639-1 language code. If empty, the short description will be applied to all users for whose language there is no dedicated short description.
 }
 
-func (r *SetMyShortDescriptionRequest) WriteMultipart(w *multipart.Writer) {
+func (r *SetMyShortDescriptionRequest) writeMultipart(w *multipart.Writer) {
 	if r.ShortDescription != "" {
 		w.WriteField("short_description", r.ShortDescription)
 	}
@@ -2601,7 +2601,7 @@ type GetMyShortDescriptionRequest struct {
 	LanguageCode string // A two-letter ISO 639-1 language code or an empty string
 }
 
-func (r *GetMyShortDescriptionRequest) WriteMultipart(w *multipart.Writer) {
+func (r *GetMyShortDescriptionRequest) writeMultipart(w *multipart.Writer) {
 	if r.LanguageCode != "" {
 		w.WriteField("language_code", r.LanguageCode)
 	}
@@ -2613,7 +2613,7 @@ type SetChatMenuButtonRequest struct {
 	MenuButton *MenuButton // A JSON-serialized object for the bot's new menu button. Defaults to MenuButtonDefault
 }
 
-func (r *SetChatMenuButtonRequest) WriteMultipart(w *multipart.Writer) {
+func (r *SetChatMenuButtonRequest) writeMultipart(w *multipart.Writer) {
 	{
 		b, _ := json.Marshal(r.ChatID)
 		fw, _ := w.CreateFormField("chat_id")
@@ -2631,7 +2631,7 @@ type GetChatMenuButtonRequest struct {
 	ChatID int64 // Unique identifier for the target private chat. If not specified, default bot's menu button will be returned
 }
 
-func (r *GetChatMenuButtonRequest) WriteMultipart(w *multipart.Writer) {
+func (r *GetChatMenuButtonRequest) writeMultipart(w *multipart.Writer) {
 	{
 		b, _ := json.Marshal(r.ChatID)
 		fw, _ := w.CreateFormField("chat_id")
@@ -2645,7 +2645,7 @@ type SetMyDefaultAdministratorRightsRequest struct {
 	ForChannels bool                     // Pass True to change the default administrator rights of the bot in channels. Otherwise, the default administrator rights of the bot for groups and supergroups will be changed.
 }
 
-func (r *SetMyDefaultAdministratorRightsRequest) WriteMultipart(w *multipart.Writer) {
+func (r *SetMyDefaultAdministratorRightsRequest) writeMultipart(w *multipart.Writer) {
 	if r.Rights != nil {
 		b, _ := json.Marshal(r.Rights)
 		fw, _ := w.CreateFormField("rights")
@@ -2663,7 +2663,7 @@ type GetMyDefaultAdministratorRightsRequest struct {
 	ForChannels bool // Pass True to get default administrator rights of the bot in channels. Otherwise, default administrator rights of the bot for groups and supergroups will be returned.
 }
 
-func (r *GetMyDefaultAdministratorRightsRequest) WriteMultipart(w *multipart.Writer) {
+func (r *GetMyDefaultAdministratorRightsRequest) writeMultipart(w *multipart.Writer) {
 	{
 		b, _ := json.Marshal(r.ForChannels)
 		fw, _ := w.CreateFormField("for_channels")
@@ -2684,7 +2684,7 @@ type EditMessageTextRequest struct {
 	ReplyMarkup          *InlineKeyboardMarkup // A JSON-serialized object for an inline keyboard.
 }
 
-func (r *EditMessageTextRequest) WriteMultipart(w *multipart.Writer) {
+func (r *EditMessageTextRequest) writeMultipart(w *multipart.Writer) {
 	if r.BusinessConnectionID != "" {
 		w.WriteField("business_connection_id", r.BusinessConnectionID)
 	}
@@ -2729,7 +2729,7 @@ type EditMessageCaptionRequest struct {
 	ReplyMarkup           *InlineKeyboardMarkup // A JSON-serialized object for an inline keyboard.
 }
 
-func (r *EditMessageCaptionRequest) WriteMultipart(w *multipart.Writer) {
+func (r *EditMessageCaptionRequest) writeMultipart(w *multipart.Writer) {
 	if r.BusinessConnectionID != "" {
 		w.WriteField("business_connection_id", r.BusinessConnectionID)
 	}
@@ -2773,7 +2773,7 @@ type EditMessageMediaRequest struct {
 	ReplyMarkup          *InlineKeyboardMarkup // A JSON-serialized object for a new inline keyboard.
 }
 
-func (r *EditMessageMediaRequest) WriteMultipart(w *multipart.Writer) {
+func (r *EditMessageMediaRequest) writeMultipart(w *multipart.Writer) {
 	if r.BusinessConnectionID != "" {
 		w.WriteField("business_connection_id", r.BusinessConnectionID)
 	}
@@ -2821,7 +2821,7 @@ type EditMessageLiveLocationRequest struct {
 	ReplyMarkup          *InlineKeyboardMarkup // A JSON-serialized object for a new inline keyboard.
 }
 
-func (r *EditMessageLiveLocationRequest) WriteMultipart(w *multipart.Writer) {
+func (r *EditMessageLiveLocationRequest) writeMultipart(w *multipart.Writer) {
 	if r.BusinessConnectionID != "" {
 		w.WriteField("business_connection_id", r.BusinessConnectionID)
 	}
@@ -2880,7 +2880,7 @@ type StopMessageLiveLocationRequest struct {
 	ReplyMarkup          *InlineKeyboardMarkup // A JSON-serialized object for a new inline keyboard.
 }
 
-func (r *StopMessageLiveLocationRequest) WriteMultipart(w *multipart.Writer) {
+func (r *StopMessageLiveLocationRequest) writeMultipart(w *multipart.Writer) {
 	if r.BusinessConnectionID != "" {
 		w.WriteField("business_connection_id", r.BusinessConnectionID)
 	}
@@ -2909,7 +2909,7 @@ type EditMessageReplyMarkupRequest struct {
 	ReplyMarkup          *InlineKeyboardMarkup // A JSON-serialized object for an inline keyboard.
 }
 
-func (r *EditMessageReplyMarkupRequest) WriteMultipart(w *multipart.Writer) {
+func (r *EditMessageReplyMarkupRequest) writeMultipart(w *multipart.Writer) {
 	if r.BusinessConnectionID != "" {
 		w.WriteField("business_connection_id", r.BusinessConnectionID)
 	}
@@ -2937,7 +2937,7 @@ type StopPollRequest struct {
 	ReplyMarkup          *InlineKeyboardMarkup // A JSON-serialized object for a new message inline keyboard.
 }
 
-func (r *StopPollRequest) WriteMultipart(w *multipart.Writer) {
+func (r *StopPollRequest) writeMultipart(w *multipart.Writer) {
 	if r.BusinessConnectionID != "" {
 		w.WriteField("business_connection_id", r.BusinessConnectionID)
 	}
@@ -2960,7 +2960,7 @@ type DeleteMessageRequest struct {
 	MessageID int    // Identifier of the message to delete
 }
 
-func (r *DeleteMessageRequest) WriteMultipart(w *multipart.Writer) {
+func (r *DeleteMessageRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 	{
 		b, _ := json.Marshal(r.MessageID)
@@ -2975,7 +2975,7 @@ type DeleteMessagesRequest struct {
 	MessageIds []int  // A JSON-serialized list of 1-100 identifiers of messages to delete. See deleteMessage for limitations on which messages can be deleted
 }
 
-func (r *DeleteMessagesRequest) WriteMultipart(w *multipart.Writer) {
+func (r *DeleteMessagesRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 	{
 		b, _ := json.Marshal(r.MessageIds)
@@ -2999,7 +2999,7 @@ type SendStickerRequest struct {
 	ReplyMarkup          Markup           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
-func (r *SendStickerRequest) WriteMultipart(w *multipart.Writer) {
+func (r *SendStickerRequest) writeMultipart(w *multipart.Writer) {
 	if r.BusinessConnectionID != "" {
 		w.WriteField("business_connection_id", r.BusinessConnectionID)
 	}
@@ -3053,7 +3053,7 @@ type GetStickerSetRequest struct {
 	Name string // Name of the sticker set
 }
 
-func (r *GetStickerSetRequest) WriteMultipart(w *multipart.Writer) {
+func (r *GetStickerSetRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("name", r.Name)
 }
 
@@ -3062,7 +3062,7 @@ type GetCustomEmojiStickersRequest struct {
 	CustomEmojiIds []string // A JSON-serialized list of custom emoji identifiers. At most 200 custom emoji identifiers can be specified.
 }
 
-func (r *GetCustomEmojiStickersRequest) WriteMultipart(w *multipart.Writer) {
+func (r *GetCustomEmojiStickersRequest) writeMultipart(w *multipart.Writer) {
 	{
 		b, _ := json.Marshal(r.CustomEmojiIds)
 		fw, _ := w.CreateFormField("custom_emoji_ids")
@@ -3077,7 +3077,7 @@ type UploadStickerFileRequest struct {
 	StickerFormat string    // Format of the sticker, must be one of "static", "animated", "video"
 }
 
-func (r *UploadStickerFileRequest) WriteMultipart(w *multipart.Writer) {
+func (r *UploadStickerFileRequest) writeMultipart(w *multipart.Writer) {
 	{
 		b, _ := json.Marshal(r.UserID)
 		fw, _ := w.CreateFormField("user_id")
@@ -3102,7 +3102,7 @@ type CreateNewStickerSetRequest struct {
 	NeedsRepainting bool           // Pass True if stickers in the sticker set must be repainted to the color of text when used in messages, the accent color if used as emoji status, white on chat photos, or another appropriate color based on context; for custom emoji sticker sets only
 }
 
-func (r *CreateNewStickerSetRequest) WriteMultipart(w *multipart.Writer) {
+func (r *CreateNewStickerSetRequest) writeMultipart(w *multipart.Writer) {
 	{
 		b, _ := json.Marshal(r.UserID)
 		fw, _ := w.CreateFormField("user_id")
@@ -3132,7 +3132,7 @@ type AddStickerToSetRequest struct {
 	Sticker *InputSticker // A JSON-serialized object with information about the added sticker. If exactly the same sticker had already been added to the set, then the set isn't changed.
 }
 
-func (r *AddStickerToSetRequest) WriteMultipart(w *multipart.Writer) {
+func (r *AddStickerToSetRequest) writeMultipart(w *multipart.Writer) {
 	{
 		b, _ := json.Marshal(r.UserID)
 		fw, _ := w.CreateFormField("user_id")
@@ -3152,7 +3152,7 @@ type SetStickerPositionInSetRequest struct {
 	Position int    // New sticker position in the set, zero-based
 }
 
-func (r *SetStickerPositionInSetRequest) WriteMultipart(w *multipart.Writer) {
+func (r *SetStickerPositionInSetRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("sticker", r.Sticker)
 	{
 		b, _ := json.Marshal(r.Position)
@@ -3166,7 +3166,7 @@ type DeleteStickerFromSetRequest struct {
 	Sticker string // File identifier of the sticker
 }
 
-func (r *DeleteStickerFromSetRequest) WriteMultipart(w *multipart.Writer) {
+func (r *DeleteStickerFromSetRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("sticker", r.Sticker)
 }
 
@@ -3178,7 +3178,7 @@ type ReplaceStickerInSetRequest struct {
 	Sticker    *InputSticker // A JSON-serialized object with information about the added sticker. If exactly the same sticker had already been added to the set, then the set remains unchanged.
 }
 
-func (r *ReplaceStickerInSetRequest) WriteMultipart(w *multipart.Writer) {
+func (r *ReplaceStickerInSetRequest) writeMultipart(w *multipart.Writer) {
 	{
 		b, _ := json.Marshal(r.UserID)
 		fw, _ := w.CreateFormField("user_id")
@@ -3199,7 +3199,7 @@ type SetStickerEmojiListRequest struct {
 	EmojiList []string // A JSON-serialized list of 1-20 emoji associated with the sticker
 }
 
-func (r *SetStickerEmojiListRequest) WriteMultipart(w *multipart.Writer) {
+func (r *SetStickerEmojiListRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("sticker", r.Sticker)
 	{
 		b, _ := json.Marshal(r.EmojiList)
@@ -3214,7 +3214,7 @@ type SetStickerKeywordsRequest struct {
 	Keywords []string // A JSON-serialized list of 0-20 search keywords for the sticker with total length of up to 64 characters
 }
 
-func (r *SetStickerKeywordsRequest) WriteMultipart(w *multipart.Writer) {
+func (r *SetStickerKeywordsRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("sticker", r.Sticker)
 	if r.Keywords != nil {
 		b, _ := json.Marshal(r.Keywords)
@@ -3229,7 +3229,7 @@ type SetStickerMaskPositionRequest struct {
 	MaskPosition *MaskPosition // A JSON-serialized object with the position where the mask should be placed on faces. Omit the parameter to remove the mask position.
 }
 
-func (r *SetStickerMaskPositionRequest) WriteMultipart(w *multipart.Writer) {
+func (r *SetStickerMaskPositionRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("sticker", r.Sticker)
 	if r.MaskPosition != nil {
 		b, _ := json.Marshal(r.MaskPosition)
@@ -3244,7 +3244,7 @@ type SetStickerSetTitleRequest struct {
 	Title string // Sticker set title, 1-64 characters
 }
 
-func (r *SetStickerSetTitleRequest) WriteMultipart(w *multipart.Writer) {
+func (r *SetStickerSetTitleRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("name", r.Name)
 	w.WriteField("title", r.Title)
 }
@@ -3257,7 +3257,7 @@ type SetStickerSetThumbnailRequest struct {
 	Format    string    // Format of the thumbnail, must be one of "static" for a .WEBP or .PNG image, "animated" for a .TGS animation, or "video" for a .WEBM video
 }
 
-func (r *SetStickerSetThumbnailRequest) WriteMultipart(w *multipart.Writer) {
+func (r *SetStickerSetThumbnailRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("name", r.Name)
 	{
 		b, _ := json.Marshal(r.UserID)
@@ -3279,7 +3279,7 @@ type SetCustomEmojiStickerSetThumbnailRequest struct {
 	CustomEmojiID string // Custom emoji identifier of a sticker from the sticker set; pass an empty string to drop the thumbnail and use the first sticker as the thumbnail.
 }
 
-func (r *SetCustomEmojiStickerSetThumbnailRequest) WriteMultipart(w *multipart.Writer) {
+func (r *SetCustomEmojiStickerSetThumbnailRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("name", r.Name)
 	if r.CustomEmojiID != "" {
 		w.WriteField("custom_emoji_id", r.CustomEmojiID)
@@ -3291,7 +3291,7 @@ type DeleteStickerSetRequest struct {
 	Name string // Sticker set name
 }
 
-func (r *DeleteStickerSetRequest) WriteMultipart(w *multipart.Writer) {
+func (r *DeleteStickerSetRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("name", r.Name)
 }
 
@@ -3306,7 +3306,7 @@ type SendGiftRequest struct {
 	TextEntities  []MessageEntity // A JSON-serialized list of special entities that appear in the gift text. It can be specified instead of text_parse_mode. Entities other than "bold", "italic", "underline", "strikethrough", "spoiler", and "custom_emoji" are ignored.
 }
 
-func (r *SendGiftRequest) WriteMultipart(w *multipart.Writer) {
+func (r *SendGiftRequest) writeMultipart(w *multipart.Writer) {
 	{
 		b, _ := json.Marshal(r.UserID)
 		fw, _ := w.CreateFormField("user_id")
@@ -3338,7 +3338,7 @@ type VerifyUserRequest struct {
 	CustomDescription string // Custom description for the verification; 0-70 characters. Must be empty if the organization isn't allowed to provide a custom verification description.
 }
 
-func (r *VerifyUserRequest) WriteMultipart(w *multipart.Writer) {
+func (r *VerifyUserRequest) writeMultipart(w *multipart.Writer) {
 	{
 		b, _ := json.Marshal(r.UserID)
 		fw, _ := w.CreateFormField("user_id")
@@ -3355,7 +3355,7 @@ type VerifyChatRequest struct {
 	CustomDescription string // Custom description for the verification; 0-70 characters. Must be empty if the organization isn't allowed to provide a custom verification description.
 }
 
-func (r *VerifyChatRequest) WriteMultipart(w *multipart.Writer) {
+func (r *VerifyChatRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 	if r.CustomDescription != "" {
 		w.WriteField("custom_description", r.CustomDescription)
@@ -3367,7 +3367,7 @@ type RemoveUserVerificationRequest struct {
 	UserID int64 // Unique identifier of the target user
 }
 
-func (r *RemoveUserVerificationRequest) WriteMultipart(w *multipart.Writer) {
+func (r *RemoveUserVerificationRequest) writeMultipart(w *multipart.Writer) {
 	{
 		b, _ := json.Marshal(r.UserID)
 		fw, _ := w.CreateFormField("user_id")
@@ -3380,7 +3380,7 @@ type RemoveChatVerificationRequest struct {
 	ChatID ChatID // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
 }
 
-func (r *RemoveChatVerificationRequest) WriteMultipart(w *multipart.Writer) {
+func (r *RemoveChatVerificationRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 }
 
@@ -3394,7 +3394,7 @@ type AnswerInlineQueryRequest struct {
 	Button        *InlineQueryResultsButton // A JSON-serialized object describing a button to be shown above inline query results
 }
 
-func (r *AnswerInlineQueryRequest) WriteMultipart(w *multipart.Writer) {
+func (r *AnswerInlineQueryRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("inline_query_id", r.InlineQueryID)
 	{
 		b, _ := json.Marshal(r.Results)
@@ -3427,7 +3427,7 @@ type AnswerWebAppQueryRequest struct {
 	Result        InlineQueryResult // A JSON-serialized object describing the message to be sent
 }
 
-func (r *AnswerWebAppQueryRequest) WriteMultipart(w *multipart.Writer) {
+func (r *AnswerWebAppQueryRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("web_app_query_id", r.WebAppQueryID)
 	{
 		b, _ := json.Marshal(r.Result)
@@ -3446,7 +3446,7 @@ type SavePreparedInlineMessageRequest struct {
 	AllowChannelChats bool              // Pass True if the message can be sent to channel chats
 }
 
-func (r *SavePreparedInlineMessageRequest) WriteMultipart(w *multipart.Writer) {
+func (r *SavePreparedInlineMessageRequest) writeMultipart(w *multipart.Writer) {
 	{
 		b, _ := json.Marshal(r.UserID)
 		fw, _ := w.CreateFormField("user_id")
@@ -3512,7 +3512,7 @@ type SendInvoiceRequest struct {
 	ReplyMarkup               *InlineKeyboardMarkup // A JSON-serialized object for an inline keyboard. If empty, one 'Pay total price' button will be shown. If not empty, the first button must be a Pay button.
 }
 
-func (r *SendInvoiceRequest) WriteMultipart(w *multipart.Writer) {
+func (r *SendInvoiceRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("chat_id", r.ChatID.String())
 	{
 		b, _ := json.Marshal(r.MessageThreadID)
@@ -3656,7 +3656,7 @@ type CreateInvoiceLinkRequest struct {
 	IsFlexible                bool           // Pass True if the final price depends on the shipping method. Ignored for payments in Telegram Stars.
 }
 
-func (r *CreateInvoiceLinkRequest) WriteMultipart(w *multipart.Writer) {
+func (r *CreateInvoiceLinkRequest) writeMultipart(w *multipart.Writer) {
 	if r.BusinessConnectionID != "" {
 		w.WriteField("business_connection_id", r.BusinessConnectionID)
 	}
@@ -3753,7 +3753,7 @@ type AnswerShippingQueryRequest struct {
 	ErrorMessage    string           // Required if ok is False. Error message in human readable form that explains why it is impossible to complete the order (e.g. "Sorry, delivery to your desired address is unavailable"). Telegram will display this message to the user.
 }
 
-func (r *AnswerShippingQueryRequest) WriteMultipart(w *multipart.Writer) {
+func (r *AnswerShippingQueryRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("shipping_query_id", r.ShippingQueryID)
 	{
 		b, _ := json.Marshal(r.Ok)
@@ -3777,7 +3777,7 @@ type AnswerPreCheckoutQueryRequest struct {
 	ErrorMessage       string // Required if ok is False. Error message in human readable form that explains the reason for failure to proceed with the checkout (e.g. "Sorry, somebody just bought the last of our amazing black T-shirts while you were busy filling out your payment details. Please choose a different color or garment!"). Telegram will display this message to the user.
 }
 
-func (r *AnswerPreCheckoutQueryRequest) WriteMultipart(w *multipart.Writer) {
+func (r *AnswerPreCheckoutQueryRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("pre_checkout_query_id", r.PreCheckoutQueryID)
 	{
 		b, _ := json.Marshal(r.Ok)
@@ -3795,7 +3795,7 @@ type GetStarTransactionsRequest struct {
 	Limit  int   // The maximum number of transactions to be retrieved. Values between 1-100 are accepted. Defaults to 100.
 }
 
-func (r *GetStarTransactionsRequest) WriteMultipart(w *multipart.Writer) {
+func (r *GetStarTransactionsRequest) writeMultipart(w *multipart.Writer) {
 	{
 		b, _ := json.Marshal(r.Offset)
 		fw, _ := w.CreateFormField("offset")
@@ -3814,7 +3814,7 @@ type RefundStarPaymentRequest struct {
 	TelegramPaymentChargeID string // Telegram payment identifier
 }
 
-func (r *RefundStarPaymentRequest) WriteMultipart(w *multipart.Writer) {
+func (r *RefundStarPaymentRequest) writeMultipart(w *multipart.Writer) {
 	{
 		b, _ := json.Marshal(r.UserID)
 		fw, _ := w.CreateFormField("user_id")
@@ -3830,7 +3830,7 @@ type EditUserStarSubscriptionRequest struct {
 	IsCanceled              bool   // Pass True to cancel extension of the user subscription; the subscription must be active up to the end of the current subscription period. Pass False to allow the user to re-enable a subscription that was previously canceled by the bot.
 }
 
-func (r *EditUserStarSubscriptionRequest) WriteMultipart(w *multipart.Writer) {
+func (r *EditUserStarSubscriptionRequest) writeMultipart(w *multipart.Writer) {
 	{
 		b, _ := json.Marshal(r.UserID)
 		fw, _ := w.CreateFormField("user_id")
@@ -3850,7 +3850,7 @@ type SetPassportDataErrorsRequest struct {
 	Errors []PassportElementError // A JSON-serialized array describing the errors
 }
 
-func (r *SetPassportDataErrorsRequest) WriteMultipart(w *multipart.Writer) {
+func (r *SetPassportDataErrorsRequest) writeMultipart(w *multipart.Writer) {
 	{
 		b, _ := json.Marshal(r.UserID)
 		fw, _ := w.CreateFormField("user_id")
@@ -3877,7 +3877,7 @@ type SendGameRequest struct {
 	ReplyMarkup          *InlineKeyboardMarkup // A JSON-serialized object for an inline keyboard. If empty, one 'Play game_title' button will be shown. If not empty, the first button must launch the game.
 }
 
-func (r *SendGameRequest) WriteMultipart(w *multipart.Writer) {
+func (r *SendGameRequest) writeMultipart(w *multipart.Writer) {
 	if r.BusinessConnectionID != "" {
 		w.WriteField("business_connection_id", r.BusinessConnectionID)
 	}
@@ -3933,7 +3933,7 @@ type SetGameScoreRequest struct {
 	InlineMessageID    string // Required if chat_id and message_id are not specified. Identifier of the inline message
 }
 
-func (r *SetGameScoreRequest) WriteMultipart(w *multipart.Writer) {
+func (r *SetGameScoreRequest) writeMultipart(w *multipart.Writer) {
 	{
 		b, _ := json.Marshal(r.UserID)
 		fw, _ := w.CreateFormField("user_id")
@@ -3977,7 +3977,7 @@ type GetGameHighScoresRequest struct {
 	InlineMessageID string // Required if chat_id and message_id are not specified. Identifier of the inline message
 }
 
-func (r *GetGameHighScoresRequest) WriteMultipart(w *multipart.Writer) {
+func (r *GetGameHighScoresRequest) writeMultipart(w *multipart.Writer) {
 	{
 		b, _ := json.Marshal(r.UserID)
 		fw, _ := w.CreateFormField("user_id")

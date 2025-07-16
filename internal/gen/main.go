@@ -290,6 +290,11 @@ func generateMethods(parser *Parser, methods []Method) {
 
 	for _, m := range methods {
 		pascalName := camelCase(m.Name, true)
+		structName := pascalName
+
+		if !strings.HasSuffix(structName, "Request") {
+			structName += "Request"
+		}
 
 		parsedSpecType := parser.ParseSpecTypes(m.Returns)
 		typeString := parsedSpecType.TypeString()
@@ -300,7 +305,7 @@ func generateMethods(parser *Parser, methods []Method) {
 		if len(m.Fields) == 0 {
 			args = "(ctx context.Context)"
 		} else {
-			args = "(ctx context.Context, request RequestBuilder)"
+			args = fmt.Sprintf("(ctx context.Context, request *%s)", structName)
 			data = "request"
 		}
 
@@ -397,7 +402,7 @@ func generateRequestWriteMultipart(
 	m *Method,
 	structName string,
 ) {
-	fmt.Fprintf(w, "func (r *%s) WriteMultipart(w *multipart.Writer) {", structName)
+	fmt.Fprintf(w, "func (r *%s) writeMultipart(w *multipart.Writer) {", structName)
 
 	for _, field := range m.Fields {
 		parsedTypeField := parser.ParseTypeField(&field)
