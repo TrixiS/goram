@@ -95,19 +95,21 @@ func (r *DeleteWebhookRequest) writeMultipart(w *multipart.Writer) {
 
 // see Bot.SendMessage(ctx, &SendMessageRequest{})
 type SendMessageRequest struct {
-	BusinessConnectionID string              // Unique identifier of the business connection on behalf of which the message will be sent
-	ChatID               ChatID              // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-	MessageThreadID      int64               // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
-	Text                 string              // Text of the message to be sent, 1-4096 characters after entities parsing
-	ParseMode            ParseMode           // Mode for parsing entities in the message text. See formatting options for more details.
-	Entities             []MessageEntity     // A JSON-serialized list of special entities that appear in message text, which can be specified instead of parse_mode
-	LinkPreviewOptions   *LinkPreviewOptions // Link preview generation options for the message
-	DisableNotification  bool                // Sends the message silently. Users will receive a notification with no sound.
-	ProtectContent       bool                // Protects the contents of the sent message from forwarding and saving
-	AllowPaidBroadcast   bool                // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
-	MessageEffectID      string              // Unique identifier of the message effect to be added to the message; for private chats only
-	ReplyParameters      *ReplyParameters    // Description of the message to reply to
-	ReplyMarkup          Markup              // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	BusinessConnectionID    string                   // Unique identifier of the business connection on behalf of which the message will be sent
+	ChatID                  ChatID                   // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+	MessageThreadID         int64                    // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	DirectMessagesTopicID   int64                    // Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
+	Text                    string                   // Text of the message to be sent, 1-4096 characters after entities parsing
+	ParseMode               ParseMode                // Mode for parsing entities in the message text. See formatting options for more details.
+	Entities                []MessageEntity          // A JSON-serialized list of special entities that appear in message text, which can be specified instead of parse_mode
+	LinkPreviewOptions      *LinkPreviewOptions      // Link preview generation options for the message
+	DisableNotification     bool                     // Sends the message silently. Users will receive a notification with no sound.
+	ProtectContent          bool                     // Protects the contents of the sent message from forwarding and saving
+	AllowPaidBroadcast      bool                     // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	MessageEffectID         string                   // Unique identifier of the message effect to be added to the message; for private chats only
+	SuggestedPostParameters *SuggestedPostParameters // A JSON-serialized object containing the parameters of the suggested post to send; for direct messages chats only. If the message is sent as a reply to another suggested post, then that suggested post is automatically declined.
+	ReplyParameters         *ReplyParameters         // Description of the message to reply to
+	ReplyMarkup             Markup                   // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
 func (r *SendMessageRequest) writeMultipart(w *multipart.Writer) {
@@ -118,6 +120,11 @@ func (r *SendMessageRequest) writeMultipart(w *multipart.Writer) {
 	{
 		b, _ := json.Marshal(r.MessageThreadID)
 		fw, _ := w.CreateFormField("message_thread_id")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.DirectMessagesTopicID)
+		fw, _ := w.CreateFormField("direct_messages_topic_id")
 		fw.Write(b)
 	}
 	w.WriteField("text", r.Text)
@@ -150,6 +157,11 @@ func (r *SendMessageRequest) writeMultipart(w *multipart.Writer) {
 	if r.MessageEffectID != "" {
 		w.WriteField("message_effect_id", r.MessageEffectID)
 	}
+	if r.SuggestedPostParameters != nil {
+		b, _ := json.Marshal(r.SuggestedPostParameters)
+		fw, _ := w.CreateFormField("suggested_post_parameters")
+		fw.Write(b)
+	}
 	if r.ReplyParameters != nil {
 		b, _ := json.Marshal(r.ReplyParameters)
 		fw, _ := w.CreateFormField("reply_parameters")
@@ -164,13 +176,15 @@ func (r *SendMessageRequest) writeMultipart(w *multipart.Writer) {
 
 // see Bot.ForwardMessage(ctx, &ForwardMessageRequest{})
 type ForwardMessageRequest struct {
-	ChatID              ChatID // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-	MessageThreadID     int64  // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
-	FromChatID          ChatID // Unique identifier for the chat where the original message was sent (or channel username in the format @channelusername)
-	VideoStartTimestamp int    // New start timestamp for the forwarded video in the message
-	DisableNotification bool   // Sends the message silently. Users will receive a notification with no sound.
-	ProtectContent      bool   // Protects the contents of the forwarded message from forwarding and saving
-	MessageID           int    // Message identifier in the chat specified in from_chat_id
+	ChatID                  ChatID                   // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+	MessageThreadID         int64                    // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	DirectMessagesTopicID   int64                    // Identifier of the direct messages topic to which the message will be forwarded; required if the message is forwarded to a direct messages chat
+	FromChatID              ChatID                   // Unique identifier for the chat where the original message was sent (or channel username in the format @channelusername)
+	VideoStartTimestamp     int                      // New start timestamp for the forwarded video in the message
+	DisableNotification     bool                     // Sends the message silently. Users will receive a notification with no sound.
+	ProtectContent          bool                     // Protects the contents of the forwarded message from forwarding and saving
+	SuggestedPostParameters *SuggestedPostParameters // A JSON-serialized object containing the parameters of the suggested post to send; for direct messages chats only
+	MessageID               int                      // Message identifier in the chat specified in from_chat_id
 }
 
 func (r *ForwardMessageRequest) writeMultipart(w *multipart.Writer) {
@@ -178,6 +192,11 @@ func (r *ForwardMessageRequest) writeMultipart(w *multipart.Writer) {
 	{
 		b, _ := json.Marshal(r.MessageThreadID)
 		fw, _ := w.CreateFormField("message_thread_id")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.DirectMessagesTopicID)
+		fw, _ := w.CreateFormField("direct_messages_topic_id")
 		fw.Write(b)
 	}
 	w.WriteField("from_chat_id", r.FromChatID.String())
@@ -196,6 +215,11 @@ func (r *ForwardMessageRequest) writeMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("protect_content")
 		fw.Write(b)
 	}
+	if r.SuggestedPostParameters != nil {
+		b, _ := json.Marshal(r.SuggestedPostParameters)
+		fw, _ := w.CreateFormField("suggested_post_parameters")
+		fw.Write(b)
+	}
 	{
 		b, _ := json.Marshal(r.MessageID)
 		fw, _ := w.CreateFormField("message_id")
@@ -205,12 +229,13 @@ func (r *ForwardMessageRequest) writeMultipart(w *multipart.Writer) {
 
 // see Bot.ForwardMessages(ctx, &ForwardMessagesRequest{})
 type ForwardMessagesRequest struct {
-	ChatID              ChatID // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-	MessageThreadID     int64  // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
-	FromChatID          ChatID // Unique identifier for the chat where the original messages were sent (or channel username in the format @channelusername)
-	MessageIds          []int  // A JSON-serialized list of 1-100 identifiers of messages in the chat from_chat_id to forward. The identifiers must be specified in a strictly increasing order.
-	DisableNotification bool   // Sends the messages silently. Users will receive a notification with no sound.
-	ProtectContent      bool   // Protects the contents of the forwarded messages from forwarding and saving
+	ChatID                ChatID // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+	MessageThreadID       int64  // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	DirectMessagesTopicID int64  // Identifier of the direct messages topic to which the messages will be forwarded; required if the messages are forwarded to a direct messages chat
+	FromChatID            ChatID // Unique identifier for the chat where the original messages were sent (or channel username in the format @channelusername)
+	MessageIds            []int  // A JSON-serialized list of 1-100 identifiers of messages in the chat from_chat_id to forward. The identifiers must be specified in a strictly increasing order.
+	DisableNotification   bool   // Sends the messages silently. Users will receive a notification with no sound.
+	ProtectContent        bool   // Protects the contents of the forwarded messages from forwarding and saving
 }
 
 func (r *ForwardMessagesRequest) writeMultipart(w *multipart.Writer) {
@@ -218,6 +243,11 @@ func (r *ForwardMessagesRequest) writeMultipart(w *multipart.Writer) {
 	{
 		b, _ := json.Marshal(r.MessageThreadID)
 		fw, _ := w.CreateFormField("message_thread_id")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.DirectMessagesTopicID)
+		fw, _ := w.CreateFormField("direct_messages_topic_id")
 		fw.Write(b)
 	}
 	w.WriteField("from_chat_id", r.FromChatID.String())
@@ -240,20 +270,22 @@ func (r *ForwardMessagesRequest) writeMultipart(w *multipart.Writer) {
 
 // see Bot.CopyMessage(ctx, &CopyMessageRequest{})
 type CopyMessageRequest struct {
-	ChatID                ChatID           // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-	MessageThreadID       int64            // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
-	FromChatID            ChatID           // Unique identifier for the chat where the original message was sent (or channel username in the format @channelusername)
-	MessageID             int              // Message identifier in the chat specified in from_chat_id
-	VideoStartTimestamp   int              // New start timestamp for the copied video in the message
-	Caption               string           // New caption for media, 0-1024 characters after entities parsing. If not specified, the original caption is kept
-	ParseMode             ParseMode        // Mode for parsing entities in the new caption. See formatting options for more details.
-	CaptionEntities       []MessageEntity  // A JSON-serialized list of special entities that appear in the new caption, which can be specified instead of parse_mode
-	ShowCaptionAboveMedia bool             // Pass True, if the caption must be shown above the message media. Ignored if a new caption isn't specified.
-	DisableNotification   bool             // Sends the message silently. Users will receive a notification with no sound.
-	ProtectContent        bool             // Protects the contents of the sent message from forwarding and saving
-	AllowPaidBroadcast    bool             // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
-	ReplyParameters       *ReplyParameters // Description of the message to reply to
-	ReplyMarkup           Markup           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	ChatID                  ChatID                   // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+	MessageThreadID         int64                    // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	DirectMessagesTopicID   int64                    // Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
+	FromChatID              ChatID                   // Unique identifier for the chat where the original message was sent (or channel username in the format @channelusername)
+	MessageID               int                      // Message identifier in the chat specified in from_chat_id
+	VideoStartTimestamp     int                      // New start timestamp for the copied video in the message
+	Caption                 string                   // New caption for media, 0-1024 characters after entities parsing. If not specified, the original caption is kept
+	ParseMode               ParseMode                // Mode for parsing entities in the new caption. See formatting options for more details.
+	CaptionEntities         []MessageEntity          // A JSON-serialized list of special entities that appear in the new caption, which can be specified instead of parse_mode
+	ShowCaptionAboveMedia   bool                     // Pass True, if the caption must be shown above the message media. Ignored if a new caption isn't specified.
+	DisableNotification     bool                     // Sends the message silently. Users will receive a notification with no sound.
+	ProtectContent          bool                     // Protects the contents of the sent message from forwarding and saving
+	AllowPaidBroadcast      bool                     // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	SuggestedPostParameters *SuggestedPostParameters // A JSON-serialized object containing the parameters of the suggested post to send; for direct messages chats only. If the message is sent as a reply to another suggested post, then that suggested post is automatically declined.
+	ReplyParameters         *ReplyParameters         // Description of the message to reply to
+	ReplyMarkup             Markup                   // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
 func (r *CopyMessageRequest) writeMultipart(w *multipart.Writer) {
@@ -261,6 +293,11 @@ func (r *CopyMessageRequest) writeMultipart(w *multipart.Writer) {
 	{
 		b, _ := json.Marshal(r.MessageThreadID)
 		fw, _ := w.CreateFormField("message_thread_id")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.DirectMessagesTopicID)
+		fw, _ := w.CreateFormField("direct_messages_topic_id")
 		fw.Write(b)
 	}
 	w.WriteField("from_chat_id", r.FromChatID.String())
@@ -303,6 +340,11 @@ func (r *CopyMessageRequest) writeMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("allow_paid_broadcast")
 		fw.Write(b)
 	}
+	if r.SuggestedPostParameters != nil {
+		b, _ := json.Marshal(r.SuggestedPostParameters)
+		fw, _ := w.CreateFormField("suggested_post_parameters")
+		fw.Write(b)
+	}
 	if r.ReplyParameters != nil {
 		b, _ := json.Marshal(r.ReplyParameters)
 		fw, _ := w.CreateFormField("reply_parameters")
@@ -317,13 +359,14 @@ func (r *CopyMessageRequest) writeMultipart(w *multipart.Writer) {
 
 // see Bot.CopyMessages(ctx, &CopyMessagesRequest{})
 type CopyMessagesRequest struct {
-	ChatID              ChatID // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-	MessageThreadID     int64  // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
-	FromChatID          ChatID // Unique identifier for the chat where the original messages were sent (or channel username in the format @channelusername)
-	MessageIds          []int  // A JSON-serialized list of 1-100 identifiers of messages in the chat from_chat_id to copy. The identifiers must be specified in a strictly increasing order.
-	DisableNotification bool   // Sends the messages silently. Users will receive a notification with no sound.
-	ProtectContent      bool   // Protects the contents of the sent messages from forwarding and saving
-	RemoveCaption       bool   // Pass True to copy the messages without their captions
+	ChatID                ChatID // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+	MessageThreadID       int64  // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	DirectMessagesTopicID int64  // Identifier of the direct messages topic to which the messages will be sent; required if the messages are sent to a direct messages chat
+	FromChatID            ChatID // Unique identifier for the chat where the original messages were sent (or channel username in the format @channelusername)
+	MessageIds            []int  // A JSON-serialized list of 1-100 identifiers of messages in the chat from_chat_id to copy. The identifiers must be specified in a strictly increasing order.
+	DisableNotification   bool   // Sends the messages silently. Users will receive a notification with no sound.
+	ProtectContent        bool   // Protects the contents of the sent messages from forwarding and saving
+	RemoveCaption         bool   // Pass True to copy the messages without their captions
 }
 
 func (r *CopyMessagesRequest) writeMultipart(w *multipart.Writer) {
@@ -331,6 +374,11 @@ func (r *CopyMessagesRequest) writeMultipart(w *multipart.Writer) {
 	{
 		b, _ := json.Marshal(r.MessageThreadID)
 		fw, _ := w.CreateFormField("message_thread_id")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.DirectMessagesTopicID)
+		fw, _ := w.CreateFormField("direct_messages_topic_id")
 		fw.Write(b)
 	}
 	w.WriteField("from_chat_id", r.FromChatID.String())
@@ -358,21 +406,23 @@ func (r *CopyMessagesRequest) writeMultipart(w *multipart.Writer) {
 
 // see Bot.SendPhoto(ctx, &SendPhotoRequest{})
 type SendPhotoRequest struct {
-	BusinessConnectionID  string           // Unique identifier of the business connection on behalf of which the message will be sent
-	ChatID                ChatID           // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-	MessageThreadID       int64            // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
-	Photo                 InputFile        // Photo to send. Pass a file_id as String to send a photo that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a photo from the Internet, or upload a new photo using multipart/form-data. The photo must be at most 10 MB in size. The photo's width and height must not exceed 10000 in total. Width and height ratio must be at most 20. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	Caption               string           // Photo caption (may also be used when resending photos by file_id), 0-1024 characters after entities parsing
-	ParseMode             ParseMode        // Mode for parsing entities in the photo caption. See formatting options for more details.
-	CaptionEntities       []MessageEntity  // A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
-	ShowCaptionAboveMedia bool             // Pass True, if the caption must be shown above the message media
-	HasSpoiler            bool             // Pass True if the photo needs to be covered with a spoiler animation
-	DisableNotification   bool             // Sends the message silently. Users will receive a notification with no sound.
-	ProtectContent        bool             // Protects the contents of the sent message from forwarding and saving
-	AllowPaidBroadcast    bool             // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
-	MessageEffectID       string           // Unique identifier of the message effect to be added to the message; for private chats only
-	ReplyParameters       *ReplyParameters // Description of the message to reply to
-	ReplyMarkup           Markup           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	BusinessConnectionID    string                   // Unique identifier of the business connection on behalf of which the message will be sent
+	ChatID                  ChatID                   // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+	MessageThreadID         int64                    // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	DirectMessagesTopicID   int64                    // Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
+	Photo                   InputFile                // Photo to send. Pass a file_id as String to send a photo that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a photo from the Internet, or upload a new photo using multipart/form-data. The photo must be at most 10 MB in size. The photo's width and height must not exceed 10000 in total. Width and height ratio must be at most 20. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+	Caption                 string                   // Photo caption (may also be used when resending photos by file_id), 0-1024 characters after entities parsing
+	ParseMode               ParseMode                // Mode for parsing entities in the photo caption. See formatting options for more details.
+	CaptionEntities         []MessageEntity          // A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
+	ShowCaptionAboveMedia   bool                     // Pass True, if the caption must be shown above the message media
+	HasSpoiler              bool                     // Pass True if the photo needs to be covered with a spoiler animation
+	DisableNotification     bool                     // Sends the message silently. Users will receive a notification with no sound.
+	ProtectContent          bool                     // Protects the contents of the sent message from forwarding and saving
+	AllowPaidBroadcast      bool                     // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	MessageEffectID         string                   // Unique identifier of the message effect to be added to the message; for private chats only
+	SuggestedPostParameters *SuggestedPostParameters // A JSON-serialized object containing the parameters of the suggested post to send; for direct messages chats only. If the message is sent as a reply to another suggested post, then that suggested post is automatically declined.
+	ReplyParameters         *ReplyParameters         // Description of the message to reply to
+	ReplyMarkup             Markup                   // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
 func (r *SendPhotoRequest) writeMultipart(w *multipart.Writer) {
@@ -383,6 +433,11 @@ func (r *SendPhotoRequest) writeMultipart(w *multipart.Writer) {
 	{
 		b, _ := json.Marshal(r.MessageThreadID)
 		fw, _ := w.CreateFormField("message_thread_id")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.DirectMessagesTopicID)
+		fw, _ := w.CreateFormField("direct_messages_topic_id")
 		fw.Write(b)
 	}
 	if r.Photo.FileID != "" {
@@ -428,6 +483,11 @@ func (r *SendPhotoRequest) writeMultipart(w *multipart.Writer) {
 	if r.MessageEffectID != "" {
 		w.WriteField("message_effect_id", r.MessageEffectID)
 	}
+	if r.SuggestedPostParameters != nil {
+		b, _ := json.Marshal(r.SuggestedPostParameters)
+		fw, _ := w.CreateFormField("suggested_post_parameters")
+		fw.Write(b)
+	}
 	if r.ReplyParameters != nil {
 		b, _ := json.Marshal(r.ReplyParameters)
 		fw, _ := w.CreateFormField("reply_parameters")
@@ -442,23 +502,25 @@ func (r *SendPhotoRequest) writeMultipart(w *multipart.Writer) {
 
 // see Bot.SendAudio(ctx, &SendAudioRequest{})
 type SendAudioRequest struct {
-	BusinessConnectionID string           // Unique identifier of the business connection on behalf of which the message will be sent
-	ChatID               ChatID           // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-	MessageThreadID      int64            // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
-	Audio                InputFile        // Audio file to send. Pass a file_id as String to send an audio file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get an audio file from the Internet, or upload a new one using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	Caption              string           // Audio caption, 0-1024 characters after entities parsing
-	ParseMode            ParseMode        // Mode for parsing entities in the audio caption. See formatting options for more details.
-	CaptionEntities      []MessageEntity  // A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
-	Duration             int              // Duration of the audio in seconds
-	Performer            string           // Performer
-	Title                string           // Track name
-	Thumbnail            InputFile        // Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	DisableNotification  bool             // Sends the message silently. Users will receive a notification with no sound.
-	ProtectContent       bool             // Protects the contents of the sent message from forwarding and saving
-	AllowPaidBroadcast   bool             // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
-	MessageEffectID      string           // Unique identifier of the message effect to be added to the message; for private chats only
-	ReplyParameters      *ReplyParameters // Description of the message to reply to
-	ReplyMarkup          Markup           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	BusinessConnectionID    string                   // Unique identifier of the business connection on behalf of which the message will be sent
+	ChatID                  ChatID                   // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+	MessageThreadID         int64                    // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	DirectMessagesTopicID   int64                    // Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
+	Audio                   InputFile                // Audio file to send. Pass a file_id as String to send an audio file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get an audio file from the Internet, or upload a new one using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+	Caption                 string                   // Audio caption, 0-1024 characters after entities parsing
+	ParseMode               ParseMode                // Mode for parsing entities in the audio caption. See formatting options for more details.
+	CaptionEntities         []MessageEntity          // A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
+	Duration                int                      // Duration of the audio in seconds
+	Performer               string                   // Performer
+	Title                   string                   // Track name
+	Thumbnail               InputFile                // Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+	DisableNotification     bool                     // Sends the message silently. Users will receive a notification with no sound.
+	ProtectContent          bool                     // Protects the contents of the sent message from forwarding and saving
+	AllowPaidBroadcast      bool                     // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	MessageEffectID         string                   // Unique identifier of the message effect to be added to the message; for private chats only
+	SuggestedPostParameters *SuggestedPostParameters // A JSON-serialized object containing the parameters of the suggested post to send; for direct messages chats only. If the message is sent as a reply to another suggested post, then that suggested post is automatically declined.
+	ReplyParameters         *ReplyParameters         // Description of the message to reply to
+	ReplyMarkup             Markup                   // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
 func (r *SendAudioRequest) writeMultipart(w *multipart.Writer) {
@@ -469,6 +531,11 @@ func (r *SendAudioRequest) writeMultipart(w *multipart.Writer) {
 	{
 		b, _ := json.Marshal(r.MessageThreadID)
 		fw, _ := w.CreateFormField("message_thread_id")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.DirectMessagesTopicID)
+		fw, _ := w.CreateFormField("direct_messages_topic_id")
 		fw.Write(b)
 	}
 	if r.Audio.FileID != "" {
@@ -521,6 +588,11 @@ func (r *SendAudioRequest) writeMultipart(w *multipart.Writer) {
 	if r.MessageEffectID != "" {
 		w.WriteField("message_effect_id", r.MessageEffectID)
 	}
+	if r.SuggestedPostParameters != nil {
+		b, _ := json.Marshal(r.SuggestedPostParameters)
+		fw, _ := w.CreateFormField("suggested_post_parameters")
+		fw.Write(b)
+	}
 	if r.ReplyParameters != nil {
 		b, _ := json.Marshal(r.ReplyParameters)
 		fw, _ := w.CreateFormField("reply_parameters")
@@ -535,21 +607,23 @@ func (r *SendAudioRequest) writeMultipart(w *multipart.Writer) {
 
 // see Bot.SendDocument(ctx, &SendDocumentRequest{})
 type SendDocumentRequest struct {
-	BusinessConnectionID        string           // Unique identifier of the business connection on behalf of which the message will be sent
-	ChatID                      ChatID           // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-	MessageThreadID             int64            // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
-	Document                    InputFile        // File to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	Thumbnail                   InputFile        // Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	Caption                     string           // Document caption (may also be used when resending documents by file_id), 0-1024 characters after entities parsing
-	ParseMode                   ParseMode        // Mode for parsing entities in the document caption. See formatting options for more details.
-	CaptionEntities             []MessageEntity  // A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
-	DisableContentTypeDetection bool             // Disables automatic server-side content type detection for files uploaded using multipart/form-data
-	DisableNotification         bool             // Sends the message silently. Users will receive a notification with no sound.
-	ProtectContent              bool             // Protects the contents of the sent message from forwarding and saving
-	AllowPaidBroadcast          bool             // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
-	MessageEffectID             string           // Unique identifier of the message effect to be added to the message; for private chats only
-	ReplyParameters             *ReplyParameters // Description of the message to reply to
-	ReplyMarkup                 Markup           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	BusinessConnectionID        string                   // Unique identifier of the business connection on behalf of which the message will be sent
+	ChatID                      ChatID                   // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+	MessageThreadID             int64                    // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	DirectMessagesTopicID       int64                    // Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
+	Document                    InputFile                // File to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+	Thumbnail                   InputFile                // Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+	Caption                     string                   // Document caption (may also be used when resending documents by file_id), 0-1024 characters after entities parsing
+	ParseMode                   ParseMode                // Mode for parsing entities in the document caption. See formatting options for more details.
+	CaptionEntities             []MessageEntity          // A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
+	DisableContentTypeDetection bool                     // Disables automatic server-side content type detection for files uploaded using multipart/form-data
+	DisableNotification         bool                     // Sends the message silently. Users will receive a notification with no sound.
+	ProtectContent              bool                     // Protects the contents of the sent message from forwarding and saving
+	AllowPaidBroadcast          bool                     // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	MessageEffectID             string                   // Unique identifier of the message effect to be added to the message; for private chats only
+	SuggestedPostParameters     *SuggestedPostParameters // A JSON-serialized object containing the parameters of the suggested post to send; for direct messages chats only. If the message is sent as a reply to another suggested post, then that suggested post is automatically declined.
+	ReplyParameters             *ReplyParameters         // Description of the message to reply to
+	ReplyMarkup                 Markup                   // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
 func (r *SendDocumentRequest) writeMultipart(w *multipart.Writer) {
@@ -560,6 +634,11 @@ func (r *SendDocumentRequest) writeMultipart(w *multipart.Writer) {
 	{
 		b, _ := json.Marshal(r.MessageThreadID)
 		fw, _ := w.CreateFormField("message_thread_id")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.DirectMessagesTopicID)
+		fw, _ := w.CreateFormField("direct_messages_topic_id")
 		fw.Write(b)
 	}
 	if r.Document.FileID != "" {
@@ -606,6 +685,11 @@ func (r *SendDocumentRequest) writeMultipart(w *multipart.Writer) {
 	if r.MessageEffectID != "" {
 		w.WriteField("message_effect_id", r.MessageEffectID)
 	}
+	if r.SuggestedPostParameters != nil {
+		b, _ := json.Marshal(r.SuggestedPostParameters)
+		fw, _ := w.CreateFormField("suggested_post_parameters")
+		fw.Write(b)
+	}
 	if r.ReplyParameters != nil {
 		b, _ := json.Marshal(r.ReplyParameters)
 		fw, _ := w.CreateFormField("reply_parameters")
@@ -620,28 +704,30 @@ func (r *SendDocumentRequest) writeMultipart(w *multipart.Writer) {
 
 // see Bot.SendVideo(ctx, &SendVideoRequest{})
 type SendVideoRequest struct {
-	BusinessConnectionID  string           // Unique identifier of the business connection on behalf of which the message will be sent
-	ChatID                ChatID           // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-	MessageThreadID       int64            // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
-	Video                 InputFile        // Video to send. Pass a file_id as String to send a video that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a video from the Internet, or upload a new video using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	Duration              int              // Duration of sent video in seconds
-	Width                 int              // Video width
-	Height                int              // Video height
-	Thumbnail             InputFile        // Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	Cover                 InputFile        // Cover for the video in the message. Pass a file_id to send a file that exists on the Telegram servers (recommended), pass an HTTP URL for Telegram to get a file from the Internet, or pass "attach://<file_attach_name>" to upload a new one using multipart/form-data under <file_attach_name> name. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	StartTimestamp        int              // Start timestamp for the video in the message
-	Caption               string           // Video caption (may also be used when resending videos by file_id), 0-1024 characters after entities parsing
-	ParseMode             ParseMode        // Mode for parsing entities in the video caption. See formatting options for more details.
-	CaptionEntities       []MessageEntity  // A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
-	ShowCaptionAboveMedia bool             // Pass True, if the caption must be shown above the message media
-	HasSpoiler            bool             // Pass True if the video needs to be covered with a spoiler animation
-	SupportsStreaming     bool             // Pass True if the uploaded video is suitable for streaming
-	DisableNotification   bool             // Sends the message silently. Users will receive a notification with no sound.
-	ProtectContent        bool             // Protects the contents of the sent message from forwarding and saving
-	AllowPaidBroadcast    bool             // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
-	MessageEffectID       string           // Unique identifier of the message effect to be added to the message; for private chats only
-	ReplyParameters       *ReplyParameters // Description of the message to reply to
-	ReplyMarkup           Markup           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	BusinessConnectionID    string                   // Unique identifier of the business connection on behalf of which the message will be sent
+	ChatID                  ChatID                   // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+	MessageThreadID         int64                    // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	DirectMessagesTopicID   int64                    // Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
+	Video                   InputFile                // Video to send. Pass a file_id as String to send a video that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a video from the Internet, or upload a new video using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+	Duration                int                      // Duration of sent video in seconds
+	Width                   int                      // Video width
+	Height                  int                      // Video height
+	Thumbnail               InputFile                // Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+	Cover                   InputFile                // Cover for the video in the message. Pass a file_id to send a file that exists on the Telegram servers (recommended), pass an HTTP URL for Telegram to get a file from the Internet, or pass "attach://<file_attach_name>" to upload a new one using multipart/form-data under <file_attach_name> name. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+	StartTimestamp          int                      // Start timestamp for the video in the message
+	Caption                 string                   // Video caption (may also be used when resending videos by file_id), 0-1024 characters after entities parsing
+	ParseMode               ParseMode                // Mode for parsing entities in the video caption. See formatting options for more details.
+	CaptionEntities         []MessageEntity          // A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
+	ShowCaptionAboveMedia   bool                     // Pass True, if the caption must be shown above the message media
+	HasSpoiler              bool                     // Pass True if the video needs to be covered with a spoiler animation
+	SupportsStreaming       bool                     // Pass True if the uploaded video is suitable for streaming
+	DisableNotification     bool                     // Sends the message silently. Users will receive a notification with no sound.
+	ProtectContent          bool                     // Protects the contents of the sent message from forwarding and saving
+	AllowPaidBroadcast      bool                     // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	MessageEffectID         string                   // Unique identifier of the message effect to be added to the message; for private chats only
+	SuggestedPostParameters *SuggestedPostParameters // A JSON-serialized object containing the parameters of the suggested post to send; for direct messages chats only. If the message is sent as a reply to another suggested post, then that suggested post is automatically declined.
+	ReplyParameters         *ReplyParameters         // Description of the message to reply to
+	ReplyMarkup             Markup                   // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
 func (r *SendVideoRequest) writeMultipart(w *multipart.Writer) {
@@ -652,6 +738,11 @@ func (r *SendVideoRequest) writeMultipart(w *multipart.Writer) {
 	{
 		b, _ := json.Marshal(r.MessageThreadID)
 		fw, _ := w.CreateFormField("message_thread_id")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.DirectMessagesTopicID)
+		fw, _ := w.CreateFormField("direct_messages_topic_id")
 		fw.Write(b)
 	}
 	if r.Video.FileID != "" {
@@ -734,6 +825,11 @@ func (r *SendVideoRequest) writeMultipart(w *multipart.Writer) {
 	if r.MessageEffectID != "" {
 		w.WriteField("message_effect_id", r.MessageEffectID)
 	}
+	if r.SuggestedPostParameters != nil {
+		b, _ := json.Marshal(r.SuggestedPostParameters)
+		fw, _ := w.CreateFormField("suggested_post_parameters")
+		fw.Write(b)
+	}
 	if r.ReplyParameters != nil {
 		b, _ := json.Marshal(r.ReplyParameters)
 		fw, _ := w.CreateFormField("reply_parameters")
@@ -748,25 +844,27 @@ func (r *SendVideoRequest) writeMultipart(w *multipart.Writer) {
 
 // see Bot.SendAnimation(ctx, &SendAnimationRequest{})
 type SendAnimationRequest struct {
-	BusinessConnectionID  string           // Unique identifier of the business connection on behalf of which the message will be sent
-	ChatID                ChatID           // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-	MessageThreadID       int64            // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
-	Animation             InputFile        // Animation to send. Pass a file_id as String to send an animation that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get an animation from the Internet, or upload a new animation using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	Duration              int              // Duration of sent animation in seconds
-	Width                 int              // Animation width
-	Height                int              // Animation height
-	Thumbnail             InputFile        // Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	Caption               string           // Animation caption (may also be used when resending animation by file_id), 0-1024 characters after entities parsing
-	ParseMode             ParseMode        // Mode for parsing entities in the animation caption. See formatting options for more details.
-	CaptionEntities       []MessageEntity  // A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
-	ShowCaptionAboveMedia bool             // Pass True, if the caption must be shown above the message media
-	HasSpoiler            bool             // Pass True if the animation needs to be covered with a spoiler animation
-	DisableNotification   bool             // Sends the message silently. Users will receive a notification with no sound.
-	ProtectContent        bool             // Protects the contents of the sent message from forwarding and saving
-	AllowPaidBroadcast    bool             // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
-	MessageEffectID       string           // Unique identifier of the message effect to be added to the message; for private chats only
-	ReplyParameters       *ReplyParameters // Description of the message to reply to
-	ReplyMarkup           Markup           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	BusinessConnectionID    string                   // Unique identifier of the business connection on behalf of which the message will be sent
+	ChatID                  ChatID                   // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+	MessageThreadID         int64                    // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	DirectMessagesTopicID   int64                    // Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
+	Animation               InputFile                // Animation to send. Pass a file_id as String to send an animation that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get an animation from the Internet, or upload a new animation using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+	Duration                int                      // Duration of sent animation in seconds
+	Width                   int                      // Animation width
+	Height                  int                      // Animation height
+	Thumbnail               InputFile                // Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+	Caption                 string                   // Animation caption (may also be used when resending animation by file_id), 0-1024 characters after entities parsing
+	ParseMode               ParseMode                // Mode for parsing entities in the animation caption. See formatting options for more details.
+	CaptionEntities         []MessageEntity          // A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
+	ShowCaptionAboveMedia   bool                     // Pass True, if the caption must be shown above the message media
+	HasSpoiler              bool                     // Pass True if the animation needs to be covered with a spoiler animation
+	DisableNotification     bool                     // Sends the message silently. Users will receive a notification with no sound.
+	ProtectContent          bool                     // Protects the contents of the sent message from forwarding and saving
+	AllowPaidBroadcast      bool                     // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	MessageEffectID         string                   // Unique identifier of the message effect to be added to the message; for private chats only
+	SuggestedPostParameters *SuggestedPostParameters // A JSON-serialized object containing the parameters of the suggested post to send; for direct messages chats only. If the message is sent as a reply to another suggested post, then that suggested post is automatically declined.
+	ReplyParameters         *ReplyParameters         // Description of the message to reply to
+	ReplyMarkup             Markup                   // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
 func (r *SendAnimationRequest) writeMultipart(w *multipart.Writer) {
@@ -777,6 +875,11 @@ func (r *SendAnimationRequest) writeMultipart(w *multipart.Writer) {
 	{
 		b, _ := json.Marshal(r.MessageThreadID)
 		fw, _ := w.CreateFormField("message_thread_id")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.DirectMessagesTopicID)
+		fw, _ := w.CreateFormField("direct_messages_topic_id")
 		fw.Write(b)
 	}
 	if r.Animation.FileID != "" {
@@ -843,6 +946,11 @@ func (r *SendAnimationRequest) writeMultipart(w *multipart.Writer) {
 	if r.MessageEffectID != "" {
 		w.WriteField("message_effect_id", r.MessageEffectID)
 	}
+	if r.SuggestedPostParameters != nil {
+		b, _ := json.Marshal(r.SuggestedPostParameters)
+		fw, _ := w.CreateFormField("suggested_post_parameters")
+		fw.Write(b)
+	}
 	if r.ReplyParameters != nil {
 		b, _ := json.Marshal(r.ReplyParameters)
 		fw, _ := w.CreateFormField("reply_parameters")
@@ -857,20 +965,22 @@ func (r *SendAnimationRequest) writeMultipart(w *multipart.Writer) {
 
 // see Bot.SendVoice(ctx, &SendVoiceRequest{})
 type SendVoiceRequest struct {
-	BusinessConnectionID string           // Unique identifier of the business connection on behalf of which the message will be sent
-	ChatID               ChatID           // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-	MessageThreadID      int64            // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
-	Voice                InputFile        // Audio file to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	Caption              string           // Voice message caption, 0-1024 characters after entities parsing
-	ParseMode            ParseMode        // Mode for parsing entities in the voice message caption. See formatting options for more details.
-	CaptionEntities      []MessageEntity  // A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
-	Duration             int              // Duration of the voice message in seconds
-	DisableNotification  bool             // Sends the message silently. Users will receive a notification with no sound.
-	ProtectContent       bool             // Protects the contents of the sent message from forwarding and saving
-	AllowPaidBroadcast   bool             // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
-	MessageEffectID      string           // Unique identifier of the message effect to be added to the message; for private chats only
-	ReplyParameters      *ReplyParameters // Description of the message to reply to
-	ReplyMarkup          Markup           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	BusinessConnectionID    string                   // Unique identifier of the business connection on behalf of which the message will be sent
+	ChatID                  ChatID                   // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+	MessageThreadID         int64                    // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	DirectMessagesTopicID   int64                    // Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
+	Voice                   InputFile                // Audio file to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a file from the Internet, or upload a new one using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+	Caption                 string                   // Voice message caption, 0-1024 characters after entities parsing
+	ParseMode               ParseMode                // Mode for parsing entities in the voice message caption. See formatting options for more details.
+	CaptionEntities         []MessageEntity          // A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
+	Duration                int                      // Duration of the voice message in seconds
+	DisableNotification     bool                     // Sends the message silently. Users will receive a notification with no sound.
+	ProtectContent          bool                     // Protects the contents of the sent message from forwarding and saving
+	AllowPaidBroadcast      bool                     // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	MessageEffectID         string                   // Unique identifier of the message effect to be added to the message; for private chats only
+	SuggestedPostParameters *SuggestedPostParameters // A JSON-serialized object containing the parameters of the suggested post to send; for direct messages chats only. If the message is sent as a reply to another suggested post, then that suggested post is automatically declined.
+	ReplyParameters         *ReplyParameters         // Description of the message to reply to
+	ReplyMarkup             Markup                   // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
 func (r *SendVoiceRequest) writeMultipart(w *multipart.Writer) {
@@ -881,6 +991,11 @@ func (r *SendVoiceRequest) writeMultipart(w *multipart.Writer) {
 	{
 		b, _ := json.Marshal(r.MessageThreadID)
 		fw, _ := w.CreateFormField("message_thread_id")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.DirectMessagesTopicID)
+		fw, _ := w.CreateFormField("direct_messages_topic_id")
 		fw.Write(b)
 	}
 	if r.Voice.FileID != "" {
@@ -921,6 +1036,11 @@ func (r *SendVoiceRequest) writeMultipart(w *multipart.Writer) {
 	if r.MessageEffectID != "" {
 		w.WriteField("message_effect_id", r.MessageEffectID)
 	}
+	if r.SuggestedPostParameters != nil {
+		b, _ := json.Marshal(r.SuggestedPostParameters)
+		fw, _ := w.CreateFormField("suggested_post_parameters")
+		fw.Write(b)
+	}
 	if r.ReplyParameters != nil {
 		b, _ := json.Marshal(r.ReplyParameters)
 		fw, _ := w.CreateFormField("reply_parameters")
@@ -935,19 +1055,21 @@ func (r *SendVoiceRequest) writeMultipart(w *multipart.Writer) {
 
 // see Bot.SendVideoNote(ctx, &SendVideoNoteRequest{})
 type SendVideoNoteRequest struct {
-	BusinessConnectionID string           // Unique identifier of the business connection on behalf of which the message will be sent
-	ChatID               ChatID           // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-	MessageThreadID      int64            // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
-	VideoNote            InputFile        // Video note to send. Pass a file_id as String to send a video note that exists on the Telegram servers (recommended) or upload a new video using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files. Sending video notes by a URL is currently unsupported
-	Duration             int              // Duration of sent video in seconds
-	Length               int              // Video width and height, i.e. diameter of the video message
-	Thumbnail            InputFile        // Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
-	DisableNotification  bool             // Sends the message silently. Users will receive a notification with no sound.
-	ProtectContent       bool             // Protects the contents of the sent message from forwarding and saving
-	AllowPaidBroadcast   bool             // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
-	MessageEffectID      string           // Unique identifier of the message effect to be added to the message; for private chats only
-	ReplyParameters      *ReplyParameters // Description of the message to reply to
-	ReplyMarkup          Markup           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	BusinessConnectionID    string                   // Unique identifier of the business connection on behalf of which the message will be sent
+	ChatID                  ChatID                   // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+	MessageThreadID         int64                    // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	DirectMessagesTopicID   int64                    // Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
+	VideoNote               InputFile                // Video note to send. Pass a file_id as String to send a video note that exists on the Telegram servers (recommended) or upload a new video using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files. Sending video notes by a URL is currently unsupported
+	Duration                int                      // Duration of sent video in seconds
+	Length                  int                      // Video width and height, i.e. diameter of the video message
+	Thumbnail               InputFile                // Thumbnail of the file sent; can be ignored if thumbnail generation for the file is supported server-side. The thumbnail should be in JPEG format and less than 200 kB in size. A thumbnail's width and height should not exceed 320. Ignored if the file is not uploaded using multipart/form-data. Thumbnails can't be reused and can be only uploaded as a new file, so you can pass "attach://<file_attach_name>" if the thumbnail was uploaded using multipart/form-data under <file_attach_name>. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
+	DisableNotification     bool                     // Sends the message silently. Users will receive a notification with no sound.
+	ProtectContent          bool                     // Protects the contents of the sent message from forwarding and saving
+	AllowPaidBroadcast      bool                     // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	MessageEffectID         string                   // Unique identifier of the message effect to be added to the message; for private chats only
+	SuggestedPostParameters *SuggestedPostParameters // A JSON-serialized object containing the parameters of the suggested post to send; for direct messages chats only. If the message is sent as a reply to another suggested post, then that suggested post is automatically declined.
+	ReplyParameters         *ReplyParameters         // Description of the message to reply to
+	ReplyMarkup             Markup                   // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
 func (r *SendVideoNoteRequest) writeMultipart(w *multipart.Writer) {
@@ -958,6 +1080,11 @@ func (r *SendVideoNoteRequest) writeMultipart(w *multipart.Writer) {
 	{
 		b, _ := json.Marshal(r.MessageThreadID)
 		fw, _ := w.CreateFormField("message_thread_id")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.DirectMessagesTopicID)
+		fw, _ := w.CreateFormField("direct_messages_topic_id")
 		fw.Write(b)
 	}
 	if r.VideoNote.FileID != "" {
@@ -1000,6 +1127,11 @@ func (r *SendVideoNoteRequest) writeMultipart(w *multipart.Writer) {
 	if r.MessageEffectID != "" {
 		w.WriteField("message_effect_id", r.MessageEffectID)
 	}
+	if r.SuggestedPostParameters != nil {
+		b, _ := json.Marshal(r.SuggestedPostParameters)
+		fw, _ := w.CreateFormField("suggested_post_parameters")
+		fw.Write(b)
+	}
 	if r.ReplyParameters != nil {
 		b, _ := json.Marshal(r.ReplyParameters)
 		fw, _ := w.CreateFormField("reply_parameters")
@@ -1014,20 +1146,23 @@ func (r *SendVideoNoteRequest) writeMultipart(w *multipart.Writer) {
 
 // see Bot.SendPaidMedia(ctx, &SendPaidMediaRequest{})
 type SendPaidMediaRequest struct {
-	BusinessConnectionID  string           // Unique identifier of the business connection on behalf of which the message will be sent
-	ChatID                ChatID           // Unique identifier for the target chat or username of the target channel (in the format @channelusername). If the chat is a channel, all Telegram Star proceeds from this media will be credited to the chat's balance. Otherwise, they will be credited to the bot's balance.
-	StarCount             int              // The number of Telegram Stars that must be paid to buy access to the media; 1-2500
-	Media                 []InputPaidMedia // A JSON-serialized array describing the media to be sent; up to 10 items
-	Payload               string           // Bot-defined paid media payload, 0-128 bytes. This will not be displayed to the user, use it for your internal processes.
-	Caption               string           // Media caption, 0-1024 characters after entities parsing
-	ParseMode             ParseMode        // Mode for parsing entities in the media caption. See formatting options for more details.
-	CaptionEntities       []MessageEntity  // A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
-	ShowCaptionAboveMedia bool             // Pass True, if the caption must be shown above the message media
-	DisableNotification   bool             // Sends the message silently. Users will receive a notification with no sound.
-	ProtectContent        bool             // Protects the contents of the sent message from forwarding and saving
-	AllowPaidBroadcast    bool             // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
-	ReplyParameters       *ReplyParameters // Description of the message to reply to
-	ReplyMarkup           Markup           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	BusinessConnectionID    string                   // Unique identifier of the business connection on behalf of which the message will be sent
+	ChatID                  ChatID                   // Unique identifier for the target chat or username of the target channel (in the format @channelusername). If the chat is a channel, all Telegram Star proceeds from this media will be credited to the chat's balance. Otherwise, they will be credited to the bot's balance.
+	MessageThreadID         int64                    // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	DirectMessagesTopicID   int64                    // Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
+	StarCount               int                      // The number of Telegram Stars that must be paid to buy access to the media; 1-10000
+	Media                   []InputPaidMedia         // A JSON-serialized array describing the media to be sent; up to 10 items
+	Payload                 string                   // Bot-defined paid media payload, 0-128 bytes. This will not be displayed to the user, use it for your internal processes.
+	Caption                 string                   // Media caption, 0-1024 characters after entities parsing
+	ParseMode               ParseMode                // Mode for parsing entities in the media caption. See formatting options for more details.
+	CaptionEntities         []MessageEntity          // A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
+	ShowCaptionAboveMedia   bool                     // Pass True, if the caption must be shown above the message media
+	DisableNotification     bool                     // Sends the message silently. Users will receive a notification with no sound.
+	ProtectContent          bool                     // Protects the contents of the sent message from forwarding and saving
+	AllowPaidBroadcast      bool                     // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	SuggestedPostParameters *SuggestedPostParameters // A JSON-serialized object containing the parameters of the suggested post to send; for direct messages chats only. If the message is sent as a reply to another suggested post, then that suggested post is automatically declined.
+	ReplyParameters         *ReplyParameters         // Description of the message to reply to
+	ReplyMarkup             Markup                   // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
 func (r *SendPaidMediaRequest) writeMultipart(w *multipart.Writer) {
@@ -1035,6 +1170,16 @@ func (r *SendPaidMediaRequest) writeMultipart(w *multipart.Writer) {
 		w.WriteField("business_connection_id", r.BusinessConnectionID)
 	}
 	w.WriteField("chat_id", r.ChatID.String())
+	{
+		b, _ := json.Marshal(r.MessageThreadID)
+		fw, _ := w.CreateFormField("message_thread_id")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.DirectMessagesTopicID)
+		fw, _ := w.CreateFormField("direct_messages_topic_id")
+		fw.Write(b)
+	}
 	{
 		b, _ := json.Marshal(r.StarCount)
 		fw, _ := w.CreateFormField("star_count")
@@ -1077,6 +1222,11 @@ func (r *SendPaidMediaRequest) writeMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("allow_paid_broadcast")
 		fw.Write(b)
 	}
+	if r.SuggestedPostParameters != nil {
+		b, _ := json.Marshal(r.SuggestedPostParameters)
+		fw, _ := w.CreateFormField("suggested_post_parameters")
+		fw.Write(b)
+	}
 	if r.ReplyParameters != nil {
 		b, _ := json.Marshal(r.ReplyParameters)
 		fw, _ := w.CreateFormField("reply_parameters")
@@ -1091,15 +1241,16 @@ func (r *SendPaidMediaRequest) writeMultipart(w *multipart.Writer) {
 
 // see Bot.SendMediaGroup(ctx, &SendMediaGroupRequest{})
 type SendMediaGroupRequest struct {
-	BusinessConnectionID string           // Unique identifier of the business connection on behalf of which the message will be sent
-	ChatID               ChatID           // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-	MessageThreadID      int64            // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
-	Media                []InputMedia     // A JSON-serialized array describing messages to be sent, must include 2-10 items
-	DisableNotification  bool             // Sends messages silently. Users will receive a notification with no sound.
-	ProtectContent       bool             // Protects the contents of the sent messages from forwarding and saving
-	AllowPaidBroadcast   bool             // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
-	MessageEffectID      string           // Unique identifier of the message effect to be added to the message; for private chats only
-	ReplyParameters      *ReplyParameters // Description of the message to reply to
+	BusinessConnectionID  string           // Unique identifier of the business connection on behalf of which the message will be sent
+	ChatID                ChatID           // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+	MessageThreadID       int64            // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	DirectMessagesTopicID int64            // Identifier of the direct messages topic to which the messages will be sent; required if the messages are sent to a direct messages chat
+	Media                 []InputMedia     // A JSON-serialized array describing messages to be sent, must include 2-10 items
+	DisableNotification   bool             // Sends messages silently. Users will receive a notification with no sound.
+	ProtectContent        bool             // Protects the contents of the sent messages from forwarding and saving
+	AllowPaidBroadcast    bool             // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	MessageEffectID       string           // Unique identifier of the message effect to be added to the message; for private chats only
+	ReplyParameters       *ReplyParameters // Description of the message to reply to
 }
 
 func (r *SendMediaGroupRequest) writeMultipart(w *multipart.Writer) {
@@ -1110,6 +1261,11 @@ func (r *SendMediaGroupRequest) writeMultipart(w *multipart.Writer) {
 	{
 		b, _ := json.Marshal(r.MessageThreadID)
 		fw, _ := w.CreateFormField("message_thread_id")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.DirectMessagesTopicID)
+		fw, _ := w.CreateFormField("direct_messages_topic_id")
 		fw.Write(b)
 	}
 	for i := 0; i < len(r.Media); i++ {
@@ -1154,21 +1310,23 @@ func (r *SendMediaGroupRequest) writeMultipart(w *multipart.Writer) {
 
 // see Bot.SendLocation(ctx, &SendLocationRequest{})
 type SendLocationRequest struct {
-	BusinessConnectionID string           // Unique identifier of the business connection on behalf of which the message will be sent
-	ChatID               ChatID           // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-	MessageThreadID      int64            // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
-	Latitude             float64          // Latitude of the location
-	Longitude            float64          // Longitude of the location
-	HorizontalAccuracy   float64          // The radius of uncertainty for the location, measured in meters; 0-1500
-	LivePeriod           int              // Period in seconds during which the location will be updated (see Live Locations, should be between 60 and 86400, or 0x7FFFFFFF for live locations that can be edited indefinitely.
-	Heading              int              // For live locations, a direction in which the user is moving, in degrees. Must be between 1 and 360 if specified.
-	ProximityAlertRadius int              // For live locations, a maximum distance for proximity alerts about approaching another chat member, in meters. Must be between 1 and 100000 if specified.
-	DisableNotification  bool             // Sends the message silently. Users will receive a notification with no sound.
-	ProtectContent       bool             // Protects the contents of the sent message from forwarding and saving
-	AllowPaidBroadcast   bool             // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
-	MessageEffectID      string           // Unique identifier of the message effect to be added to the message; for private chats only
-	ReplyParameters      *ReplyParameters // Description of the message to reply to
-	ReplyMarkup          Markup           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	BusinessConnectionID    string                   // Unique identifier of the business connection on behalf of which the message will be sent
+	ChatID                  ChatID                   // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+	MessageThreadID         int64                    // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	DirectMessagesTopicID   int64                    // Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
+	Latitude                float64                  // Latitude of the location
+	Longitude               float64                  // Longitude of the location
+	HorizontalAccuracy      float64                  // The radius of uncertainty for the location, measured in meters; 0-1500
+	LivePeriod              int                      // Period in seconds during which the location will be updated (see Live Locations, should be between 60 and 86400, or 0x7FFFFFFF for live locations that can be edited indefinitely.
+	Heading                 int                      // For live locations, a direction in which the user is moving, in degrees. Must be between 1 and 360 if specified.
+	ProximityAlertRadius    int                      // For live locations, a maximum distance for proximity alerts about approaching another chat member, in meters. Must be between 1 and 100000 if specified.
+	DisableNotification     bool                     // Sends the message silently. Users will receive a notification with no sound.
+	ProtectContent          bool                     // Protects the contents of the sent message from forwarding and saving
+	AllowPaidBroadcast      bool                     // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	MessageEffectID         string                   // Unique identifier of the message effect to be added to the message; for private chats only
+	SuggestedPostParameters *SuggestedPostParameters // A JSON-serialized object containing the parameters of the suggested post to send; for direct messages chats only. If the message is sent as a reply to another suggested post, then that suggested post is automatically declined.
+	ReplyParameters         *ReplyParameters         // Description of the message to reply to
+	ReplyMarkup             Markup                   // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
 func (r *SendLocationRequest) writeMultipart(w *multipart.Writer) {
@@ -1179,6 +1337,11 @@ func (r *SendLocationRequest) writeMultipart(w *multipart.Writer) {
 	{
 		b, _ := json.Marshal(r.MessageThreadID)
 		fw, _ := w.CreateFormField("message_thread_id")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.DirectMessagesTopicID)
+		fw, _ := w.CreateFormField("direct_messages_topic_id")
 		fw.Write(b)
 	}
 	{
@@ -1229,6 +1392,11 @@ func (r *SendLocationRequest) writeMultipart(w *multipart.Writer) {
 	if r.MessageEffectID != "" {
 		w.WriteField("message_effect_id", r.MessageEffectID)
 	}
+	if r.SuggestedPostParameters != nil {
+		b, _ := json.Marshal(r.SuggestedPostParameters)
+		fw, _ := w.CreateFormField("suggested_post_parameters")
+		fw.Write(b)
+	}
 	if r.ReplyParameters != nil {
 		b, _ := json.Marshal(r.ReplyParameters)
 		fw, _ := w.CreateFormField("reply_parameters")
@@ -1243,23 +1411,25 @@ func (r *SendLocationRequest) writeMultipart(w *multipart.Writer) {
 
 // see Bot.SendVenue(ctx, &SendVenueRequest{})
 type SendVenueRequest struct {
-	BusinessConnectionID string           // Unique identifier of the business connection on behalf of which the message will be sent
-	ChatID               ChatID           // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-	MessageThreadID      int64            // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
-	Latitude             float64          // Latitude of the venue
-	Longitude            float64          // Longitude of the venue
-	Title                string           // Name of the venue
-	Address              string           // Address of the venue
-	FoursquareID         string           // Foursquare identifier of the venue
-	FoursquareType       string           // Foursquare type of the venue, if known. (For example, "arts_entertainment/default", "arts_entertainment/aquarium" or "food/icecream".)
-	GooglePlaceID        string           // Google Places identifier of the venue
-	GooglePlaceType      string           // Google Places type of the venue. (See supported types.)
-	DisableNotification  bool             // Sends the message silently. Users will receive a notification with no sound.
-	ProtectContent       bool             // Protects the contents of the sent message from forwarding and saving
-	AllowPaidBroadcast   bool             // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
-	MessageEffectID      string           // Unique identifier of the message effect to be added to the message; for private chats only
-	ReplyParameters      *ReplyParameters // Description of the message to reply to
-	ReplyMarkup          Markup           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	BusinessConnectionID    string                   // Unique identifier of the business connection on behalf of which the message will be sent
+	ChatID                  ChatID                   // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+	MessageThreadID         int64                    // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	DirectMessagesTopicID   int64                    // Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
+	Latitude                float64                  // Latitude of the venue
+	Longitude               float64                  // Longitude of the venue
+	Title                   string                   // Name of the venue
+	Address                 string                   // Address of the venue
+	FoursquareID            string                   // Foursquare identifier of the venue
+	FoursquareType          string                   // Foursquare type of the venue, if known. (For example, "arts_entertainment/default", "arts_entertainment/aquarium" or "food/icecream".)
+	GooglePlaceID           string                   // Google Places identifier of the venue
+	GooglePlaceType         string                   // Google Places type of the venue. (See supported types.)
+	DisableNotification     bool                     // Sends the message silently. Users will receive a notification with no sound.
+	ProtectContent          bool                     // Protects the contents of the sent message from forwarding and saving
+	AllowPaidBroadcast      bool                     // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	MessageEffectID         string                   // Unique identifier of the message effect to be added to the message; for private chats only
+	SuggestedPostParameters *SuggestedPostParameters // A JSON-serialized object containing the parameters of the suggested post to send; for direct messages chats only. If the message is sent as a reply to another suggested post, then that suggested post is automatically declined.
+	ReplyParameters         *ReplyParameters         // Description of the message to reply to
+	ReplyMarkup             Markup                   // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
 func (r *SendVenueRequest) writeMultipart(w *multipart.Writer) {
@@ -1270,6 +1440,11 @@ func (r *SendVenueRequest) writeMultipart(w *multipart.Writer) {
 	{
 		b, _ := json.Marshal(r.MessageThreadID)
 		fw, _ := w.CreateFormField("message_thread_id")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.DirectMessagesTopicID)
+		fw, _ := w.CreateFormField("direct_messages_topic_id")
 		fw.Write(b)
 	}
 	{
@@ -1314,6 +1489,11 @@ func (r *SendVenueRequest) writeMultipart(w *multipart.Writer) {
 	if r.MessageEffectID != "" {
 		w.WriteField("message_effect_id", r.MessageEffectID)
 	}
+	if r.SuggestedPostParameters != nil {
+		b, _ := json.Marshal(r.SuggestedPostParameters)
+		fw, _ := w.CreateFormField("suggested_post_parameters")
+		fw.Write(b)
+	}
 	if r.ReplyParameters != nil {
 		b, _ := json.Marshal(r.ReplyParameters)
 		fw, _ := w.CreateFormField("reply_parameters")
@@ -1328,19 +1508,21 @@ func (r *SendVenueRequest) writeMultipart(w *multipart.Writer) {
 
 // see Bot.SendContact(ctx, &SendContactRequest{})
 type SendContactRequest struct {
-	BusinessConnectionID string           // Unique identifier of the business connection on behalf of which the message will be sent
-	ChatID               ChatID           // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-	MessageThreadID      int64            // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
-	PhoneNumber          string           // Contact's phone number
-	FirstName            string           // Contact's first name
-	LastName             string           // Contact's last name
-	Vcard                string           // Additional data about the contact in the form of a vCard, 0-2048 bytes
-	DisableNotification  bool             // Sends the message silently. Users will receive a notification with no sound.
-	ProtectContent       bool             // Protects the contents of the sent message from forwarding and saving
-	AllowPaidBroadcast   bool             // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
-	MessageEffectID      string           // Unique identifier of the message effect to be added to the message; for private chats only
-	ReplyParameters      *ReplyParameters // Description of the message to reply to
-	ReplyMarkup          Markup           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	BusinessConnectionID    string                   // Unique identifier of the business connection on behalf of which the message will be sent
+	ChatID                  ChatID                   // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+	MessageThreadID         int64                    // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	DirectMessagesTopicID   int64                    // Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
+	PhoneNumber             string                   // Contact's phone number
+	FirstName               string                   // Contact's first name
+	LastName                string                   // Contact's last name
+	Vcard                   string                   // Additional data about the contact in the form of a vCard, 0-2048 bytes
+	DisableNotification     bool                     // Sends the message silently. Users will receive a notification with no sound.
+	ProtectContent          bool                     // Protects the contents of the sent message from forwarding and saving
+	AllowPaidBroadcast      bool                     // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	MessageEffectID         string                   // Unique identifier of the message effect to be added to the message; for private chats only
+	SuggestedPostParameters *SuggestedPostParameters // A JSON-serialized object containing the parameters of the suggested post to send; for direct messages chats only. If the message is sent as a reply to another suggested post, then that suggested post is automatically declined.
+	ReplyParameters         *ReplyParameters         // Description of the message to reply to
+	ReplyMarkup             Markup                   // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
 func (r *SendContactRequest) writeMultipart(w *multipart.Writer) {
@@ -1351,6 +1533,11 @@ func (r *SendContactRequest) writeMultipart(w *multipart.Writer) {
 	{
 		b, _ := json.Marshal(r.MessageThreadID)
 		fw, _ := w.CreateFormField("message_thread_id")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.DirectMessagesTopicID)
+		fw, _ := w.CreateFormField("direct_messages_topic_id")
 		fw.Write(b)
 	}
 	w.WriteField("phone_number", r.PhoneNumber)
@@ -1379,6 +1566,11 @@ func (r *SendContactRequest) writeMultipart(w *multipart.Writer) {
 	if r.MessageEffectID != "" {
 		w.WriteField("message_effect_id", r.MessageEffectID)
 	}
+	if r.SuggestedPostParameters != nil {
+		b, _ := json.Marshal(r.SuggestedPostParameters)
+		fw, _ := w.CreateFormField("suggested_post_parameters")
+		fw.Write(b)
+	}
 	if r.ReplyParameters != nil {
 		b, _ := json.Marshal(r.ReplyParameters)
 		fw, _ := w.CreateFormField("reply_parameters")
@@ -1394,12 +1586,12 @@ func (r *SendContactRequest) writeMultipart(w *multipart.Writer) {
 // see Bot.SendPoll(ctx, &SendPollRequest{})
 type SendPollRequest struct {
 	BusinessConnectionID  string            // Unique identifier of the business connection on behalf of which the message will be sent
-	ChatID                ChatID            // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+	ChatID                ChatID            // Unique identifier for the target chat or username of the target channel (in the format @channelusername). Polls can't be sent to channel direct messages chats.
 	MessageThreadID       int64             // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
 	Question              string            // Poll question, 1-300 characters
 	QuestionParseMode     string            // Mode for parsing entities in the question. See formatting options for more details. Currently, only custom emoji entities are allowed
 	QuestionEntities      []MessageEntity   // A JSON-serialized list of special entities that appear in the poll question. It can be specified instead of question_parse_mode
-	Options               []InputPollOption // A JSON-serialized list of 2-10 answer options
+	Options               []InputPollOption // A JSON-serialized list of 2-12 answer options
 	IsAnonymous           bool              // True, if the poll needs to be anonymous, defaults to True
 	Type                  string            // Poll type, "quiz" or "regular", defaults to "regular"
 	AllowsMultipleAnswers bool              // True, if the poll allows multiple answers, ignored for polls in quiz mode, defaults to False
@@ -1516,18 +1708,69 @@ func (r *SendPollRequest) writeMultipart(w *multipart.Writer) {
 	}
 }
 
+// see Bot.SendChecklist(ctx, &SendChecklistRequest{})
+type SendChecklistRequest struct {
+	BusinessConnectionID string                // Unique identifier of the business connection on behalf of which the message will be sent
+	ChatID               int64                 // Unique identifier for the target chat
+	Checklist            *InputChecklist       // A JSON-serialized object for the checklist to send
+	DisableNotification  bool                  // Sends the message silently. Users will receive a notification with no sound.
+	ProtectContent       bool                  // Protects the contents of the sent message from forwarding and saving
+	MessageEffectID      string                // Unique identifier of the message effect to be added to the message
+	ReplyParameters      *ReplyParameters      // A JSON-serialized object for description of the message to reply to
+	ReplyMarkup          *InlineKeyboardMarkup // A JSON-serialized object for an inline keyboard
+}
+
+func (r *SendChecklistRequest) writeMultipart(w *multipart.Writer) {
+	w.WriteField("business_connection_id", r.BusinessConnectionID)
+	{
+		b, _ := json.Marshal(r.ChatID)
+		fw, _ := w.CreateFormField("chat_id")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.Checklist)
+		fw, _ := w.CreateFormField("checklist")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.DisableNotification)
+		fw, _ := w.CreateFormField("disable_notification")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.ProtectContent)
+		fw, _ := w.CreateFormField("protect_content")
+		fw.Write(b)
+	}
+	if r.MessageEffectID != "" {
+		w.WriteField("message_effect_id", r.MessageEffectID)
+	}
+	if r.ReplyParameters != nil {
+		b, _ := json.Marshal(r.ReplyParameters)
+		fw, _ := w.CreateFormField("reply_parameters")
+		fw.Write(b)
+	}
+	if r.ReplyMarkup != nil {
+		b, _ := json.Marshal(r.ReplyMarkup)
+		fw, _ := w.CreateFormField("reply_markup")
+		fw.Write(b)
+	}
+}
+
 // see Bot.SendDice(ctx, &SendDiceRequest{})
 type SendDiceRequest struct {
-	BusinessConnectionID string           // Unique identifier of the business connection on behalf of which the message will be sent
-	ChatID               ChatID           // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-	MessageThreadID      int64            // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
-	Emoji                string           // Emoji on which the dice throw animation is based. Currently, must be one of "🎲", "🎯", "🏀", "⚽", "🎳", or "🎰". Dice can have values 1-6 for "🎲", "🎯" and "🎳", values 1-5 for "🏀" and "⚽", and values 1-64 for "🎰". Defaults to "🎲"
-	DisableNotification  bool             // Sends the message silently. Users will receive a notification with no sound.
-	ProtectContent       bool             // Protects the contents of the sent message from forwarding
-	AllowPaidBroadcast   bool             // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
-	MessageEffectID      string           // Unique identifier of the message effect to be added to the message; for private chats only
-	ReplyParameters      *ReplyParameters // Description of the message to reply to
-	ReplyMarkup          Markup           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	BusinessConnectionID    string                   // Unique identifier of the business connection on behalf of which the message will be sent
+	ChatID                  ChatID                   // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+	MessageThreadID         int64                    // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	DirectMessagesTopicID   int64                    // Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
+	Emoji                   string                   // Emoji on which the dice throw animation is based. Currently, must be one of "🎲", "🎯", "🏀", "⚽", "🎳", or "🎰". Dice can have values 1-6 for "🎲", "🎯" and "🎳", values 1-5 for "🏀" and "⚽", and values 1-64 for "🎰". Defaults to "🎲"
+	DisableNotification     bool                     // Sends the message silently. Users will receive a notification with no sound.
+	ProtectContent          bool                     // Protects the contents of the sent message from forwarding
+	AllowPaidBroadcast      bool                     // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	MessageEffectID         string                   // Unique identifier of the message effect to be added to the message; for private chats only
+	SuggestedPostParameters *SuggestedPostParameters // A JSON-serialized object containing the parameters of the suggested post to send; for direct messages chats only. If the message is sent as a reply to another suggested post, then that suggested post is automatically declined.
+	ReplyParameters         *ReplyParameters         // Description of the message to reply to
+	ReplyMarkup             Markup                   // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
 func (r *SendDiceRequest) writeMultipart(w *multipart.Writer) {
@@ -1538,6 +1781,11 @@ func (r *SendDiceRequest) writeMultipart(w *multipart.Writer) {
 	{
 		b, _ := json.Marshal(r.MessageThreadID)
 		fw, _ := w.CreateFormField("message_thread_id")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.DirectMessagesTopicID)
+		fw, _ := w.CreateFormField("direct_messages_topic_id")
 		fw.Write(b)
 	}
 	if r.Emoji != "" {
@@ -1561,6 +1809,11 @@ func (r *SendDiceRequest) writeMultipart(w *multipart.Writer) {
 	if r.MessageEffectID != "" {
 		w.WriteField("message_effect_id", r.MessageEffectID)
 	}
+	if r.SuggestedPostParameters != nil {
+		b, _ := json.Marshal(r.SuggestedPostParameters)
+		fw, _ := w.CreateFormField("suggested_post_parameters")
+		fw.Write(b)
+	}
 	if r.ReplyParameters != nil {
 		b, _ := json.Marshal(r.ReplyParameters)
 		fw, _ := w.CreateFormField("reply_parameters")
@@ -1576,7 +1829,7 @@ func (r *SendDiceRequest) writeMultipart(w *multipart.Writer) {
 // see Bot.SendChatAction(ctx, &SendChatActionRequest{})
 type SendChatActionRequest struct {
 	BusinessConnectionID string     // Unique identifier of the business connection on behalf of which the action will be sent
-	ChatID               ChatID     // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+	ChatID               ChatID     // Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername). Channel chats and channel direct messages chats aren't supported.
 	MessageThreadID      int64      // Unique identifier for the target message thread; for supergroups only
 	Action               ChatAction // Type of action to broadcast. Choose one, depending on what the user is about to receive: typing for text messages, upload_photo for photos, record_video or upload_video for videos, record_voice or upload_voice for voice notes, upload_document for general files, choose_sticker for stickers, find_location for location data, record_video_note or upload_video_note for video notes.
 }
@@ -1761,23 +2014,24 @@ func (r *RestrictChatMemberRequest) writeMultipart(w *multipart.Writer) {
 
 // see Bot.PromoteChatMember(ctx, &PromoteChatMemberRequest{})
 type PromoteChatMemberRequest struct {
-	ChatID              ChatID // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-	UserID              int64  // Unique identifier of the target user
-	IsAnonymous         bool   // Pass True if the administrator's presence in the chat is hidden
-	CanManageChat       bool   // Pass True if the administrator can access the chat event log, get boost list, see hidden supergroup and channel members, report spam messages and ignore slow mode. Implied by any other administrator privilege.
-	CanDeleteMessages   bool   // Pass True if the administrator can delete messages of other users
-	CanManageVideoChats bool   // Pass True if the administrator can manage video chats
-	CanRestrictMembers  bool   // Pass True if the administrator can restrict, ban or unban chat members, or access supergroup statistics
-	CanPromoteMembers   bool   // Pass True if the administrator can add new administrators with a subset of their own privileges or demote administrators that they have promoted, directly or indirectly (promoted by administrators that were appointed by him)
-	CanChangeInfo       bool   // Pass True if the administrator can change chat title, photo and other settings
-	CanInviteUsers      bool   // Pass True if the administrator can invite new users to the chat
-	CanPostStories      bool   // Pass True if the administrator can post stories to the chat
-	CanEditStories      bool   // Pass True if the administrator can edit stories posted by other users, post stories to the chat page, pin chat stories, and access the chat's story archive
-	CanDeleteStories    bool   // Pass True if the administrator can delete stories posted by other users
-	CanPostMessages     bool   // Pass True if the administrator can post messages in the channel, or access channel statistics; for channels only
-	CanEditMessages     bool   // Pass True if the administrator can edit messages of other users and can pin messages; for channels only
-	CanPinMessages      bool   // Pass True if the administrator can pin messages; for supergroups only
-	CanManageTopics     bool   // Pass True if the user is allowed to create, rename, close, and reopen forum topics; for supergroups only
+	ChatID                  ChatID // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+	UserID                  int64  // Unique identifier of the target user
+	IsAnonymous             bool   // Pass True if the administrator's presence in the chat is hidden
+	CanManageChat           bool   // Pass True if the administrator can access the chat event log, get boost list, see hidden supergroup and channel members, report spam messages, ignore slow mode, and send messages to the chat without paying Telegram Stars. Implied by any other administrator privilege.
+	CanDeleteMessages       bool   // Pass True if the administrator can delete messages of other users
+	CanManageVideoChats     bool   // Pass True if the administrator can manage video chats
+	CanRestrictMembers      bool   // Pass True if the administrator can restrict, ban or unban chat members, or access supergroup statistics
+	CanPromoteMembers       bool   // Pass True if the administrator can add new administrators with a subset of their own privileges or demote administrators that they have promoted, directly or indirectly (promoted by administrators that were appointed by him)
+	CanChangeInfo           bool   // Pass True if the administrator can change chat title, photo and other settings
+	CanInviteUsers          bool   // Pass True if the administrator can invite new users to the chat
+	CanPostStories          bool   // Pass True if the administrator can post stories to the chat
+	CanEditStories          bool   // Pass True if the administrator can edit stories posted by other users, post stories to the chat page, pin chat stories, and access the chat's story archive
+	CanDeleteStories        bool   // Pass True if the administrator can delete stories posted by other users
+	CanPostMessages         bool   // Pass True if the administrator can post messages in the channel, approve suggested posts, or access channel statistics; for channels only
+	CanEditMessages         bool   // Pass True if the administrator can edit messages of other users and can pin messages; for channels only
+	CanPinMessages          bool   // Pass True if the administrator can pin messages; for supergroups only
+	CanManageTopics         bool   // Pass True if the user is allowed to create, rename, close, and reopen forum topics; for supergroups only
+	CanManageDirectMessages bool   // Pass True if the administrator can manage direct messages within the channel and decline suggested posts; for channels only
 }
 
 func (r *PromoteChatMemberRequest) writeMultipart(w *multipart.Writer) {
@@ -1860,6 +2114,11 @@ func (r *PromoteChatMemberRequest) writeMultipart(w *multipart.Writer) {
 	{
 		b, _ := json.Marshal(r.CanManageTopics)
 		fw, _ := w.CreateFormField("can_manage_topics")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.CanManageDirectMessages)
+		fw, _ := w.CreateFormField("can_manage_direct_messages")
 		fw.Write(b)
 	}
 }
@@ -2010,7 +2269,7 @@ type CreateChatSubscriptionInviteLinkRequest struct {
 	ChatID             ChatID // Unique identifier for the target channel chat or username of the target channel (in the format @channelusername)
 	Name               string // Invite link name; 0-32 characters
 	SubscriptionPeriod int    // The number of seconds the subscription will be active for before the next payment. Currently, it must always be 2592000 (30 days).
-	SubscriptionPrice  int    // The amount of Telegram Stars a user must pay initially and after each subsequent subscription period to be a member of the chat; 1-2500
+	SubscriptionPrice  int    // The amount of Telegram Stars a user must pay initially and after each subsequent subscription period to be a member of the chat; 1-10000
 }
 
 func (r *CreateChatSubscriptionInviteLinkRequest) writeMultipart(w *multipart.Writer) {
@@ -2190,7 +2449,7 @@ func (r *UnpinAllChatMessagesRequest) writeMultipart(w *multipart.Writer) {
 
 // see Bot.LeaveChat(ctx, &LeaveChatRequest{})
 type LeaveChatRequest struct {
-	ChatID ChatID // Unique identifier for the target chat or username of the target supergroup or channel (in the format @channelusername)
+	ChatID ChatID // Unique identifier for the target chat or username of the target supergroup or channel (in the format @channelusername). Channel direct messages chats aren't supported; leave the corresponding channel instead.
 }
 
 func (r *LeaveChatRequest) writeMultipart(w *multipart.Writer) {
@@ -2671,6 +2930,509 @@ func (r *GetMyDefaultAdministratorRightsRequest) writeMultipart(w *multipart.Wri
 	}
 }
 
+// see Bot.SendGift(ctx, &SendGiftRequest{})
+type SendGiftRequest struct {
+	UserID        int64           // Required if chat_id is not specified. Unique identifier of the target user who will receive the gift.
+	ChatID        ChatID          // Required if user_id is not specified. Unique identifier for the chat or username of the channel (in the format @channelusername) that will receive the gift.
+	GiftID        string          // Identifier of the gift
+	PayForUpgrade bool            // Pass True to pay for the gift upgrade from the bot's balance, thereby making the upgrade free for the receiver
+	Text          string          // Text that will be shown along with the gift; 0-128 characters
+	TextParseMode string          // Mode for parsing entities in the text. See formatting options for more details. Entities other than "bold", "italic", "underline", "strikethrough", "spoiler", and "custom_emoji" are ignored.
+	TextEntities  []MessageEntity // A JSON-serialized list of special entities that appear in the gift text. It can be specified instead of text_parse_mode. Entities other than "bold", "italic", "underline", "strikethrough", "spoiler", and "custom_emoji" are ignored.
+}
+
+func (r *SendGiftRequest) writeMultipart(w *multipart.Writer) {
+	{
+		b, _ := json.Marshal(r.UserID)
+		fw, _ := w.CreateFormField("user_id")
+		fw.Write(b)
+	}
+	w.WriteField("chat_id", r.ChatID.String())
+	w.WriteField("gift_id", r.GiftID)
+	{
+		b, _ := json.Marshal(r.PayForUpgrade)
+		fw, _ := w.CreateFormField("pay_for_upgrade")
+		fw.Write(b)
+	}
+	if r.Text != "" {
+		w.WriteField("text", r.Text)
+	}
+	if r.TextParseMode != "" {
+		w.WriteField("text_parse_mode", r.TextParseMode)
+	}
+	if r.TextEntities != nil {
+		b, _ := json.Marshal(r.TextEntities)
+		fw, _ := w.CreateFormField("text_entities")
+		fw.Write(b)
+	}
+}
+
+// see Bot.GiftPremiumSubscription(ctx, &GiftPremiumSubscriptionRequest{})
+type GiftPremiumSubscriptionRequest struct {
+	UserID        int64           // Unique identifier of the target user who will receive a Telegram Premium subscription
+	MonthCount    int             // Number of months the Telegram Premium subscription will be active for the user; must be one of 3, 6, or 12
+	StarCount     int             // Number of Telegram Stars to pay for the Telegram Premium subscription; must be 1000 for 3 months, 1500 for 6 months, and 2500 for 12 months
+	Text          string          // Text that will be shown along with the service message about the subscription; 0-128 characters
+	TextParseMode string          // Mode for parsing entities in the text. See formatting options for more details. Entities other than "bold", "italic", "underline", "strikethrough", "spoiler", and "custom_emoji" are ignored.
+	TextEntities  []MessageEntity // A JSON-serialized list of special entities that appear in the gift text. It can be specified instead of text_parse_mode. Entities other than "bold", "italic", "underline", "strikethrough", "spoiler", and "custom_emoji" are ignored.
+}
+
+func (r *GiftPremiumSubscriptionRequest) writeMultipart(w *multipart.Writer) {
+	{
+		b, _ := json.Marshal(r.UserID)
+		fw, _ := w.CreateFormField("user_id")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.MonthCount)
+		fw, _ := w.CreateFormField("month_count")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.StarCount)
+		fw, _ := w.CreateFormField("star_count")
+		fw.Write(b)
+	}
+	if r.Text != "" {
+		w.WriteField("text", r.Text)
+	}
+	if r.TextParseMode != "" {
+		w.WriteField("text_parse_mode", r.TextParseMode)
+	}
+	if r.TextEntities != nil {
+		b, _ := json.Marshal(r.TextEntities)
+		fw, _ := w.CreateFormField("text_entities")
+		fw.Write(b)
+	}
+}
+
+// see Bot.VerifyUser(ctx, &VerifyUserRequest{})
+type VerifyUserRequest struct {
+	UserID            int64  // Unique identifier of the target user
+	CustomDescription string // Custom description for the verification; 0-70 characters. Must be empty if the organization isn't allowed to provide a custom verification description.
+}
+
+func (r *VerifyUserRequest) writeMultipart(w *multipart.Writer) {
+	{
+		b, _ := json.Marshal(r.UserID)
+		fw, _ := w.CreateFormField("user_id")
+		fw.Write(b)
+	}
+	if r.CustomDescription != "" {
+		w.WriteField("custom_description", r.CustomDescription)
+	}
+}
+
+// see Bot.VerifyChat(ctx, &VerifyChatRequest{})
+type VerifyChatRequest struct {
+	ChatID            ChatID // Unique identifier for the target chat or username of the target channel (in the format @channelusername). Channel direct messages chats can't be verified.
+	CustomDescription string // Custom description for the verification; 0-70 characters. Must be empty if the organization isn't allowed to provide a custom verification description.
+}
+
+func (r *VerifyChatRequest) writeMultipart(w *multipart.Writer) {
+	w.WriteField("chat_id", r.ChatID.String())
+	if r.CustomDescription != "" {
+		w.WriteField("custom_description", r.CustomDescription)
+	}
+}
+
+// see Bot.RemoveUserVerification(ctx, &RemoveUserVerificationRequest{})
+type RemoveUserVerificationRequest struct {
+	UserID int64 // Unique identifier of the target user
+}
+
+func (r *RemoveUserVerificationRequest) writeMultipart(w *multipart.Writer) {
+	{
+		b, _ := json.Marshal(r.UserID)
+		fw, _ := w.CreateFormField("user_id")
+		fw.Write(b)
+	}
+}
+
+// see Bot.RemoveChatVerification(ctx, &RemoveChatVerificationRequest{})
+type RemoveChatVerificationRequest struct {
+	ChatID ChatID // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+}
+
+func (r *RemoveChatVerificationRequest) writeMultipart(w *multipart.Writer) {
+	w.WriteField("chat_id", r.ChatID.String())
+}
+
+// see Bot.ReadBusinessMessage(ctx, &ReadBusinessMessageRequest{})
+type ReadBusinessMessageRequest struct {
+	BusinessConnectionID string // Unique identifier of the business connection on behalf of which to read the message
+	ChatID               int64  // Unique identifier of the chat in which the message was received. The chat must have been active in the last 24 hours.
+	MessageID            int    // Unique identifier of the message to mark as read
+}
+
+func (r *ReadBusinessMessageRequest) writeMultipart(w *multipart.Writer) {
+	w.WriteField("business_connection_id", r.BusinessConnectionID)
+	{
+		b, _ := json.Marshal(r.ChatID)
+		fw, _ := w.CreateFormField("chat_id")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.MessageID)
+		fw, _ := w.CreateFormField("message_id")
+		fw.Write(b)
+	}
+}
+
+// see Bot.DeleteBusinessMessages(ctx, &DeleteBusinessMessagesRequest{})
+type DeleteBusinessMessagesRequest struct {
+	BusinessConnectionID string // Unique identifier of the business connection on behalf of which to delete the messages
+	MessageIds           []int  // A JSON-serialized list of 1-100 identifiers of messages to delete. All messages must be from the same chat. See deleteMessage for limitations on which messages can be deleted
+}
+
+func (r *DeleteBusinessMessagesRequest) writeMultipart(w *multipart.Writer) {
+	w.WriteField("business_connection_id", r.BusinessConnectionID)
+	{
+		b, _ := json.Marshal(r.MessageIds)
+		fw, _ := w.CreateFormField("message_ids")
+		fw.Write(b)
+	}
+}
+
+// see Bot.SetBusinessAccountName(ctx, &SetBusinessAccountNameRequest{})
+type SetBusinessAccountNameRequest struct {
+	BusinessConnectionID string // Unique identifier of the business connection
+	FirstName            string // The new value of the first name for the business account; 1-64 characters
+	LastName             string // The new value of the last name for the business account; 0-64 characters
+}
+
+func (r *SetBusinessAccountNameRequest) writeMultipart(w *multipart.Writer) {
+	w.WriteField("business_connection_id", r.BusinessConnectionID)
+	w.WriteField("first_name", r.FirstName)
+	if r.LastName != "" {
+		w.WriteField("last_name", r.LastName)
+	}
+}
+
+// see Bot.SetBusinessAccountUsername(ctx, &SetBusinessAccountUsernameRequest{})
+type SetBusinessAccountUsernameRequest struct {
+	BusinessConnectionID string // Unique identifier of the business connection
+	Username             string // The new value of the username for the business account; 0-32 characters
+}
+
+func (r *SetBusinessAccountUsernameRequest) writeMultipart(w *multipart.Writer) {
+	w.WriteField("business_connection_id", r.BusinessConnectionID)
+	if r.Username != "" {
+		w.WriteField("username", r.Username)
+	}
+}
+
+// see Bot.SetBusinessAccountBio(ctx, &SetBusinessAccountBioRequest{})
+type SetBusinessAccountBioRequest struct {
+	BusinessConnectionID string // Unique identifier of the business connection
+	Bio                  string // The new value of the bio for the business account; 0-140 characters
+}
+
+func (r *SetBusinessAccountBioRequest) writeMultipart(w *multipart.Writer) {
+	w.WriteField("business_connection_id", r.BusinessConnectionID)
+	if r.Bio != "" {
+		w.WriteField("bio", r.Bio)
+	}
+}
+
+// see Bot.SetBusinessAccountProfilePhoto(ctx, &SetBusinessAccountProfilePhotoRequest{})
+type SetBusinessAccountProfilePhotoRequest struct {
+	BusinessConnectionID string             // Unique identifier of the business connection
+	Photo                *InputProfilePhoto // The new profile photo to set
+	IsPublic             bool               // Pass True to set the public photo, which will be visible even if the main photo is hidden by the business account's privacy settings. An account can have only one public photo.
+}
+
+func (r *SetBusinessAccountProfilePhotoRequest) writeMultipart(w *multipart.Writer) {
+	w.WriteField("business_connection_id", r.BusinessConnectionID)
+	{
+		b, _ := json.Marshal(r.Photo)
+		fw, _ := w.CreateFormField("photo")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.IsPublic)
+		fw, _ := w.CreateFormField("is_public")
+		fw.Write(b)
+	}
+}
+
+// see Bot.RemoveBusinessAccountProfilePhoto(ctx, &RemoveBusinessAccountProfilePhotoRequest{})
+type RemoveBusinessAccountProfilePhotoRequest struct {
+	BusinessConnectionID string // Unique identifier of the business connection
+	IsPublic             bool   // Pass True to remove the public photo, which is visible even if the main photo is hidden by the business account's privacy settings. After the main photo is removed, the previous profile photo (if present) becomes the main photo.
+}
+
+func (r *RemoveBusinessAccountProfilePhotoRequest) writeMultipart(w *multipart.Writer) {
+	w.WriteField("business_connection_id", r.BusinessConnectionID)
+	{
+		b, _ := json.Marshal(r.IsPublic)
+		fw, _ := w.CreateFormField("is_public")
+		fw.Write(b)
+	}
+}
+
+// see Bot.SetBusinessAccountGiftSettings(ctx, &SetBusinessAccountGiftSettingsRequest{})
+type SetBusinessAccountGiftSettingsRequest struct {
+	BusinessConnectionID string             // Unique identifier of the business connection
+	ShowGiftButton       bool               // Pass True, if a button for sending a gift to the user or by the business account must always be shown in the input field
+	AcceptedGiftTypes    *AcceptedGiftTypes // Types of gifts accepted by the business account
+}
+
+func (r *SetBusinessAccountGiftSettingsRequest) writeMultipart(w *multipart.Writer) {
+	w.WriteField("business_connection_id", r.BusinessConnectionID)
+	{
+		b, _ := json.Marshal(r.ShowGiftButton)
+		fw, _ := w.CreateFormField("show_gift_button")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.AcceptedGiftTypes)
+		fw, _ := w.CreateFormField("accepted_gift_types")
+		fw.Write(b)
+	}
+}
+
+// see Bot.GetBusinessAccountStarBalance(ctx, &GetBusinessAccountStarBalanceRequest{})
+type GetBusinessAccountStarBalanceRequest struct {
+	BusinessConnectionID string // Unique identifier of the business connection
+}
+
+func (r *GetBusinessAccountStarBalanceRequest) writeMultipart(w *multipart.Writer) {
+	w.WriteField("business_connection_id", r.BusinessConnectionID)
+}
+
+// see Bot.TransferBusinessAccountStars(ctx, &TransferBusinessAccountStarsRequest{})
+type TransferBusinessAccountStarsRequest struct {
+	BusinessConnectionID string // Unique identifier of the business connection
+	StarCount            int    // Number of Telegram Stars to transfer; 1-10000
+}
+
+func (r *TransferBusinessAccountStarsRequest) writeMultipart(w *multipart.Writer) {
+	w.WriteField("business_connection_id", r.BusinessConnectionID)
+	{
+		b, _ := json.Marshal(r.StarCount)
+		fw, _ := w.CreateFormField("star_count")
+		fw.Write(b)
+	}
+}
+
+// see Bot.GetBusinessAccountGifts(ctx, &GetBusinessAccountGiftsRequest{})
+type GetBusinessAccountGiftsRequest struct {
+	BusinessConnectionID string // Unique identifier of the business connection
+	ExcludeUnsaved       bool   // Pass True to exclude gifts that aren't saved to the account's profile page
+	ExcludeSaved         bool   // Pass True to exclude gifts that are saved to the account's profile page
+	ExcludeUnlimited     bool   // Pass True to exclude gifts that can be purchased an unlimited number of times
+	ExcludeLimited       bool   // Pass True to exclude gifts that can be purchased a limited number of times
+	ExcludeUnique        bool   // Pass True to exclude unique gifts
+	SortByPrice          bool   // Pass True to sort results by gift price instead of send date. Sorting is applied before pagination.
+	Offset               string // Offset of the first entry to return as received from the previous request; use empty string to get the first chunk of results
+	Limit                int    // The maximum number of gifts to be returned; 1-100. Defaults to 100
+}
+
+func (r *GetBusinessAccountGiftsRequest) writeMultipart(w *multipart.Writer) {
+	w.WriteField("business_connection_id", r.BusinessConnectionID)
+	{
+		b, _ := json.Marshal(r.ExcludeUnsaved)
+		fw, _ := w.CreateFormField("exclude_unsaved")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.ExcludeSaved)
+		fw, _ := w.CreateFormField("exclude_saved")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.ExcludeUnlimited)
+		fw, _ := w.CreateFormField("exclude_unlimited")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.ExcludeLimited)
+		fw, _ := w.CreateFormField("exclude_limited")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.ExcludeUnique)
+		fw, _ := w.CreateFormField("exclude_unique")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.SortByPrice)
+		fw, _ := w.CreateFormField("sort_by_price")
+		fw.Write(b)
+	}
+	if r.Offset != "" {
+		w.WriteField("offset", r.Offset)
+	}
+	{
+		b, _ := json.Marshal(r.Limit)
+		fw, _ := w.CreateFormField("limit")
+		fw.Write(b)
+	}
+}
+
+// see Bot.ConvertGiftToStars(ctx, &ConvertGiftToStarsRequest{})
+type ConvertGiftToStarsRequest struct {
+	BusinessConnectionID string // Unique identifier of the business connection
+	OwnedGiftID          string // Unique identifier of the regular gift that should be converted to Telegram Stars
+}
+
+func (r *ConvertGiftToStarsRequest) writeMultipart(w *multipart.Writer) {
+	w.WriteField("business_connection_id", r.BusinessConnectionID)
+	w.WriteField("owned_gift_id", r.OwnedGiftID)
+}
+
+// see Bot.UpgradeGift(ctx, &UpgradeGiftRequest{})
+type UpgradeGiftRequest struct {
+	BusinessConnectionID string // Unique identifier of the business connection
+	OwnedGiftID          string // Unique identifier of the regular gift that should be upgraded to a unique one
+	KeepOriginalDetails  bool   // Pass True to keep the original gift text, sender and receiver in the upgraded gift
+	StarCount            int    // The amount of Telegram Stars that will be paid for the upgrade from the business account balance. If gift.prepaid_upgrade_star_count > 0, then pass 0, otherwise, the can_transfer_stars business bot right is required and gift.upgrade_star_count must be passed.
+}
+
+func (r *UpgradeGiftRequest) writeMultipart(w *multipart.Writer) {
+	w.WriteField("business_connection_id", r.BusinessConnectionID)
+	w.WriteField("owned_gift_id", r.OwnedGiftID)
+	{
+		b, _ := json.Marshal(r.KeepOriginalDetails)
+		fw, _ := w.CreateFormField("keep_original_details")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.StarCount)
+		fw, _ := w.CreateFormField("star_count")
+		fw.Write(b)
+	}
+}
+
+// see Bot.TransferGift(ctx, &TransferGiftRequest{})
+type TransferGiftRequest struct {
+	BusinessConnectionID string // Unique identifier of the business connection
+	OwnedGiftID          string // Unique identifier of the regular gift that should be transferred
+	NewOwnerChatID       int64  // Unique identifier of the chat which will own the gift. The chat must be active in the last 24 hours.
+	StarCount            int    // The amount of Telegram Stars that will be paid for the transfer from the business account balance. If positive, then the can_transfer_stars business bot right is required.
+}
+
+func (r *TransferGiftRequest) writeMultipart(w *multipart.Writer) {
+	w.WriteField("business_connection_id", r.BusinessConnectionID)
+	w.WriteField("owned_gift_id", r.OwnedGiftID)
+	{
+		b, _ := json.Marshal(r.NewOwnerChatID)
+		fw, _ := w.CreateFormField("new_owner_chat_id")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.StarCount)
+		fw, _ := w.CreateFormField("star_count")
+		fw.Write(b)
+	}
+}
+
+// see Bot.PostStory(ctx, &PostStoryRequest{})
+type PostStoryRequest struct {
+	BusinessConnectionID string             // Unique identifier of the business connection
+	Content              *InputStoryContent // Content of the story
+	ActivePeriod         int                // Period after which the story is moved to the archive, in seconds; must be one of 6 * 3600, 12 * 3600, 86400, or 2 * 86400
+	Caption              string             // Caption of the story, 0-2048 characters after entities parsing
+	ParseMode            ParseMode          // Mode for parsing entities in the story caption. See formatting options for more details.
+	CaptionEntities      []MessageEntity    // A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
+	Areas                []StoryArea        // A JSON-serialized list of clickable areas to be shown on the story
+	PostToChatPage       bool               // Pass True to keep the story accessible after it expires
+	ProtectContent       bool               // Pass True if the content of the story must be protected from forwarding and screenshotting
+}
+
+func (r *PostStoryRequest) writeMultipart(w *multipart.Writer) {
+	w.WriteField("business_connection_id", r.BusinessConnectionID)
+	{
+		b, _ := json.Marshal(r.Content)
+		fw, _ := w.CreateFormField("content")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.ActivePeriod)
+		fw, _ := w.CreateFormField("active_period")
+		fw.Write(b)
+	}
+	if r.Caption != "" {
+		w.WriteField("caption", r.Caption)
+	}
+	w.WriteField("parse_mode", string(r.ParseMode))
+	if r.CaptionEntities != nil {
+		b, _ := json.Marshal(r.CaptionEntities)
+		fw, _ := w.CreateFormField("caption_entities")
+		fw.Write(b)
+	}
+	if r.Areas != nil {
+		b, _ := json.Marshal(r.Areas)
+		fw, _ := w.CreateFormField("areas")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.PostToChatPage)
+		fw, _ := w.CreateFormField("post_to_chat_page")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.ProtectContent)
+		fw, _ := w.CreateFormField("protect_content")
+		fw.Write(b)
+	}
+}
+
+// see Bot.EditStory(ctx, &EditStoryRequest{})
+type EditStoryRequest struct {
+	BusinessConnectionID string             // Unique identifier of the business connection
+	StoryID              int64              // Unique identifier of the story to edit
+	Content              *InputStoryContent // Content of the story
+	Caption              string             // Caption of the story, 0-2048 characters after entities parsing
+	ParseMode            ParseMode          // Mode for parsing entities in the story caption. See formatting options for more details.
+	CaptionEntities      []MessageEntity    // A JSON-serialized list of special entities that appear in the caption, which can be specified instead of parse_mode
+	Areas                []StoryArea        // A JSON-serialized list of clickable areas to be shown on the story
+}
+
+func (r *EditStoryRequest) writeMultipart(w *multipart.Writer) {
+	w.WriteField("business_connection_id", r.BusinessConnectionID)
+	{
+		b, _ := json.Marshal(r.StoryID)
+		fw, _ := w.CreateFormField("story_id")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.Content)
+		fw, _ := w.CreateFormField("content")
+		fw.Write(b)
+	}
+	if r.Caption != "" {
+		w.WriteField("caption", r.Caption)
+	}
+	w.WriteField("parse_mode", string(r.ParseMode))
+	if r.CaptionEntities != nil {
+		b, _ := json.Marshal(r.CaptionEntities)
+		fw, _ := w.CreateFormField("caption_entities")
+		fw.Write(b)
+	}
+	if r.Areas != nil {
+		b, _ := json.Marshal(r.Areas)
+		fw, _ := w.CreateFormField("areas")
+		fw.Write(b)
+	}
+}
+
+// see Bot.DeleteStory(ctx, &DeleteStoryRequest{})
+type DeleteStoryRequest struct {
+	BusinessConnectionID string // Unique identifier of the business connection
+	StoryID              int64  // Unique identifier of the story to delete
+}
+
+func (r *DeleteStoryRequest) writeMultipart(w *multipart.Writer) {
+	w.WriteField("business_connection_id", r.BusinessConnectionID)
+	{
+		b, _ := json.Marshal(r.StoryID)
+		fw, _ := w.CreateFormField("story_id")
+		fw.Write(b)
+	}
+}
+
 // see Bot.EditMessageText(ctx, &EditMessageTextRequest{})
 type EditMessageTextRequest struct {
 	BusinessConnectionID string                // Unique identifier of the business connection on behalf of which the message to be edited was sent
@@ -2900,6 +3662,39 @@ func (r *StopMessageLiveLocationRequest) writeMultipart(w *multipart.Writer) {
 	}
 }
 
+// see Bot.EditMessageChecklist(ctx, &EditMessageChecklistRequest{})
+type EditMessageChecklistRequest struct {
+	BusinessConnectionID string                // Unique identifier of the business connection on behalf of which the message will be sent
+	ChatID               int64                 // Unique identifier for the target chat
+	MessageID            int                   // Unique identifier for the target message
+	Checklist            *InputChecklist       // A JSON-serialized object for the new checklist
+	ReplyMarkup          *InlineKeyboardMarkup // A JSON-serialized object for the new inline keyboard for the message
+}
+
+func (r *EditMessageChecklistRequest) writeMultipart(w *multipart.Writer) {
+	w.WriteField("business_connection_id", r.BusinessConnectionID)
+	{
+		b, _ := json.Marshal(r.ChatID)
+		fw, _ := w.CreateFormField("chat_id")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.MessageID)
+		fw, _ := w.CreateFormField("message_id")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.Checklist)
+		fw, _ := w.CreateFormField("checklist")
+		fw.Write(b)
+	}
+	if r.ReplyMarkup != nil {
+		b, _ := json.Marshal(r.ReplyMarkup)
+		fw, _ := w.CreateFormField("reply_markup")
+		fw.Write(b)
+	}
+}
+
 // see Bot.EditMessageReplyMarkup(ctx, &EditMessageReplyMarkupRequest{})
 type EditMessageReplyMarkupRequest struct {
 	BusinessConnectionID string                // Unique identifier of the business connection on behalf of which the message to be edited was sent
@@ -2954,6 +3749,54 @@ func (r *StopPollRequest) writeMultipart(w *multipart.Writer) {
 	}
 }
 
+// see Bot.ApproveSuggestedPost(ctx, &ApproveSuggestedPostRequest{})
+type ApproveSuggestedPostRequest struct {
+	ChatID    int64 // Unique identifier for the target direct messages chat
+	MessageID int   // Identifier of a suggested post message to approve
+	SendDate  int   // Point in time (Unix timestamp) when the post is expected to be published; omit if the date has already been specified when the suggested post was created. If specified, then the date must be not more than 2678400 seconds (30 days) in the future
+}
+
+func (r *ApproveSuggestedPostRequest) writeMultipart(w *multipart.Writer) {
+	{
+		b, _ := json.Marshal(r.ChatID)
+		fw, _ := w.CreateFormField("chat_id")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.MessageID)
+		fw, _ := w.CreateFormField("message_id")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.SendDate)
+		fw, _ := w.CreateFormField("send_date")
+		fw.Write(b)
+	}
+}
+
+// see Bot.DeclineSuggestedPost(ctx, &DeclineSuggestedPostRequest{})
+type DeclineSuggestedPostRequest struct {
+	ChatID    int64  // Unique identifier for the target direct messages chat
+	MessageID int    // Identifier of a suggested post message to decline
+	Comment   string // Comment for the creator of the suggested post; 0-128 characters
+}
+
+func (r *DeclineSuggestedPostRequest) writeMultipart(w *multipart.Writer) {
+	{
+		b, _ := json.Marshal(r.ChatID)
+		fw, _ := w.CreateFormField("chat_id")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.MessageID)
+		fw, _ := w.CreateFormField("message_id")
+		fw.Write(b)
+	}
+	if r.Comment != "" {
+		w.WriteField("comment", r.Comment)
+	}
+}
+
 // see Bot.DeleteMessage(ctx, &DeleteMessageRequest{})
 type DeleteMessageRequest struct {
 	ChatID    ChatID // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
@@ -2986,17 +3829,19 @@ func (r *DeleteMessagesRequest) writeMultipart(w *multipart.Writer) {
 
 // see Bot.SendSticker(ctx, &SendStickerRequest{})
 type SendStickerRequest struct {
-	BusinessConnectionID string           // Unique identifier of the business connection on behalf of which the message will be sent
-	ChatID               ChatID           // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-	MessageThreadID      int64            // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
-	Sticker              InputFile        // Sticker to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a .WEBP sticker from the Internet, or upload a new .WEBP, .TGS, or .WEBM sticker using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files. Video and animated stickers can't be sent via an HTTP URL.
-	Emoji                string           // Emoji associated with the sticker; only for just uploaded stickers
-	DisableNotification  bool             // Sends the message silently. Users will receive a notification with no sound.
-	ProtectContent       bool             // Protects the contents of the sent message from forwarding and saving
-	AllowPaidBroadcast   bool             // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
-	MessageEffectID      string           // Unique identifier of the message effect to be added to the message; for private chats only
-	ReplyParameters      *ReplyParameters // Description of the message to reply to
-	ReplyMarkup          Markup           // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
+	BusinessConnectionID    string                   // Unique identifier of the business connection on behalf of which the message will be sent
+	ChatID                  ChatID                   // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+	MessageThreadID         int64                    // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	DirectMessagesTopicID   int64                    // Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
+	Sticker                 InputFile                // Sticker to send. Pass a file_id as String to send a file that exists on the Telegram servers (recommended), pass an HTTP URL as a String for Telegram to get a .WEBP sticker from the Internet, or upload a new .WEBP, .TGS, or .WEBM sticker using multipart/form-data. More information on Sending Files: https://core.telegram.org/bots/api#sending-files. Video and animated stickers can't be sent via an HTTP URL.
+	Emoji                   string                   // Emoji associated with the sticker; only for just uploaded stickers
+	DisableNotification     bool                     // Sends the message silently. Users will receive a notification with no sound.
+	ProtectContent          bool                     // Protects the contents of the sent message from forwarding and saving
+	AllowPaidBroadcast      bool                     // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	MessageEffectID         string                   // Unique identifier of the message effect to be added to the message; for private chats only
+	SuggestedPostParameters *SuggestedPostParameters // A JSON-serialized object containing the parameters of the suggested post to send; for direct messages chats only. If the message is sent as a reply to another suggested post, then that suggested post is automatically declined.
+	ReplyParameters         *ReplyParameters         // Description of the message to reply to
+	ReplyMarkup             Markup                   // Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
 }
 
 func (r *SendStickerRequest) writeMultipart(w *multipart.Writer) {
@@ -3007,6 +3852,11 @@ func (r *SendStickerRequest) writeMultipart(w *multipart.Writer) {
 	{
 		b, _ := json.Marshal(r.MessageThreadID)
 		fw, _ := w.CreateFormField("message_thread_id")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.DirectMessagesTopicID)
+		fw, _ := w.CreateFormField("direct_messages_topic_id")
 		fw.Write(b)
 	}
 	if r.Sticker.FileID != "" {
@@ -3035,6 +3885,11 @@ func (r *SendStickerRequest) writeMultipart(w *multipart.Writer) {
 	}
 	if r.MessageEffectID != "" {
 		w.WriteField("message_effect_id", r.MessageEffectID)
+	}
+	if r.SuggestedPostParameters != nil {
+		b, _ := json.Marshal(r.SuggestedPostParameters)
+		fw, _ := w.CreateFormField("suggested_post_parameters")
+		fw.Write(b)
 	}
 	if r.ReplyParameters != nil {
 		b, _ := json.Marshal(r.ReplyParameters)
@@ -3295,95 +4150,6 @@ func (r *DeleteStickerSetRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("name", r.Name)
 }
 
-// see Bot.SendGift(ctx, &SendGiftRequest{})
-type SendGiftRequest struct {
-	UserID        int64           // Required if chat_id is not specified. Unique identifier of the target user who will receive the gift.
-	ChatID        ChatID          // Required if user_id is not specified. Unique identifier for the chat or username of the channel (in the format @channelusername) that will receive the gift.
-	GiftID        string          // Identifier of the gift
-	PayForUpgrade bool            // Pass True to pay for the gift upgrade from the bot's balance, thereby making the upgrade free for the receiver
-	Text          string          // Text that will be shown along with the gift; 0-128 characters
-	TextParseMode string          // Mode for parsing entities in the text. See formatting options for more details. Entities other than "bold", "italic", "underline", "strikethrough", "spoiler", and "custom_emoji" are ignored.
-	TextEntities  []MessageEntity // A JSON-serialized list of special entities that appear in the gift text. It can be specified instead of text_parse_mode. Entities other than "bold", "italic", "underline", "strikethrough", "spoiler", and "custom_emoji" are ignored.
-}
-
-func (r *SendGiftRequest) writeMultipart(w *multipart.Writer) {
-	{
-		b, _ := json.Marshal(r.UserID)
-		fw, _ := w.CreateFormField("user_id")
-		fw.Write(b)
-	}
-	w.WriteField("chat_id", r.ChatID.String())
-	w.WriteField("gift_id", r.GiftID)
-	{
-		b, _ := json.Marshal(r.PayForUpgrade)
-		fw, _ := w.CreateFormField("pay_for_upgrade")
-		fw.Write(b)
-	}
-	if r.Text != "" {
-		w.WriteField("text", r.Text)
-	}
-	if r.TextParseMode != "" {
-		w.WriteField("text_parse_mode", r.TextParseMode)
-	}
-	if r.TextEntities != nil {
-		b, _ := json.Marshal(r.TextEntities)
-		fw, _ := w.CreateFormField("text_entities")
-		fw.Write(b)
-	}
-}
-
-// see Bot.VerifyUser(ctx, &VerifyUserRequest{})
-type VerifyUserRequest struct {
-	UserID            int64  // Unique identifier of the target user
-	CustomDescription string // Custom description for the verification; 0-70 characters. Must be empty if the organization isn't allowed to provide a custom verification description.
-}
-
-func (r *VerifyUserRequest) writeMultipart(w *multipart.Writer) {
-	{
-		b, _ := json.Marshal(r.UserID)
-		fw, _ := w.CreateFormField("user_id")
-		fw.Write(b)
-	}
-	if r.CustomDescription != "" {
-		w.WriteField("custom_description", r.CustomDescription)
-	}
-}
-
-// see Bot.VerifyChat(ctx, &VerifyChatRequest{})
-type VerifyChatRequest struct {
-	ChatID            ChatID // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-	CustomDescription string // Custom description for the verification; 0-70 characters. Must be empty if the organization isn't allowed to provide a custom verification description.
-}
-
-func (r *VerifyChatRequest) writeMultipart(w *multipart.Writer) {
-	w.WriteField("chat_id", r.ChatID.String())
-	if r.CustomDescription != "" {
-		w.WriteField("custom_description", r.CustomDescription)
-	}
-}
-
-// see Bot.RemoveUserVerification(ctx, &RemoveUserVerificationRequest{})
-type RemoveUserVerificationRequest struct {
-	UserID int64 // Unique identifier of the target user
-}
-
-func (r *RemoveUserVerificationRequest) writeMultipart(w *multipart.Writer) {
-	{
-		b, _ := json.Marshal(r.UserID)
-		fw, _ := w.CreateFormField("user_id")
-		fw.Write(b)
-	}
-}
-
-// see Bot.RemoveChatVerification(ctx, &RemoveChatVerificationRequest{})
-type RemoveChatVerificationRequest struct {
-	ChatID ChatID // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-}
-
-func (r *RemoveChatVerificationRequest) writeMultipart(w *multipart.Writer) {
-	w.WriteField("chat_id", r.ChatID.String())
-}
-
 // see Bot.AnswerInlineQuery(ctx, &AnswerInlineQueryRequest{})
 type AnswerInlineQueryRequest struct {
 	InlineQueryID string                    // Unique identifier for the answered query
@@ -3481,35 +4247,37 @@ func (r *SavePreparedInlineMessageRequest) writeMultipart(w *multipart.Writer) {
 
 // see Bot.SendInvoice(ctx, &SendInvoiceRequest{})
 type SendInvoiceRequest struct {
-	ChatID                    ChatID                // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
-	MessageThreadID           int64                 // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
-	Title                     string                // Product name, 1-32 characters
-	Description               string                // Product description, 1-255 characters
-	Payload                   string                // Bot-defined invoice payload, 1-128 bytes. This will not be displayed to the user, use it for your internal processes.
-	ProviderToken             string                // Payment provider token, obtained via @BotFather. Pass an empty string for payments in Telegram Stars.
-	Currency                  string                // Three-letter ISO 4217 currency code, see more on currencies. Pass "XTR" for payments in Telegram Stars.
-	Prices                    []LabeledPrice        // Price breakdown, a JSON-serialized list of components (e.g. product price, tax, discount, delivery cost, delivery tax, bonus, etc.). Must contain exactly one item for payments in Telegram Stars.
-	MaxTipAmount              int                   // The maximum accepted amount for tips in the smallest units of the currency (integer, not float/double). For example, for a maximum tip of US$ 1.45 pass max_tip_amount = 145. See the exp parameter in currencies.json, it shows the number of digits past the decimal point for each currency (2 for the majority of currencies). Defaults to 0. Not supported for payments in Telegram Stars.
-	SuggestedTipAmounts       []int                 // A JSON-serialized array of suggested amounts of tips in the smallest units of the currency (integer, not float/double). At most 4 suggested tip amounts can be specified. The suggested tip amounts must be positive, passed in a strictly increased order and must not exceed max_tip_amount.
-	StartParameter            string                // Unique deep-linking parameter. If left empty, forwarded copies of the sent message will have a Pay button, allowing multiple users to pay directly from the forwarded message, using the same invoice. If non-empty, forwarded copies of the sent message will have a URL button with a deep link to the bot (instead of a Pay button), with the value used as the start parameter
-	ProviderData              string                // JSON-serialized data about the invoice, which will be shared with the payment provider. A detailed description of required fields should be provided by the payment provider.
-	PhotoUrl                  string                // URL of the product photo for the invoice. Can be a photo of the goods or a marketing image for a service. People like it better when they see what they are paying for.
-	PhotoSize                 int                   // Photo size in bytes
-	PhotoWidth                int                   // Photo width
-	PhotoHeight               int                   // Photo height
-	NeedName                  bool                  // Pass True if you require the user's full name to complete the order. Ignored for payments in Telegram Stars.
-	NeedPhoneNumber           bool                  // Pass True if you require the user's phone number to complete the order. Ignored for payments in Telegram Stars.
-	NeedEmail                 bool                  // Pass True if you require the user's email address to complete the order. Ignored for payments in Telegram Stars.
-	NeedShippingAddress       bool                  // Pass True if you require the user's shipping address to complete the order. Ignored for payments in Telegram Stars.
-	SendPhoneNumberToProvider bool                  // Pass True if the user's phone number should be sent to the provider. Ignored for payments in Telegram Stars.
-	SendEmailToProvider       bool                  // Pass True if the user's email address should be sent to the provider. Ignored for payments in Telegram Stars.
-	IsFlexible                bool                  // Pass True if the final price depends on the shipping method. Ignored for payments in Telegram Stars.
-	DisableNotification       bool                  // Sends the message silently. Users will receive a notification with no sound.
-	ProtectContent            bool                  // Protects the contents of the sent message from forwarding and saving
-	AllowPaidBroadcast        bool                  // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
-	MessageEffectID           string                // Unique identifier of the message effect to be added to the message; for private chats only
-	ReplyParameters           *ReplyParameters      // Description of the message to reply to
-	ReplyMarkup               *InlineKeyboardMarkup // A JSON-serialized object for an inline keyboard. If empty, one 'Pay total price' button will be shown. If not empty, the first button must be a Pay button.
+	ChatID                    ChatID                   // Unique identifier for the target chat or username of the target channel (in the format @channelusername)
+	MessageThreadID           int64                    // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
+	DirectMessagesTopicID     int64                    // Identifier of the direct messages topic to which the message will be sent; required if the message is sent to a direct messages chat
+	Title                     string                   // Product name, 1-32 characters
+	Description               string                   // Product description, 1-255 characters
+	Payload                   string                   // Bot-defined invoice payload, 1-128 bytes. This will not be displayed to the user, use it for your internal processes.
+	ProviderToken             string                   // Payment provider token, obtained via @BotFather. Pass an empty string for payments in Telegram Stars.
+	Currency                  string                   // Three-letter ISO 4217 currency code, see more on currencies. Pass "XTR" for payments in Telegram Stars.
+	Prices                    []LabeledPrice           // Price breakdown, a JSON-serialized list of components (e.g. product price, tax, discount, delivery cost, delivery tax, bonus, etc.). Must contain exactly one item for payments in Telegram Stars.
+	MaxTipAmount              int                      // The maximum accepted amount for tips in the smallest units of the currency (integer, not float/double). For example, for a maximum tip of US$ 1.45 pass max_tip_amount = 145. See the exp parameter in currencies.json, it shows the number of digits past the decimal point for each currency (2 for the majority of currencies). Defaults to 0. Not supported for payments in Telegram Stars.
+	SuggestedTipAmounts       []int                    // A JSON-serialized array of suggested amounts of tips in the smallest units of the currency (integer, not float/double). At most 4 suggested tip amounts can be specified. The suggested tip amounts must be positive, passed in a strictly increased order and must not exceed max_tip_amount.
+	StartParameter            string                   // Unique deep-linking parameter. If left empty, forwarded copies of the sent message will have a Pay button, allowing multiple users to pay directly from the forwarded message, using the same invoice. If non-empty, forwarded copies of the sent message will have a URL button with a deep link to the bot (instead of a Pay button), with the value used as the start parameter
+	ProviderData              string                   // JSON-serialized data about the invoice, which will be shared with the payment provider. A detailed description of required fields should be provided by the payment provider.
+	PhotoUrl                  string                   // URL of the product photo for the invoice. Can be a photo of the goods or a marketing image for a service. People like it better when they see what they are paying for.
+	PhotoSize                 int                      // Photo size in bytes
+	PhotoWidth                int                      // Photo width
+	PhotoHeight               int                      // Photo height
+	NeedName                  bool                     // Pass True if you require the user's full name to complete the order. Ignored for payments in Telegram Stars.
+	NeedPhoneNumber           bool                     // Pass True if you require the user's phone number to complete the order. Ignored for payments in Telegram Stars.
+	NeedEmail                 bool                     // Pass True if you require the user's email address to complete the order. Ignored for payments in Telegram Stars.
+	NeedShippingAddress       bool                     // Pass True if you require the user's shipping address to complete the order. Ignored for payments in Telegram Stars.
+	SendPhoneNumberToProvider bool                     // Pass True if the user's phone number should be sent to the provider. Ignored for payments in Telegram Stars.
+	SendEmailToProvider       bool                     // Pass True if the user's email address should be sent to the provider. Ignored for payments in Telegram Stars.
+	IsFlexible                bool                     // Pass True if the final price depends on the shipping method. Ignored for payments in Telegram Stars.
+	DisableNotification       bool                     // Sends the message silently. Users will receive a notification with no sound.
+	ProtectContent            bool                     // Protects the contents of the sent message from forwarding and saving
+	AllowPaidBroadcast        bool                     // Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	MessageEffectID           string                   // Unique identifier of the message effect to be added to the message; for private chats only
+	SuggestedPostParameters   *SuggestedPostParameters // A JSON-serialized object containing the parameters of the suggested post to send; for direct messages chats only. If the message is sent as a reply to another suggested post, then that suggested post is automatically declined.
+	ReplyParameters           *ReplyParameters         // Description of the message to reply to
+	ReplyMarkup               *InlineKeyboardMarkup    // A JSON-serialized object for an inline keyboard. If empty, one 'Pay total price' button will be shown. If not empty, the first button must be a Pay button.
 }
 
 func (r *SendInvoiceRequest) writeMultipart(w *multipart.Writer) {
@@ -3517,6 +4285,11 @@ func (r *SendInvoiceRequest) writeMultipart(w *multipart.Writer) {
 	{
 		b, _ := json.Marshal(r.MessageThreadID)
 		fw, _ := w.CreateFormField("message_thread_id")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.DirectMessagesTopicID)
+		fw, _ := w.CreateFormField("direct_messages_topic_id")
 		fw.Write(b)
 	}
 	w.WriteField("title", r.Title)
@@ -3618,6 +4391,11 @@ func (r *SendInvoiceRequest) writeMultipart(w *multipart.Writer) {
 	if r.MessageEffectID != "" {
 		w.WriteField("message_effect_id", r.MessageEffectID)
 	}
+	if r.SuggestedPostParameters != nil {
+		b, _ := json.Marshal(r.SuggestedPostParameters)
+		fw, _ := w.CreateFormField("suggested_post_parameters")
+		fw.Write(b)
+	}
 	if r.ReplyParameters != nil {
 		b, _ := json.Marshal(r.ReplyParameters)
 		fw, _ := w.CreateFormField("reply_parameters")
@@ -3639,7 +4417,7 @@ type CreateInvoiceLinkRequest struct {
 	ProviderToken             string         // Payment provider token, obtained via @BotFather. Pass an empty string for payments in Telegram Stars.
 	Currency                  string         // Three-letter ISO 4217 currency code, see more on currencies. Pass "XTR" for payments in Telegram Stars.
 	Prices                    []LabeledPrice // Price breakdown, a JSON-serialized list of components (e.g. product price, tax, discount, delivery cost, delivery tax, bonus, etc.). Must contain exactly one item for payments in Telegram Stars.
-	SubscriptionPeriod        int            // The number of seconds the subscription will be active for before the next payment. The currency must be set to "XTR" (Telegram Stars) if the parameter is used. Currently, it must always be 2592000 (30 days) if specified. Any number of subscriptions can be active for a given bot at the same time, including multiple concurrent subscriptions from the same user. Subscription price must no exceed 2500 Telegram Stars.
+	SubscriptionPeriod        int            // The number of seconds the subscription will be active for before the next payment. The currency must be set to "XTR" (Telegram Stars) if the parameter is used. Currently, it must always be 2592000 (30 days) if specified. Any number of subscriptions can be active for a given bot at the same time, including multiple concurrent subscriptions from the same user. Subscription price must no exceed 10000 Telegram Stars.
 	MaxTipAmount              int            // The maximum accepted amount for tips in the smallest units of the currency (integer, not float/double). For example, for a maximum tip of US$ 1.45 pass max_tip_amount = 145. See the exp parameter in currencies.json, it shows the number of digits past the decimal point for each currency (2 for the majority of currencies). Defaults to 0. Not supported for payments in Telegram Stars.
 	SuggestedTipAmounts       []int          // A JSON-serialized array of suggested amounts of tips in the smallest units of the currency (integer, not float/double). At most 4 suggested tip amounts can be specified. The suggested tip amounts must be positive, passed in a strictly increased order and must not exceed max_tip_amount.
 	ProviderData              string         // JSON-serialized data about the invoice, which will be shared with the payment provider. A detailed description of required fields should be provided by the payment provider.
@@ -3866,7 +4644,7 @@ func (r *SetPassportDataErrorsRequest) writeMultipart(w *multipart.Writer) {
 // see Bot.SendGame(ctx, &SendGameRequest{})
 type SendGameRequest struct {
 	BusinessConnectionID string                // Unique identifier of the business connection on behalf of which the message will be sent
-	ChatID               int64                 // Unique identifier for the target chat
+	ChatID               int64                 // Unique identifier for the target chat. Games can't be sent to channel direct messages chats and channel chats.
 	MessageThreadID      int64                 // Unique identifier for the target message thread (topic) of the forum; for forum supergroups only
 	GameShortName        string                // Short name of the game, serves as the unique identifier for the game. Set up your games via @BotFather.
 	DisableNotification  bool                  // Sends the message silently. Users will receive a notification with no sound.

@@ -358,7 +358,7 @@ func (b *Bot) SendPaidMediaVoid(ctx context.Context, request *SendPaidMediaReque
 	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "sendPaidMedia", b.options.FloodHandler, request)
 }
 
-// Use this method to send a group of photos, videos, documents or audios as an album. Documents and audio files can be only grouped in an album with messages of the same type. On success, an array of Messages that were sent is returned.
+// Use this method to send a group of photos, videos, documents or audios as an album. Documents and audio files can be only grouped in an album with messages of the same type. On success, an array of Message objects that were sent is returned.
 //
 // https://core.telegram.org/bots/api#sendmediagroup
 func (b *Bot) SendMediaGroup(ctx context.Context, request *SendMediaGroupRequest) (r []Message, err error) {
@@ -451,6 +451,25 @@ func (b *Bot) SendPoll(ctx context.Context, request *SendPollRequest) (r *Messag
 // Therefore works faster if you dont need the response value.
 func (b *Bot) SendPollVoid(ctx context.Context, request *SendPollRequest) error {
 	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "sendPoll", b.options.FloodHandler, request)
+}
+
+// Use this method to send a checklist on behalf of a connected business account. On success, the sent Message is returned.
+//
+// https://core.telegram.org/bots/api#sendchecklist
+func (b *Bot) SendChecklist(ctx context.Context, request *SendChecklistRequest) (r *Message, err error) {
+	res, err := makeRequest[*Message](ctx, b.options.Client, b.baseUrl, "sendChecklist", b.options.FloodHandler, request)
+
+	if err != nil {
+		return r, err
+	}
+
+	return res.Result, nil
+}
+
+// Does the same as Bot.SendChecklist, but parses response body only in case of an error.
+// Therefore works faster if you dont need the response value.
+func (b *Bot) SendChecklistVoid(ctx context.Context, request *SendChecklistRequest) error {
+	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "sendChecklist", b.options.FloodHandler, request)
 }
 
 // Use this method to send an animated emoji that will display a random value. On success, the sent Message is returned.
@@ -939,7 +958,7 @@ func (b *Bot) SetChatDescriptionVoid(ctx context.Context, request *SetChatDescri
 	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "setChatDescription", b.options.FloodHandler, request)
 }
 
-// Use this method to add a message to the list of pinned messages in a chat. If the chat is not a private chat, the bot must be an administrator in the chat for this to work and must have the 'can_pin_messages' administrator right in a supergroup or 'can_edit_messages' administrator right in a channel. Returns True on success.
+// Use this method to add a message to the list of pinned messages in a chat. In private chats and channel direct messages chats, all non-service messages can be pinned. Conversely, the bot must be an administrator with the 'can_pin_messages' right or the 'can_edit_messages' right to pin messages in groups and channels respectively. Returns True on success.
 //
 // https://core.telegram.org/bots/api#pinchatmessage
 func (b *Bot) PinChatMessage(ctx context.Context, request *PinChatMessageRequest) (r bool, err error) {
@@ -958,7 +977,7 @@ func (b *Bot) PinChatMessageVoid(ctx context.Context, request *PinChatMessageReq
 	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "pinChatMessage", b.options.FloodHandler, request)
 }
 
-// Use this method to remove a message from the list of pinned messages in a chat. If the chat is not a private chat, the bot must be an administrator in the chat for this to work and must have the 'can_pin_messages' administrator right in a supergroup or 'can_edit_messages' administrator right in a channel. Returns True on success.
+// Use this method to remove a message from the list of pinned messages in a chat. In private chats and channel direct messages chats, all messages can be unpinned. Conversely, the bot must be an administrator with the 'can_pin_messages' right or the 'can_edit_messages' right to unpin messages in groups and channels respectively. Returns True on success.
 //
 // https://core.telegram.org/bots/api#unpinchatmessage
 func (b *Bot) UnpinChatMessage(ctx context.Context, request *UnpinChatMessageRequest) (r bool, err error) {
@@ -977,7 +996,7 @@ func (b *Bot) UnpinChatMessageVoid(ctx context.Context, request *UnpinChatMessag
 	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "unpinChatMessage", b.options.FloodHandler, request)
 }
 
-// Use this method to clear the list of pinned messages in a chat. If the chat is not a private chat, the bot must be an administrator in the chat for this to work and must have the 'can_pin_messages' administrator right in a supergroup or 'can_edit_messages' administrator right in a channel. Returns True on success.
+// Use this method to clear the list of pinned messages in a chat. In private chats and channel direct messages chats, no additional rights are required to unpin all pinned messages. Conversely, the bot must be an administrator with the 'can_pin_messages' right or the 'can_edit_messages' right to unpin all pinned messages in groups and channels respectively. Returns True on success.
 //
 // https://core.telegram.org/bots/api#unpinallchatmessages
 func (b *Bot) UnpinAllChatMessages(ctx context.Context, request *UnpinAllChatMessagesRequest) (r bool, err error) {
@@ -1602,6 +1621,444 @@ func (b *Bot) GetMyDefaultAdministratorRights(ctx context.Context, request *GetM
 	return res.Result, nil
 }
 
+// Returns the list of gifts that can be sent by the bot to users and channel chats. Requires no parameters. Returns a Gifts object.
+//
+// https://core.telegram.org/bots/api#getavailablegifts
+func (b *Bot) GetAvailableGifts(ctx context.Context) (r *Gifts, err error) {
+	res, err := makeRequest[*Gifts](ctx, b.options.Client, b.baseUrl, "getAvailableGifts", b.options.FloodHandler, nil)
+
+	if err != nil {
+		return r, err
+	}
+
+	return res.Result, nil
+}
+
+// Sends a gift to the given user or channel chat. The gift can't be converted to Telegram Stars by the receiver. Returns True on success.
+//
+// https://core.telegram.org/bots/api#sendgift
+func (b *Bot) SendGift(ctx context.Context, request *SendGiftRequest) (r bool, err error) {
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "sendGift", b.options.FloodHandler, request)
+
+	if err != nil {
+		return r, err
+	}
+
+	return res.Result, nil
+}
+
+// Does the same as Bot.SendGift, but parses response body only in case of an error.
+// Therefore works faster if you dont need the response value.
+func (b *Bot) SendGiftVoid(ctx context.Context, request *SendGiftRequest) error {
+	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "sendGift", b.options.FloodHandler, request)
+}
+
+// Gifts a Telegram Premium subscription to the given user. Returns True on success.
+//
+// https://core.telegram.org/bots/api#giftpremiumsubscription
+func (b *Bot) GiftPremiumSubscription(ctx context.Context, request *GiftPremiumSubscriptionRequest) (r bool, err error) {
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "giftPremiumSubscription", b.options.FloodHandler, request)
+
+	if err != nil {
+		return r, err
+	}
+
+	return res.Result, nil
+}
+
+// Does the same as Bot.GiftPremiumSubscription, but parses response body only in case of an error.
+// Therefore works faster if you dont need the response value.
+func (b *Bot) GiftPremiumSubscriptionVoid(ctx context.Context, request *GiftPremiumSubscriptionRequest) error {
+	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "giftPremiumSubscription", b.options.FloodHandler, request)
+}
+
+// Verifies a user on behalf of the organization which is represented by the bot. Returns True on success.
+//
+// https://core.telegram.org/bots/api#verifyuser
+func (b *Bot) VerifyUser(ctx context.Context, request *VerifyUserRequest) (r bool, err error) {
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "verifyUser", b.options.FloodHandler, request)
+
+	if err != nil {
+		return r, err
+	}
+
+	return res.Result, nil
+}
+
+// Does the same as Bot.VerifyUser, but parses response body only in case of an error.
+// Therefore works faster if you dont need the response value.
+func (b *Bot) VerifyUserVoid(ctx context.Context, request *VerifyUserRequest) error {
+	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "verifyUser", b.options.FloodHandler, request)
+}
+
+// Verifies a chat on behalf of the organization which is represented by the bot. Returns True on success.
+//
+// https://core.telegram.org/bots/api#verifychat
+func (b *Bot) VerifyChat(ctx context.Context, request *VerifyChatRequest) (r bool, err error) {
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "verifyChat", b.options.FloodHandler, request)
+
+	if err != nil {
+		return r, err
+	}
+
+	return res.Result, nil
+}
+
+// Does the same as Bot.VerifyChat, but parses response body only in case of an error.
+// Therefore works faster if you dont need the response value.
+func (b *Bot) VerifyChatVoid(ctx context.Context, request *VerifyChatRequest) error {
+	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "verifyChat", b.options.FloodHandler, request)
+}
+
+// Removes verification from a user who is currently verified on behalf of the organization represented by the bot. Returns True on success.
+//
+// https://core.telegram.org/bots/api#removeuserverification
+func (b *Bot) RemoveUserVerification(ctx context.Context, request *RemoveUserVerificationRequest) (r bool, err error) {
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "removeUserVerification", b.options.FloodHandler, request)
+
+	if err != nil {
+		return r, err
+	}
+
+	return res.Result, nil
+}
+
+// Does the same as Bot.RemoveUserVerification, but parses response body only in case of an error.
+// Therefore works faster if you dont need the response value.
+func (b *Bot) RemoveUserVerificationVoid(ctx context.Context, request *RemoveUserVerificationRequest) error {
+	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "removeUserVerification", b.options.FloodHandler, request)
+}
+
+// Removes verification from a chat that is currently verified on behalf of the organization represented by the bot. Returns True on success.
+//
+// https://core.telegram.org/bots/api#removechatverification
+func (b *Bot) RemoveChatVerification(ctx context.Context, request *RemoveChatVerificationRequest) (r bool, err error) {
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "removeChatVerification", b.options.FloodHandler, request)
+
+	if err != nil {
+		return r, err
+	}
+
+	return res.Result, nil
+}
+
+// Does the same as Bot.RemoveChatVerification, but parses response body only in case of an error.
+// Therefore works faster if you dont need the response value.
+func (b *Bot) RemoveChatVerificationVoid(ctx context.Context, request *RemoveChatVerificationRequest) error {
+	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "removeChatVerification", b.options.FloodHandler, request)
+}
+
+// Marks incoming message as read on behalf of a business account. Requires the can_read_messages business bot right. Returns True on success.
+//
+// https://core.telegram.org/bots/api#readbusinessmessage
+func (b *Bot) ReadBusinessMessage(ctx context.Context, request *ReadBusinessMessageRequest) (r bool, err error) {
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "readBusinessMessage", b.options.FloodHandler, request)
+
+	if err != nil {
+		return r, err
+	}
+
+	return res.Result, nil
+}
+
+// Does the same as Bot.ReadBusinessMessage, but parses response body only in case of an error.
+// Therefore works faster if you dont need the response value.
+func (b *Bot) ReadBusinessMessageVoid(ctx context.Context, request *ReadBusinessMessageRequest) error {
+	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "readBusinessMessage", b.options.FloodHandler, request)
+}
+
+// Delete messages on behalf of a business account. Requires the can_delete_sent_messages business bot right to delete messages sent by the bot itself, or the can_delete_all_messages business bot right to delete any message. Returns True on success.
+//
+// https://core.telegram.org/bots/api#deletebusinessmessages
+func (b *Bot) DeleteBusinessMessages(ctx context.Context, request *DeleteBusinessMessagesRequest) (r bool, err error) {
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "deleteBusinessMessages", b.options.FloodHandler, request)
+
+	if err != nil {
+		return r, err
+	}
+
+	return res.Result, nil
+}
+
+// Does the same as Bot.DeleteBusinessMessages, but parses response body only in case of an error.
+// Therefore works faster if you dont need the response value.
+func (b *Bot) DeleteBusinessMessagesVoid(ctx context.Context, request *DeleteBusinessMessagesRequest) error {
+	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "deleteBusinessMessages", b.options.FloodHandler, request)
+}
+
+// Changes the first and last name of a managed business account. Requires the can_change_name business bot right. Returns True on success.
+//
+// https://core.telegram.org/bots/api#setbusinessaccountname
+func (b *Bot) SetBusinessAccountName(ctx context.Context, request *SetBusinessAccountNameRequest) (r bool, err error) {
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "setBusinessAccountName", b.options.FloodHandler, request)
+
+	if err != nil {
+		return r, err
+	}
+
+	return res.Result, nil
+}
+
+// Does the same as Bot.SetBusinessAccountName, but parses response body only in case of an error.
+// Therefore works faster if you dont need the response value.
+func (b *Bot) SetBusinessAccountNameVoid(ctx context.Context, request *SetBusinessAccountNameRequest) error {
+	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "setBusinessAccountName", b.options.FloodHandler, request)
+}
+
+// Changes the username of a managed business account. Requires the can_change_username business bot right. Returns True on success.
+//
+// https://core.telegram.org/bots/api#setbusinessaccountusername
+func (b *Bot) SetBusinessAccountUsername(ctx context.Context, request *SetBusinessAccountUsernameRequest) (r bool, err error) {
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "setBusinessAccountUsername", b.options.FloodHandler, request)
+
+	if err != nil {
+		return r, err
+	}
+
+	return res.Result, nil
+}
+
+// Does the same as Bot.SetBusinessAccountUsername, but parses response body only in case of an error.
+// Therefore works faster if you dont need the response value.
+func (b *Bot) SetBusinessAccountUsernameVoid(ctx context.Context, request *SetBusinessAccountUsernameRequest) error {
+	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "setBusinessAccountUsername", b.options.FloodHandler, request)
+}
+
+// Changes the bio of a managed business account. Requires the can_change_bio business bot right. Returns True on success.
+//
+// https://core.telegram.org/bots/api#setbusinessaccountbio
+func (b *Bot) SetBusinessAccountBio(ctx context.Context, request *SetBusinessAccountBioRequest) (r bool, err error) {
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "setBusinessAccountBio", b.options.FloodHandler, request)
+
+	if err != nil {
+		return r, err
+	}
+
+	return res.Result, nil
+}
+
+// Does the same as Bot.SetBusinessAccountBio, but parses response body only in case of an error.
+// Therefore works faster if you dont need the response value.
+func (b *Bot) SetBusinessAccountBioVoid(ctx context.Context, request *SetBusinessAccountBioRequest) error {
+	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "setBusinessAccountBio", b.options.FloodHandler, request)
+}
+
+// Changes the profile photo of a managed business account. Requires the can_edit_profile_photo business bot right. Returns True on success.
+//
+// https://core.telegram.org/bots/api#setbusinessaccountprofilephoto
+func (b *Bot) SetBusinessAccountProfilePhoto(ctx context.Context, request *SetBusinessAccountProfilePhotoRequest) (r bool, err error) {
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "setBusinessAccountProfilePhoto", b.options.FloodHandler, request)
+
+	if err != nil {
+		return r, err
+	}
+
+	return res.Result, nil
+}
+
+// Does the same as Bot.SetBusinessAccountProfilePhoto, but parses response body only in case of an error.
+// Therefore works faster if you dont need the response value.
+func (b *Bot) SetBusinessAccountProfilePhotoVoid(ctx context.Context, request *SetBusinessAccountProfilePhotoRequest) error {
+	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "setBusinessAccountProfilePhoto", b.options.FloodHandler, request)
+}
+
+// Removes the current profile photo of a managed business account. Requires the can_edit_profile_photo business bot right. Returns True on success.
+//
+// https://core.telegram.org/bots/api#removebusinessaccountprofilephoto
+func (b *Bot) RemoveBusinessAccountProfilePhoto(ctx context.Context, request *RemoveBusinessAccountProfilePhotoRequest) (r bool, err error) {
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "removeBusinessAccountProfilePhoto", b.options.FloodHandler, request)
+
+	if err != nil {
+		return r, err
+	}
+
+	return res.Result, nil
+}
+
+// Does the same as Bot.RemoveBusinessAccountProfilePhoto, but parses response body only in case of an error.
+// Therefore works faster if you dont need the response value.
+func (b *Bot) RemoveBusinessAccountProfilePhotoVoid(ctx context.Context, request *RemoveBusinessAccountProfilePhotoRequest) error {
+	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "removeBusinessAccountProfilePhoto", b.options.FloodHandler, request)
+}
+
+// Changes the privacy settings pertaining to incoming gifts in a managed business account. Requires the can_change_gift_settings business bot right. Returns True on success.
+//
+// https://core.telegram.org/bots/api#setbusinessaccountgiftsettings
+func (b *Bot) SetBusinessAccountGiftSettings(ctx context.Context, request *SetBusinessAccountGiftSettingsRequest) (r bool, err error) {
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "setBusinessAccountGiftSettings", b.options.FloodHandler, request)
+
+	if err != nil {
+		return r, err
+	}
+
+	return res.Result, nil
+}
+
+// Does the same as Bot.SetBusinessAccountGiftSettings, but parses response body only in case of an error.
+// Therefore works faster if you dont need the response value.
+func (b *Bot) SetBusinessAccountGiftSettingsVoid(ctx context.Context, request *SetBusinessAccountGiftSettingsRequest) error {
+	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "setBusinessAccountGiftSettings", b.options.FloodHandler, request)
+}
+
+// Returns the amount of Telegram Stars owned by a managed business account. Requires the can_view_gifts_and_stars business bot right. Returns StarAmount on success.
+//
+// https://core.telegram.org/bots/api#getbusinessaccountstarbalance
+func (b *Bot) GetBusinessAccountStarBalance(ctx context.Context, request *GetBusinessAccountStarBalanceRequest) (r *StarAmount, err error) {
+	res, err := makeRequest[*StarAmount](ctx, b.options.Client, b.baseUrl, "getBusinessAccountStarBalance", b.options.FloodHandler, request)
+
+	if err != nil {
+		return r, err
+	}
+
+	return res.Result, nil
+}
+
+// Transfers Telegram Stars from the business account balance to the bot's balance. Requires the can_transfer_stars business bot right. Returns True on success.
+//
+// https://core.telegram.org/bots/api#transferbusinessaccountstars
+func (b *Bot) TransferBusinessAccountStars(ctx context.Context, request *TransferBusinessAccountStarsRequest) (r bool, err error) {
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "transferBusinessAccountStars", b.options.FloodHandler, request)
+
+	if err != nil {
+		return r, err
+	}
+
+	return res.Result, nil
+}
+
+// Does the same as Bot.TransferBusinessAccountStars, but parses response body only in case of an error.
+// Therefore works faster if you dont need the response value.
+func (b *Bot) TransferBusinessAccountStarsVoid(ctx context.Context, request *TransferBusinessAccountStarsRequest) error {
+	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "transferBusinessAccountStars", b.options.FloodHandler, request)
+}
+
+// Returns the gifts received and owned by a managed business account. Requires the can_view_gifts_and_stars business bot right. Returns OwnedGifts on success.
+//
+// https://core.telegram.org/bots/api#getbusinessaccountgifts
+func (b *Bot) GetBusinessAccountGifts(ctx context.Context, request *GetBusinessAccountGiftsRequest) (r *OwnedGifts, err error) {
+	res, err := makeRequest[*OwnedGifts](ctx, b.options.Client, b.baseUrl, "getBusinessAccountGifts", b.options.FloodHandler, request)
+
+	if err != nil {
+		return r, err
+	}
+
+	return res.Result, nil
+}
+
+// Converts a given regular gift to Telegram Stars. Requires the can_convert_gifts_to_stars business bot right. Returns True on success.
+//
+// https://core.telegram.org/bots/api#convertgifttostars
+func (b *Bot) ConvertGiftToStars(ctx context.Context, request *ConvertGiftToStarsRequest) (r bool, err error) {
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "convertGiftToStars", b.options.FloodHandler, request)
+
+	if err != nil {
+		return r, err
+	}
+
+	return res.Result, nil
+}
+
+// Does the same as Bot.ConvertGiftToStars, but parses response body only in case of an error.
+// Therefore works faster if you dont need the response value.
+func (b *Bot) ConvertGiftToStarsVoid(ctx context.Context, request *ConvertGiftToStarsRequest) error {
+	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "convertGiftToStars", b.options.FloodHandler, request)
+}
+
+// Upgrades a given regular gift to a unique gift. Requires the can_transfer_and_upgrade_gifts business bot right. Additionally requires the can_transfer_stars business bot right if the upgrade is paid. Returns True on success.
+//
+// https://core.telegram.org/bots/api#upgradegift
+func (b *Bot) UpgradeGift(ctx context.Context, request *UpgradeGiftRequest) (r bool, err error) {
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "upgradeGift", b.options.FloodHandler, request)
+
+	if err != nil {
+		return r, err
+	}
+
+	return res.Result, nil
+}
+
+// Does the same as Bot.UpgradeGift, but parses response body only in case of an error.
+// Therefore works faster if you dont need the response value.
+func (b *Bot) UpgradeGiftVoid(ctx context.Context, request *UpgradeGiftRequest) error {
+	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "upgradeGift", b.options.FloodHandler, request)
+}
+
+// Transfers an owned unique gift to another user. Requires the can_transfer_and_upgrade_gifts business bot right. Requires can_transfer_stars business bot right if the transfer is paid. Returns True on success.
+//
+// https://core.telegram.org/bots/api#transfergift
+func (b *Bot) TransferGift(ctx context.Context, request *TransferGiftRequest) (r bool, err error) {
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "transferGift", b.options.FloodHandler, request)
+
+	if err != nil {
+		return r, err
+	}
+
+	return res.Result, nil
+}
+
+// Does the same as Bot.TransferGift, but parses response body only in case of an error.
+// Therefore works faster if you dont need the response value.
+func (b *Bot) TransferGiftVoid(ctx context.Context, request *TransferGiftRequest) error {
+	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "transferGift", b.options.FloodHandler, request)
+}
+
+// Posts a story on behalf of a managed business account. Requires the can_manage_stories business bot right. Returns Story on success.
+//
+// https://core.telegram.org/bots/api#poststory
+func (b *Bot) PostStory(ctx context.Context, request *PostStoryRequest) (r *Story, err error) {
+	res, err := makeRequest[*Story](ctx, b.options.Client, b.baseUrl, "postStory", b.options.FloodHandler, request)
+
+	if err != nil {
+		return r, err
+	}
+
+	return res.Result, nil
+}
+
+// Does the same as Bot.PostStory, but parses response body only in case of an error.
+// Therefore works faster if you dont need the response value.
+func (b *Bot) PostStoryVoid(ctx context.Context, request *PostStoryRequest) error {
+	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "postStory", b.options.FloodHandler, request)
+}
+
+// Edits a story previously posted by the bot on behalf of a managed business account. Requires the can_manage_stories business bot right. Returns Story on success.
+//
+// https://core.telegram.org/bots/api#editstory
+func (b *Bot) EditStory(ctx context.Context, request *EditStoryRequest) (r *Story, err error) {
+	res, err := makeRequest[*Story](ctx, b.options.Client, b.baseUrl, "editStory", b.options.FloodHandler, request)
+
+	if err != nil {
+		return r, err
+	}
+
+	return res.Result, nil
+}
+
+// Does the same as Bot.EditStory, but parses response body only in case of an error.
+// Therefore works faster if you dont need the response value.
+func (b *Bot) EditStoryVoid(ctx context.Context, request *EditStoryRequest) error {
+	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "editStory", b.options.FloodHandler, request)
+}
+
+// Deletes a story previously posted by the bot on behalf of a managed business account. Requires the can_manage_stories business bot right. Returns True on success.
+//
+// https://core.telegram.org/bots/api#deletestory
+func (b *Bot) DeleteStory(ctx context.Context, request *DeleteStoryRequest) (r bool, err error) {
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "deleteStory", b.options.FloodHandler, request)
+
+	if err != nil {
+		return r, err
+	}
+
+	return res.Result, nil
+}
+
+// Does the same as Bot.DeleteStory, but parses response body only in case of an error.
+// Therefore works faster if you dont need the response value.
+func (b *Bot) DeleteStoryVoid(ctx context.Context, request *DeleteStoryRequest) error {
+	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "deleteStory", b.options.FloodHandler, request)
+}
+
 // Use this method to edit text and game messages. On success, if the edited message is not an inline message, the edited Message is returned, otherwise True is returned. Note that business messages that were not sent by the bot and do not contain an inline keyboard can only be edited within 48 hours from the time they were sent.
 //
 // https://core.telegram.org/bots/api#editmessagetext
@@ -1697,6 +2154,25 @@ func (b *Bot) StopMessageLiveLocationVoid(ctx context.Context, request *StopMess
 	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "stopMessageLiveLocation", b.options.FloodHandler, request)
 }
 
+// Use this method to edit a checklist on behalf of a connected business account. On success, the edited Message is returned.
+//
+// https://core.telegram.org/bots/api#editmessagechecklist
+func (b *Bot) EditMessageChecklist(ctx context.Context, request *EditMessageChecklistRequest) (r *Message, err error) {
+	res, err := makeRequest[*Message](ctx, b.options.Client, b.baseUrl, "editMessageChecklist", b.options.FloodHandler, request)
+
+	if err != nil {
+		return r, err
+	}
+
+	return res.Result, nil
+}
+
+// Does the same as Bot.EditMessageChecklist, but parses response body only in case of an error.
+// Therefore works faster if you dont need the response value.
+func (b *Bot) EditMessageChecklistVoid(ctx context.Context, request *EditMessageChecklistRequest) error {
+	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "editMessageChecklist", b.options.FloodHandler, request)
+}
+
 // Use this method to edit only the reply markup of messages. On success, if the edited message is not an inline message, the edited Message is returned, otherwise True is returned. Note that business messages that were not sent by the bot and do not contain an inline keyboard can only be edited within 48 hours from the time they were sent.
 //
 // https://core.telegram.org/bots/api#editmessagereplymarkup
@@ -1735,6 +2211,44 @@ func (b *Bot) StopPollVoid(ctx context.Context, request *StopPollRequest) error 
 	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "stopPoll", b.options.FloodHandler, request)
 }
 
+// Use this method to approve a suggested post in a direct messages chat. The bot must have the 'can_post_messages' administrator right in the corresponding channel chat. Returns True on success.
+//
+// https://core.telegram.org/bots/api#approvesuggestedpost
+func (b *Bot) ApproveSuggestedPost(ctx context.Context, request *ApproveSuggestedPostRequest) (r bool, err error) {
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "approveSuggestedPost", b.options.FloodHandler, request)
+
+	if err != nil {
+		return r, err
+	}
+
+	return res.Result, nil
+}
+
+// Does the same as Bot.ApproveSuggestedPost, but parses response body only in case of an error.
+// Therefore works faster if you dont need the response value.
+func (b *Bot) ApproveSuggestedPostVoid(ctx context.Context, request *ApproveSuggestedPostRequest) error {
+	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "approveSuggestedPost", b.options.FloodHandler, request)
+}
+
+// Use this method to decline a suggested post in a direct messages chat. The bot must have the 'can_manage_direct_messages' administrator right in the corresponding channel chat. Returns True on success.
+//
+// https://core.telegram.org/bots/api#declinesuggestedpost
+func (b *Bot) DeclineSuggestedPost(ctx context.Context, request *DeclineSuggestedPostRequest) (r bool, err error) {
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "declineSuggestedPost", b.options.FloodHandler, request)
+
+	if err != nil {
+		return r, err
+	}
+
+	return res.Result, nil
+}
+
+// Does the same as Bot.DeclineSuggestedPost, but parses response body only in case of an error.
+// Therefore works faster if you dont need the response value.
+func (b *Bot) DeclineSuggestedPostVoid(ctx context.Context, request *DeclineSuggestedPostRequest) error {
+	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "declineSuggestedPost", b.options.FloodHandler, request)
+}
+
 // Use this method to delete a message, including service messages, with the following limitations:
 //
 // - A message can only be deleted if it was sent less than 48 hours ago.
@@ -1751,7 +2265,9 @@ func (b *Bot) StopPollVoid(ctx context.Context, request *StopPollRequest) error 
 //
 // - If the bot is an administrator of a group, it can delete any message there.
 //
-// - If the bot has can_delete_messages permission in a supergroup or a channel, it can delete any message there.
+// - If the bot has can_delete_messages administrator right in a supergroup or a channel, it can delete any message there.
+//
+// - If the bot has can_manage_direct_messages administrator right in a channel, it can delete any message in the corresponding direct messages chat.
 //
 // Returns True on success.
 //
@@ -2083,114 +2599,6 @@ func (b *Bot) DeleteStickerSetVoid(ctx context.Context, request *DeleteStickerSe
 	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "deleteStickerSet", b.options.FloodHandler, request)
 }
 
-// Returns the list of gifts that can be sent by the bot to users and channel chats. Requires no parameters. Returns a Gifts object.
-//
-// https://core.telegram.org/bots/api#getavailablegifts
-func (b *Bot) GetAvailableGifts(ctx context.Context) (r *Gifts, err error) {
-	res, err := makeRequest[*Gifts](ctx, b.options.Client, b.baseUrl, "getAvailableGifts", b.options.FloodHandler, nil)
-
-	if err != nil {
-		return r, err
-	}
-
-	return res.Result, nil
-}
-
-// Sends a gift to the given user or channel chat. The gift can't be converted to Telegram Stars by the receiver. Returns True on success.
-//
-// https://core.telegram.org/bots/api#sendgift
-func (b *Bot) SendGift(ctx context.Context, request *SendGiftRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "sendGift", b.options.FloodHandler, request)
-
-	if err != nil {
-		return r, err
-	}
-
-	return res.Result, nil
-}
-
-// Does the same as Bot.SendGift, but parses response body only in case of an error.
-// Therefore works faster if you dont need the response value.
-func (b *Bot) SendGiftVoid(ctx context.Context, request *SendGiftRequest) error {
-	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "sendGift", b.options.FloodHandler, request)
-}
-
-// Verifies a user on behalf of the organization which is represented by the bot. Returns True on success.
-//
-// https://core.telegram.org/bots/api#verifyuser
-func (b *Bot) VerifyUser(ctx context.Context, request *VerifyUserRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "verifyUser", b.options.FloodHandler, request)
-
-	if err != nil {
-		return r, err
-	}
-
-	return res.Result, nil
-}
-
-// Does the same as Bot.VerifyUser, but parses response body only in case of an error.
-// Therefore works faster if you dont need the response value.
-func (b *Bot) VerifyUserVoid(ctx context.Context, request *VerifyUserRequest) error {
-	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "verifyUser", b.options.FloodHandler, request)
-}
-
-// Verifies a chat on behalf of the organization which is represented by the bot. Returns True on success.
-//
-// https://core.telegram.org/bots/api#verifychat
-func (b *Bot) VerifyChat(ctx context.Context, request *VerifyChatRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "verifyChat", b.options.FloodHandler, request)
-
-	if err != nil {
-		return r, err
-	}
-
-	return res.Result, nil
-}
-
-// Does the same as Bot.VerifyChat, but parses response body only in case of an error.
-// Therefore works faster if you dont need the response value.
-func (b *Bot) VerifyChatVoid(ctx context.Context, request *VerifyChatRequest) error {
-	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "verifyChat", b.options.FloodHandler, request)
-}
-
-// Removes verification from a user who is currently verified on behalf of the organization represented by the bot. Returns True on success.
-//
-// https://core.telegram.org/bots/api#removeuserverification
-func (b *Bot) RemoveUserVerification(ctx context.Context, request *RemoveUserVerificationRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "removeUserVerification", b.options.FloodHandler, request)
-
-	if err != nil {
-		return r, err
-	}
-
-	return res.Result, nil
-}
-
-// Does the same as Bot.RemoveUserVerification, but parses response body only in case of an error.
-// Therefore works faster if you dont need the response value.
-func (b *Bot) RemoveUserVerificationVoid(ctx context.Context, request *RemoveUserVerificationRequest) error {
-	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "removeUserVerification", b.options.FloodHandler, request)
-}
-
-// Removes verification from a chat that is currently verified on behalf of the organization represented by the bot. Returns True on success.
-//
-// https://core.telegram.org/bots/api#removechatverification
-func (b *Bot) RemoveChatVerification(ctx context.Context, request *RemoveChatVerificationRequest) (r bool, err error) {
-	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "removeChatVerification", b.options.FloodHandler, request)
-
-	if err != nil {
-		return r, err
-	}
-
-	return res.Result, nil
-}
-
-// Does the same as Bot.RemoveChatVerification, but parses response body only in case of an error.
-// Therefore works faster if you dont need the response value.
-func (b *Bot) RemoveChatVerificationVoid(ctx context.Context, request *RemoveChatVerificationRequest) error {
-	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "removeChatVerification", b.options.FloodHandler, request)
-}
-
 // Use this method to send answers to an inline query. On success, True is returned.
 //
 // No more than 50 results per query are allowed.
@@ -2324,6 +2732,19 @@ func (b *Bot) AnswerPreCheckoutQuery(ctx context.Context, request *AnswerPreChec
 // Therefore works faster if you dont need the response value.
 func (b *Bot) AnswerPreCheckoutQueryVoid(ctx context.Context, request *AnswerPreCheckoutQueryRequest) error {
 	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "answerPreCheckoutQuery", b.options.FloodHandler, request)
+}
+
+// A method to get the current Telegram Stars balance of the bot. Requires no parameters. On success, returns a StarAmount object.
+//
+// https://core.telegram.org/bots/api#getmystarbalance
+func (b *Bot) GetMyStarBalance(ctx context.Context) (r *StarAmount, err error) {
+	res, err := makeRequest[*StarAmount](ctx, b.options.Client, b.baseUrl, "getMyStarBalance", b.options.FloodHandler, nil)
+
+	if err != nil {
+		return r, err
+	}
+
+	return res.Result, nil
 }
 
 // Returns the bot's Telegram Star transactions in chronological order. On success, returns a StarTransactions object.
