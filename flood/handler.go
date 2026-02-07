@@ -42,7 +42,11 @@ func (s *SleepHandler) Handle(
 		s.OnFlood(ctx, method, request, duration)
 	}
 
-	time.Sleep(duration)
+	select {
+	case <-ctx.Done():
+		return
+	case <-time.After(duration):
+	}
 }
 
 type methodState struct {
@@ -114,7 +118,11 @@ func (c *CondHandler) Handle(
 	state.flood = true
 	state.mu.Unlock()
 
-	time.Sleep(duration)
+	select {
+	case <-ctx.Done():
+		return
+	case <-time.After(duration):
+	}
 
 	state.mu.Lock()
 	state.flood = false
