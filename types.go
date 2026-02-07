@@ -64,6 +64,7 @@ type User struct {
 	SupportsInlineQueries   bool   `json:"supports_inline_queries,omitempty"`     // Optional. True, if the bot supports inline queries. Returned only in getMe.
 	CanConnectToBusiness    bool   `json:"can_connect_to_business,omitempty"`     // Optional. True, if the bot can be connected to a Telegram Business account to receive its messages. Returned only in getMe.
 	HasMainWebApp           bool   `json:"has_main_web_app,omitempty"`            // Optional. True, if the bot has a main Web App. Returned only in getMe.
+	HasTopicsEnabled        bool   `json:"has_topics_enabled,omitempty"`          // Optional. True, if the bot has forum topic mode enabled in private chats. Returned only in getMe.
 }
 
 // This object represents a chat.
@@ -131,6 +132,9 @@ type ChatFullInfo struct {
 	CustomEmojiStickerSetName          string                `json:"custom_emoji_sticker_set_name,omitempty"`           // Optional. For supergroups, the name of the group's custom emoji sticker set. Custom emoji from this set can be used by all users and bots in the group.
 	LinkedChatID                       int64                 `json:"linked_chat_id,omitempty"`                          // Optional. Unique identifier for the linked chat, i.e. the discussion group identifier for a channel and vice versa; for supergroups and channel chats. This identifier may be greater than 32 bits and some programming languages may have difficulty/silent defects in interpreting it. But it is smaller than 52 bits, so a signed 64 bit integer or double-precision float type are safe for storing this identifier.
 	Location                           *ChatLocation         `json:"location,omitempty"`                                // Optional. For supergroups, the location to which the supergroup is connected
+	Rating                             *UserRating           `json:"rating,omitempty"`                                  // Optional. For private chats, the rating of the user if any
+	UniqueGiftColors                   *UniqueGiftColors     `json:"unique_gift_colors,omitempty"`                      // Optional. The color scheme based on a unique gift that must be used for the chat's name, message replies and link previews
+	PaidMessageStarCount               int                   `json:"paid_message_star_count,omitempty"`                 // Optional. The number of Telegram Stars a general user have to pay to send a message to the chat
 }
 
 // This object represents a message.
@@ -138,7 +142,7 @@ type ChatFullInfo struct {
 // https://core.telegram.org/bots/api#message
 type Message struct {
 	MessageID                     int                            `json:"message_id"`                                  // Unique message identifier inside this chat. In specific instances (e.g., message containing a video sent to a big chat), the server might automatically schedule a message instead of sending it immediately. In such cases, this field will be 0 and the relevant message will be unusable until it is actually sent
-	MessageThreadID               int64                          `json:"message_thread_id,omitempty"`                 // Optional. Unique identifier of a message thread to which the message belongs; for supergroups only
+	MessageThreadID               int64                          `json:"message_thread_id,omitempty"`                 // Optional. Unique identifier of a message thread or forum topic to which the message belongs; for supergroups and private chats only
 	DirectMessagesTopic           *DirectMessagesTopic           `json:"direct_messages_topic,omitempty"`             // Optional. Information about the direct messages chat topic that contains the message
 	From                          *User                          `json:"from,omitempty"`                              // Optional. Sender of the message; may be empty for messages sent to channels. For backward compatibility, if the message was sent on behalf of a chat, the field contains a fake sender user in non-channel chats
 	SenderChat                    *Chat                          `json:"sender_chat,omitempty"`                       // Optional. Sender of the message when sent on behalf of a chat. For example, the supergroup itself for messages sent by its anonymous administrators or a linked channel for messages automatically forwarded to the channel's discussion group. For backward compatibility, if the message was sent on behalf of a chat, the field from contains a fake sender user in non-channel chats.
@@ -148,7 +152,7 @@ type Message struct {
 	BusinessConnectionID          string                         `json:"business_connection_id,omitempty"`            // Optional. Unique identifier of the business connection from which the message was received. If non-empty, the message belongs to a chat of the corresponding business account that is independent from any potential bot chat which might share the same identifier.
 	Chat                          *Chat                          `json:"chat"`                                        // Chat the message belongs to
 	ForwardOrigin                 *MessageOrigin                 `json:"forward_origin,omitempty"`                    // Optional. Information about the original message for forwarded messages
-	IsTopicMessage                bool                           `json:"is_topic_message,omitempty"`                  // Optional. True, if the message is sent to a forum topic
+	IsTopicMessage                bool                           `json:"is_topic_message,omitempty"`                  // Optional. True, if the message is sent to a topic in a forum supergroup or a private chat with the bot
 	IsAutomaticForward            bool                           `json:"is_automatic_forward,omitempty"`              // Optional. True, if the message is a channel post that was automatically forwarded to the connected discussion group
 	ReplyToMessage                *Message                       `json:"reply_to_message,omitempty"`                  // Optional. For replies in the same chat and message thread, the original message. Note that the Message object in this field will not contain further reply_to_message fields even if it itself is a reply.
 	ExternalReply                 *ExternalReplyInfo             `json:"external_reply,omitempty"`                    // Optional. Information about the message that is being replied to, which may come from another chat or forum topic
@@ -208,6 +212,7 @@ type Message struct {
 	ChatShared                    *ChatShared                    `json:"chat_shared,omitempty"`                       // Optional. Service message: a chat was shared with the bot
 	Gift                          *GiftInfo                      `json:"gift,omitempty"`                              // Optional. Service message: a regular gift was sent or received
 	UniqueGift                    *UniqueGiftInfo                `json:"unique_gift,omitempty"`                       // Optional. Service message: a unique gift was sent or received
+	GiftUpgradeSent               *GiftInfo                      `json:"gift_upgrade_sent,omitempty"`                 // Optional. Service message: upgrade of a gift was purchased after the gift was sent
 	ConnectedWebsite              string                         `json:"connected_website,omitempty"`                 // Optional. The domain name of the website on which the user has logged in. More about Telegram Login: https://core.telegram.org/widgets/login
 	WriteAccessAllowed            *WriteAccessAllowed            `json:"write_access_allowed,omitempty"`              // Optional. Service message: the user allowed the bot to write messages after adding it to the attachment or side menu, launching a Web App from a link, or accepting an explicit request from a Web App sent by the method requestWriteAccess
 	PassportData                  *PassportData                  `json:"passport_data,omitempty"`                     // Optional. Telegram Passport data
@@ -539,7 +544,8 @@ type ChecklistTask struct {
 	ID              int64           `json:"id"`                          // Unique identifier of the task
 	Text            string          `json:"text"`                        // Text of the task
 	TextEntities    []MessageEntity `json:"text_entities,omitempty"`     // Optional. Special entities that appear in the task text
-	CompletedByUser *User           `json:"completed_by_user,omitempty"` // Optional. User that completed the task; omitted if the task wasn't completed
+	CompletedByUser *User           `json:"completed_by_user,omitempty"` // Optional. User that completed the task; omitted if the task wasn't completed by a user
+	CompletedByChat *Chat           `json:"completed_by_chat,omitempty"` // Optional. Chat that completed the task; omitted if the task wasn't completed by a chat
 	CompletionDate  int             `json:"completion_date,omitempty"`   // Optional. Point in time (Unix timestamp) when the task was completed; 0 if the task wasn't completed
 }
 
@@ -704,6 +710,7 @@ type ForumTopicCreated struct {
 	Name              string `json:"name"`                           // Name of the topic
 	IconColor         int    `json:"icon_color"`                     // Color of the topic icon in RGB format
 	IconCustomEmojiID string `json:"icon_custom_emoji_id,omitempty"` // Optional. Unique identifier of the custom emoji shown as the topic icon
+	IsNameImplicit    bool   `json:"is_name_implicit,omitempty"`     // Optional. True, if the name of the topic wasn't specified explicitly by its creator and likely needs to be changed by the bot
 }
 
 // This object represents a service message about a forum topic closed in the chat. Currently holds no information.
@@ -1311,6 +1318,16 @@ type BusinessOpeningHours struct {
 	OpeningHours []BusinessOpeningHoursInterval `json:"opening_hours"`  // List of time intervals describing business opening hours
 }
 
+// This object describes the rating of a user based on their Telegram Star spendings.
+//
+// https://core.telegram.org/bots/api#userrating
+type UserRating struct {
+	Level              int `json:"level"`                       // Current level of the user, indicating their reliability when purchasing digital goods and services. A higher level suggests a more trustworthy customer; a negative level is likely reason for concern.
+	Rating             int `json:"rating"`                      // Numerical value of the user's rating; the higher the rating, the better
+	CurrentLevelRating int `json:"current_level_rating"`        // The rating value required to get the current level
+	NextLevelRating    int `json:"next_level_rating,omitempty"` // Optional. The rating value required to get to the next level; omitted if the maximum level was reached
+}
+
 // Describes the position of a clickable area within a story.
 //
 // https://core.telegram.org/bots/api#storyareaposition
@@ -1431,19 +1448,35 @@ type ForumTopic struct {
 	Name              string `json:"name"`                           // Name of the topic
 	IconColor         int    `json:"icon_color"`                     // Color of the topic icon in RGB format
 	IconCustomEmojiID string `json:"icon_custom_emoji_id,omitempty"` // Optional. Unique identifier of the custom emoji shown as the topic icon
+	IsNameImplicit    bool   `json:"is_name_implicit,omitempty"`     // Optional. True, if the name of the topic wasn't specified explicitly by its creator and likely needs to be changed by the bot
+}
+
+// This object describes the background of a gift.
+//
+// https://core.telegram.org/bots/api#giftbackground
+type GiftBackground struct {
+	CenterColor int `json:"center_color"` // Center color of the background in RGB format
+	EdgeColor   int `json:"edge_color"`   // Edge color of the background in RGB format
+	TextColor   int `json:"text_color"`   // Text color of the background in RGB format
 }
 
 // This object represents a gift that can be sent by the bot.
 //
 // https://core.telegram.org/bots/api#gift
 type Gift struct {
-	ID               string   `json:"id"`                           // Unique identifier of the gift
-	Sticker          *Sticker `json:"sticker"`                      // The sticker that represents the gift
-	StarCount        int      `json:"star_count"`                   // The number of Telegram Stars that must be paid to send the sticker
-	UpgradeStarCount int      `json:"upgrade_star_count,omitempty"` // Optional. The number of Telegram Stars that must be paid to upgrade the gift to a unique one
-	TotalCount       int      `json:"total_count,omitempty"`        // Optional. The total number of the gifts of this type that can be sent; for limited gifts only
-	RemainingCount   int      `json:"remaining_count,omitempty"`    // Optional. The number of remaining gifts of this type that can be sent; for limited gifts only
-	PublisherChat    *Chat    `json:"publisher_chat,omitempty"`     // Optional. Information about the chat that published the gift
+	ID                     string          `json:"id"`                                  // Unique identifier of the gift
+	Sticker                *Sticker        `json:"sticker"`                             // The sticker that represents the gift
+	StarCount              int             `json:"star_count"`                          // The number of Telegram Stars that must be paid to send the sticker
+	UpgradeStarCount       int             `json:"upgrade_star_count,omitempty"`        // Optional. The number of Telegram Stars that must be paid to upgrade the gift to a unique one
+	IsPremium              bool            `json:"is_premium,omitempty"`                // Optional. True, if the gift can only be purchased by Telegram Premium subscribers
+	HasColors              bool            `json:"has_colors,omitempty"`                // Optional. True, if the gift can be used (after being upgraded) to customize a user's appearance
+	TotalCount             int             `json:"total_count,omitempty"`               // Optional. The total number of gifts of this type that can be sent by all users; for limited gifts only
+	RemainingCount         int             `json:"remaining_count,omitempty"`           // Optional. The number of remaining gifts of this type that can be sent by all users; for limited gifts only
+	PersonalTotalCount     int             `json:"personal_total_count,omitempty"`      // Optional. The total number of gifts of this type that can be sent by the bot; for limited gifts only
+	PersonalRemainingCount int             `json:"personal_remaining_count,omitempty"`  // Optional. The number of remaining gifts of this type that can be sent by the bot; for limited gifts only
+	Background             *GiftBackground `json:"background,omitempty"`                // Optional. Background of the gift
+	UniqueGiftVariantCount int             `json:"unique_gift_variant_count,omitempty"` // Optional. The total number of different unique gifts that can be obtained by upgrading the gift
+	PublisherChat          *Chat           `json:"publisher_chat,omitempty"`            // Optional. Information about the chat that published the gift
 }
 
 // This object represent a list of gifts.
@@ -1490,17 +1523,33 @@ type UniqueGiftBackdrop struct {
 	RarityPerMille int                       `json:"rarity_per_mille"` // The number of unique gifts that receive this backdrop for every 1000 gifts upgraded
 }
 
+// This object contains information about the color scheme for a user's name, message replies and link previews based on a unique gift.
+//
+// https://core.telegram.org/bots/api#uniquegiftcolors
+type UniqueGiftColors struct {
+	ModelCustomEmojiID    string `json:"model_custom_emoji_id"`    // Custom emoji identifier of the unique gift's model
+	SymbolCustomEmojiID   string `json:"symbol_custom_emoji_id"`   // Custom emoji identifier of the unique gift's symbol
+	LightThemeMainColor   int    `json:"light_theme_main_color"`   // Main color used in light themes; RGB format
+	LightThemeOtherColors []int  `json:"light_theme_other_colors"` // List of 1-3 additional colors used in light themes; RGB format
+	DarkThemeMainColor    int    `json:"dark_theme_main_color"`    // Main color used in dark themes; RGB format
+	DarkThemeOtherColors  []int  `json:"dark_theme_other_colors"`  // List of 1-3 additional colors used in dark themes; RGB format
+}
+
 // This object describes a unique gift that was upgraded from a regular gift.
 //
 // https://core.telegram.org/bots/api#uniquegift
 type UniqueGift struct {
-	BaseName      string              `json:"base_name"`                // Human-readable name of the regular gift from which this unique gift was upgraded
-	Name          string              `json:"name"`                     // Unique name of the gift. This name can be used in https://t.me/nft/... links and story areas
-	Number        int                 `json:"number"`                   // Unique number of the upgraded gift among gifts upgraded from the same regular gift
-	Model         *UniqueGiftModel    `json:"model"`                    // Model of the gift
-	Symbol        *UniqueGiftSymbol   `json:"symbol"`                   // Symbol of the gift
-	Backdrop      *UniqueGiftBackdrop `json:"backdrop"`                 // Backdrop of the gift
-	PublisherChat *Chat               `json:"publisher_chat,omitempty"` // Optional. Information about the chat that published the gift
+	GiftID           string              `json:"gift_id"`                      // Identifier of the regular gift from which the gift was upgraded
+	BaseName         string              `json:"base_name"`                    // Human-readable name of the regular gift from which this unique gift was upgraded
+	Name             string              `json:"name"`                         // Unique name of the gift. This name can be used in https://t.me/nft/... links and story areas
+	Number           int                 `json:"number"`                       // Unique number of the upgraded gift among gifts upgraded from the same regular gift
+	Model            *UniqueGiftModel    `json:"model"`                        // Model of the gift
+	Symbol           *UniqueGiftSymbol   `json:"symbol"`                       // Symbol of the gift
+	Backdrop         *UniqueGiftBackdrop `json:"backdrop"`                     // Backdrop of the gift
+	IsPremium        bool                `json:"is_premium,omitempty"`         // Optional. True, if the original regular gift was exclusively purchaseable by Telegram Premium subscribers
+	IsFromBlockchain bool                `json:"is_from_blockchain,omitempty"` // Optional. True, if the gift is assigned from the TON blockchain and can't be resold or transferred in Telegram
+	Colors           *UniqueGiftColors   `json:"colors,omitempty"`             // Optional. The color scheme that can be used by the gift's owner for the chat's name, replies to messages and link previews; for business account gifts and gifts that are currently on sale only
+	PublisherChat    *Chat               `json:"publisher_chat,omitempty"`     // Optional. Information about the chat that published the gift
 }
 
 // Describes a service message about a regular gift that was sent or received.
@@ -1510,23 +1559,26 @@ type GiftInfo struct {
 	Gift                    *Gift           `json:"gift"`                                 // Information about the gift
 	OwnedGiftID             string          `json:"owned_gift_id,omitempty"`              // Optional. Unique identifier of the received gift for the bot; only present for gifts received on behalf of business accounts
 	ConvertStarCount        int             `json:"convert_star_count,omitempty"`         // Optional. Number of Telegram Stars that can be claimed by the receiver by converting the gift; omitted if conversion to Telegram Stars is impossible
-	PrepaidUpgradeStarCount int             `json:"prepaid_upgrade_star_count,omitempty"` // Optional. Number of Telegram Stars that were prepaid by the sender for the ability to upgrade the gift
+	PrepaidUpgradeStarCount int             `json:"prepaid_upgrade_star_count,omitempty"` // Optional. Number of Telegram Stars that were prepaid for the ability to upgrade the gift
+	IsUpgradeSeparate       bool            `json:"is_upgrade_separate,omitempty"`        // Optional. True, if the gift's upgrade was purchased after the gift was sent
 	CanBeUpgraded           bool            `json:"can_be_upgraded,omitempty"`            // Optional. True, if the gift can be upgraded to a unique gift
 	Text                    string          `json:"text,omitempty"`                       // Optional. Text of the message that was added to the gift
 	Entities                []MessageEntity `json:"entities,omitempty"`                   // Optional. Special entities that appear in the text
 	IsPrivate               bool            `json:"is_private,omitempty"`                 // Optional. True, if the sender and gift text are shown only to the gift receiver; otherwise, everyone will be able to see them
+	UniqueGiftNumber        int             `json:"unique_gift_number,omitempty"`         // Optional. Unique number reserved for this gift when upgraded. See the number field in UniqueGift
 }
 
 // Describes a service message about a unique gift that was sent or received.
 //
 // https://core.telegram.org/bots/api#uniquegiftinfo
 type UniqueGiftInfo struct {
-	Gift                *UniqueGift `json:"gift"`                             // Information about the gift
-	Origin              string      `json:"origin"`                           // Origin of the gift. Currently, either "upgrade" for gifts upgraded from regular gifts, "transfer" for gifts transferred from other users or channels, or "resale" for gifts bought from other users
-	LastResaleStarCount int         `json:"last_resale_star_count,omitempty"` // Optional. For gifts bought from other users, the price paid for the gift
-	OwnedGiftID         string      `json:"owned_gift_id,omitempty"`          // Optional. Unique identifier of the received gift for the bot; only present for gifts received on behalf of business accounts
-	TransferStarCount   int         `json:"transfer_star_count,omitempty"`    // Optional. Number of Telegram Stars that must be paid to transfer the gift; omitted if the bot cannot transfer the gift
-	NextTransferDate    int         `json:"next_transfer_date,omitempty"`     // Optional. Point in time (Unix timestamp) when the gift can be transferred. If it is in the past, then the gift can be transferred now
+	Gift               *UniqueGift `json:"gift"`                           // Information about the gift
+	Origin             string      `json:"origin"`                         // Origin of the gift. Currently, either "upgrade" for gifts upgraded from regular gifts, "transfer" for gifts transferred from other users or channels, "resale" for gifts bought from other users, "gifted_upgrade" for upgrades purchased after the gift was sent, or "offer" for gifts bought or sold through gift purchase offers
+	LastResaleCurrency string      `json:"last_resale_currency,omitempty"` // Optional. For gifts bought from other users, the currency in which the payment for the gift was done. Currently, one of "XTR" for Telegram Stars or "TON" for toncoins.
+	LastResaleAmount   int         `json:"last_resale_amount,omitempty"`   // Optional. For gifts bought from other users, the price paid for the gift in either Telegram Stars or nanotoncoins
+	OwnedGiftID        string      `json:"owned_gift_id,omitempty"`        // Optional. Unique identifier of the received gift for the bot; only present for gifts received on behalf of business accounts
+	TransferStarCount  int         `json:"transfer_star_count,omitempty"`  // Optional. Number of Telegram Stars that must be paid to transfer the gift; omitted if the bot cannot transfer the gift
+	NextTransferDate   int         `json:"next_transfer_date,omitempty"`   // Optional. Point in time (Unix timestamp) when the gift can be transferred. If it is in the past, then the gift can be transferred now
 }
 
 // This object describes a gift received and owned by a user or a chat. Currently, it can be one of
@@ -1548,8 +1600,10 @@ type OwnedGift struct {
 	IsSaved                 bool            `json:"is_saved,omitempty"`                   // Optional. True, if the gift is displayed on the account's profile page; for gifts received on behalf of business accounts only
 	CanBeUpgraded           bool            `json:"can_be_upgraded,omitempty"`            // Optional. True, if the gift can be upgraded to a unique gift; for gifts received on behalf of business accounts only
 	WasRefunded             bool            `json:"was_refunded,omitempty"`               // Optional. True, if the gift was refunded and isn't available anymore
-	ConvertStarCount        int             `json:"convert_star_count,omitempty"`         // Optional. Number of Telegram Stars that can be claimed by the receiver instead of the gift; omitted if the gift cannot be converted to Telegram Stars
-	PrepaidUpgradeStarCount int             `json:"prepaid_upgrade_star_count,omitempty"` // Optional. Number of Telegram Stars that were paid by the sender for the ability to upgrade the gift
+	ConvertStarCount        int             `json:"convert_star_count,omitempty"`         // Optional. Number of Telegram Stars that can be claimed by the receiver instead of the gift; omitted if the gift cannot be converted to Telegram Stars; for gifts received on behalf of business accounts only
+	PrepaidUpgradeStarCount int             `json:"prepaid_upgrade_star_count,omitempty"` // Optional. Number of Telegram Stars that were paid for the ability to upgrade the gift
+	IsUpgradeSeparate       bool            `json:"is_upgrade_separate,omitempty"`        // Optional. True, if the gift's upgrade was purchased after the gift was sent; for gifts received on behalf of business accounts only
+	UniqueGiftNumber        int             `json:"unique_gift_number,omitempty"`         // Optional. Unique number reserved for this gift when upgraded. See the number field in UniqueGift
 	CanBeTransferred        bool            `json:"can_be_transferred,omitempty"`         // Optional. True, if the gift can be transferred to another owner; for gifts received on behalf of business accounts only
 	TransferStarCount       int             `json:"transfer_star_count,omitempty"`        // Optional. Number of Telegram Stars that must be paid to transfer the gift; omitted if the bot cannot transfer the gift
 	NextTransferDate        int             `json:"next_transfer_date,omitempty"`         // Optional. Point in time (Unix timestamp) when the gift can be transferred. If it is in the past, then the gift can be transferred now
@@ -1572,6 +1626,7 @@ type AcceptedGiftTypes struct {
 	LimitedGifts        bool `json:"limited_gifts"`        // True, if limited regular gifts are accepted
 	UniqueGifts         bool `json:"unique_gifts"`         // True, if unique gifts or gifts that can be upgraded to unique for free are accepted
 	PremiumSubscription bool `json:"premium_subscription"` // True, if a Telegram Premium subscription is accepted
+	GiftsFromChannels   bool `json:"gifts_from_channels"`  // True, if transfers of unique gifts from channels are accepted
 }
 
 // Describes an amount of Telegram Stars.

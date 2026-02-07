@@ -121,7 +121,7 @@ func generateHandlers(updateType Type) {
 		structFieldName := camelCase(update.Name, false)
 		typeVar := "goram." + update.Types[0]
 
-		f.WriteString(fmt.Sprintf(`
+		fmt.Fprintf(f, `
 			// Add %s handler with provided filters
 			func (r *Router) %s(handlerFunc Func[*%s], filters... Filter[*%s]) *Router {
 				h := handler[*%s]{
@@ -140,14 +140,14 @@ func generateHandlers(updateType Type) {
 			typeVar,
 			structFieldName,
 			structFieldName,
-		))
+		)
 	}
 
 	for _, u := range updateType.Fields[1:] {
 		handlersFieldName := camelCase(u.Name, false)
 		updatePascalName := camelCase(u.Name, true)
 
-		f.WriteString(fmt.Sprintf(`
+		fmt.Fprintf(f, `
 			// Add router-level filter(s) to %s update
 			func (r *Router) Filter%s(filters... Filter[*goram.%s]) *Router {
 				r.handlers.%s.filters = append(r.handlers.%s.filters, filters...)
@@ -159,7 +159,7 @@ func generateHandlers(updateType Type) {
 			u.Types[0],
 			handlersFieldName,
 			handlersFieldName,
-		))
+		)
 	}
 
 	f.WriteString("\n")
@@ -217,20 +217,13 @@ func generateHandlers(updateType Type) {
 
 	for _, u := range updateType.Fields[1:] {
 		fieldName := camelCase(u.Name, true)
-
-		f.WriteString(fmt.Sprintf("if update.%s != nil {\n", fieldName))
-		f.WriteString(fmt.Sprintf(
-			"return r.call%sHandlers(ctx, bot, update.%s, data)\n",
-			fieldName,
-			fieldName,
-		))
-
+		fmt.Fprintf(f, "if update.%s != nil {\n", fieldName)
+		fmt.Fprintf(f, "return r.call%sHandlers(ctx, bot, update.%s, data)\n", fieldName, fieldName)
 		f.WriteString("}\n")
 	}
 
 	f.WriteString("return false, nil\n")
 	f.WriteString("}\n")
-
 	f.Close()
 }
 
@@ -263,8 +256,8 @@ func generateEnums(updateType Type, enums []Enum) {
 
 	for _, field := range updateType.Fields[1:] { // skip update_id
 		name := "Update" + camelCase(field.Name, true)
-		f.WriteString(fmt.Sprintf("// %s\n", field.Description[len("Optional. "):]))
-		f.WriteString(fmt.Sprintf(`%s UpdateType = "%s"`, name, field.Name))
+		fmt.Fprintf(f, "// %s\n", field.Description[len("Optional. "):])
+		fmt.Fprintf(f, `%s UpdateType = "%s"`, name, field.Name)
 		f.WriteString("\n\n")
 	}
 

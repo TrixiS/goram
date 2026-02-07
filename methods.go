@@ -491,6 +491,25 @@ func (b *Bot) SendDiceVoid(ctx context.Context, request *SendDiceRequest) error 
 	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "sendDice", b.options.FloodHandler, request)
 }
 
+// Use this method to stream a partial message to a user while the message is being generated; supported only for bots with forum topic mode enabled. Returns True on success.
+//
+// https://core.telegram.org/bots/api#sendmessagedraft
+func (b *Bot) SendMessageDraft(ctx context.Context, request *SendMessageDraftRequest) (r bool, err error) {
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "sendMessageDraft", b.options.FloodHandler, request)
+
+	if err != nil {
+		return r, err
+	}
+
+	return res.Result, nil
+}
+
+// Does the same as Bot.SendMessageDraft, but parses response body only in case of an error.
+// Therefore works faster if you dont need the response value.
+func (b *Bot) SendMessageDraftVoid(ctx context.Context, request *SendMessageDraftRequest) error {
+	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "sendMessageDraft", b.options.FloodHandler, request)
+}
+
 // Use this method when you need to tell the user that something is happening on the bot's side. The status is set for 5 seconds or less (when a message arrives from your bot, Telegram clients clear its typing status). Returns True on success.
 //
 // We only recommend using this method when a response from the bot will take a noticeable amount of time to arrive.
@@ -1156,7 +1175,7 @@ func (b *Bot) CreateForumTopicVoid(ctx context.Context, request *CreateForumTopi
 	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "createForumTopic", b.options.FloodHandler, request)
 }
 
-// Use this method to edit name and icon of a topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator rights, unless it is the creator of the topic. Returns True on success.
+// Use this method to edit name and icon of a topic in a forum supergroup chat or a private chat with a user. In the case of a supergroup chat the bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator rights, unless it is the creator of the topic. Returns True on success.
 //
 // https://core.telegram.org/bots/api#editforumtopic
 func (b *Bot) EditForumTopic(ctx context.Context, request *EditForumTopicRequest) (r bool, err error) {
@@ -1213,7 +1232,7 @@ func (b *Bot) ReopenForumTopicVoid(ctx context.Context, request *ReopenForumTopi
 	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "reopenForumTopic", b.options.FloodHandler, request)
 }
 
-// Use this method to delete a forum topic along with all its messages in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the can_delete_messages administrator rights. Returns True on success.
+// Use this method to delete a forum topic along with all its messages in a forum supergroup chat or a private chat with a user. In the case of a supergroup chat the bot must be an administrator in the chat for this to work and must have the can_delete_messages administrator rights. Returns True on success.
 //
 // https://core.telegram.org/bots/api#deleteforumtopic
 func (b *Bot) DeleteForumTopic(ctx context.Context, request *DeleteForumTopicRequest) (r bool, err error) {
@@ -1232,7 +1251,7 @@ func (b *Bot) DeleteForumTopicVoid(ctx context.Context, request *DeleteForumTopi
 	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "deleteForumTopic", b.options.FloodHandler, request)
 }
 
-// Use this method to clear the list of pinned messages in a forum topic. The bot must be an administrator in the chat for this to work and must have the can_pin_messages administrator right in the supergroup. Returns True on success.
+// Use this method to clear the list of pinned messages in a forum topic in a forum supergroup chat or a private chat with a user. In the case of a supergroup chat the bot must be an administrator in the chat for this to work and must have the can_pin_messages administrator right in the supergroup. Returns True on success.
 //
 // https://core.telegram.org/bots/api#unpinallforumtopicmessages
 func (b *Bot) UnpinAllForumTopicMessages(ctx context.Context, request *UnpinAllForumTopicMessagesRequest) (r bool, err error) {
@@ -1945,6 +1964,32 @@ func (b *Bot) GetBusinessAccountGifts(ctx context.Context, request *GetBusinessA
 	return res.Result, nil
 }
 
+// Returns the gifts owned and hosted by a user. Returns OwnedGifts on success.
+//
+// https://core.telegram.org/bots/api#getusergifts
+func (b *Bot) GetUserGifts(ctx context.Context, request *GetUserGiftsRequest) (r *OwnedGifts, err error) {
+	res, err := makeRequest[*OwnedGifts](ctx, b.options.Client, b.baseUrl, "getUserGifts", b.options.FloodHandler, request)
+
+	if err != nil {
+		return r, err
+	}
+
+	return res.Result, nil
+}
+
+// Returns the gifts owned by a chat. Returns OwnedGifts on success.
+//
+// https://core.telegram.org/bots/api#getchatgifts
+func (b *Bot) GetChatGifts(ctx context.Context, request *GetChatGiftsRequest) (r *OwnedGifts, err error) {
+	res, err := makeRequest[*OwnedGifts](ctx, b.options.Client, b.baseUrl, "getChatGifts", b.options.FloodHandler, request)
+
+	if err != nil {
+		return r, err
+	}
+
+	return res.Result, nil
+}
+
 // Converts a given regular gift to Telegram Stars. Requires the can_convert_gifts_to_stars business bot right. Returns True on success.
 //
 // https://core.telegram.org/bots/api#convertgifttostars
@@ -2019,6 +2064,25 @@ func (b *Bot) PostStory(ctx context.Context, request *PostStoryRequest) (r *Stor
 // Therefore works faster if you dont need the response value.
 func (b *Bot) PostStoryVoid(ctx context.Context, request *PostStoryRequest) error {
 	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "postStory", b.options.FloodHandler, request)
+}
+
+// Reposts a story on behalf of a business account from another business account. Both business accounts must be managed by the same bot, and the story on the source account must have been posted (or reposted) by the bot. Requires the can_manage_stories business bot right for both business accounts. Returns Story on success.
+//
+// https://core.telegram.org/bots/api#repoststory
+func (b *Bot) RepostStory(ctx context.Context, request *RepostStoryRequest) (r *Story, err error) {
+	res, err := makeRequest[*Story](ctx, b.options.Client, b.baseUrl, "repostStory", b.options.FloodHandler, request)
+
+	if err != nil {
+		return r, err
+	}
+
+	return res.Result, nil
+}
+
+// Does the same as Bot.RepostStory, but parses response body only in case of an error.
+// Therefore works faster if you dont need the response value.
+func (b *Bot) RepostStoryVoid(ctx context.Context, request *RepostStoryRequest) error {
+	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "repostStory", b.options.FloodHandler, request)
 }
 
 // Edits a story previously posted by the bot on behalf of a managed business account. Requires the can_manage_stories business bot right. Returns Story on success.
