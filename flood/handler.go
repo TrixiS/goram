@@ -120,13 +120,13 @@ func (c *CondHandler) Handle(
 
 	select {
 	case <-ctx.Done():
-		return
+		state.mu.Lock()
+		state.flood = false
+		state.mu.Unlock()
 	case <-time.After(duration):
+		state.mu.Lock()
+		state.flood = false
+		state.mu.Unlock()
+		state.cond.Broadcast()
 	}
-
-	state.mu.Lock()
-	state.flood = false
-	state.mu.Unlock()
-
-	state.cond.Broadcast()
 }
