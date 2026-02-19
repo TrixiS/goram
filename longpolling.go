@@ -67,7 +67,12 @@ func LongPollUpdates(
 				}
 			}
 
-			time.Sleep(options.RetryInterval)
+			select {
+			case <-ctx.Done():
+				return
+			case <-time.After(options.RetryInterval):
+				continue
+			}
 		}
 
 		close(c)
