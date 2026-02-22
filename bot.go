@@ -13,7 +13,7 @@ type BotOptions struct {
 	Token        string        // Required
 	Client       *http.Client  // Optional. If Client is nil, http.DefaultClient will be used
 	FloodHandler flood.Handler // Optional. If FloodHandler is nil, 429 flood error will be propagated to the caller of a flooded method
-	BaseUrl      string        // Optional. If BaseUrl is empty, https://api.telegram.org/ will be used
+	BaseUrl      string        // Optional. If BaseUrl is empty, https://api.telegram.org will be used
 }
 
 // Holds all methods of Telegram Bot API.

@@ -11,7 +11,7 @@ type ChatID struct {
 	Username string // Plain username, without leading @
 }
 
-// For json encoding ChatId inside structs
+// For json encoding ChatID inside structs
 func (c ChatID) MarshalJSON() ([]byte, error) {
 	if c.ID != 0 {
 		stringID := strconv.FormatInt(c.ID, 10)
@@ -80,10 +80,10 @@ type InputMedia interface {
 	getMedia() InputFile
 }
 
-// Use this if you need to pass an io.Reader that does not have .Name() method to InputFile.
+// Use this if you need to pass an io.Reader that does not have .Name() method as InputFile.
 //
-// For example: you want to send a photo via Bot.SendPhoto() method, but you have only a bytes.Buffer and the photo filename.
-// Or you have a file, but you want different filename.
+// For example: you want to send a photo via Bot.SendPhoto() method but you have only a bytes.Buffer and a filename.
+// Or you have a file, but you want a different filename.
 type NameReader struct {
 	Reader   io.Reader
 	FileName string
@@ -114,7 +114,7 @@ func (c *CallbackQuery) ChatID() ChatID {
 		return c.Message.Chat.ChatID()
 	}
 
-	return ChatID{ID: c.From.ID}
+	return c.From.ChatID()
 }
 
 // TODO: add support for media groups (fix media group handling)
