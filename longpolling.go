@@ -28,8 +28,8 @@ func LongPollUpdates(
 
 	go func() {
 		errCount := uint(0)
-		checkedForConflict := false
 
+	loop:
 		for {
 			updates, err := bot.GetUpdates(ctx, &options.RequestOptions)
 
@@ -49,14 +49,8 @@ func LongPollUpdates(
 				break
 			}
 
-			if !checkedForConflict {
-				if apiError, ok := err.(*APIError); ok &&
-					apiError.ErrorCode == http.StatusConflict {
-
-					panic(apiError)
-				}
-
-				checkedForConflict = true
+			if apiError, ok := err.(*APIError); ok && apiError.ErrorCode == http.StatusConflict {
+				panic(apiError)
 			}
 
 			if options.MaxErrors > 0 {
@@ -69,7 +63,7 @@ func LongPollUpdates(
 
 			select {
 			case <-ctx.Done():
-				return
+				break loop
 			case <-time.After(options.RetryInterval):
 				continue
 			}
