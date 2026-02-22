@@ -2,7 +2,6 @@ package goram
 
 import (
 	"context"
-	"errors"
 	"net/http"
 	"time"
 )
@@ -45,7 +44,7 @@ func LongPollUpdates(
 				continue
 			}
 
-			if errors.Is(err, context.Canceled) {
+			if err == context.Canceled {
 				break
 			}
 
