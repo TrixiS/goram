@@ -56,6 +56,7 @@ const (
 	MessageEntityTypeTextLink             MessageEntityType = "text_link"
 	MessageEntityTypeTextMention          MessageEntityType = "text_mention"
 	MessageEntityTypeCustomEmoji          MessageEntityType = "custom_emoji"
+	MessageEntityTypeDateTime             MessageEntityType = "date_time"
 )
 
 type ParseMode string

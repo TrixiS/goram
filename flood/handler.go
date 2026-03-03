@@ -44,7 +44,6 @@ func (s *SleepHandler) Handle(
 
 	select {
 	case <-ctx.Done():
-		return
 	case <-time.After(duration):
 	}
 }

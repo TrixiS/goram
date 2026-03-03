@@ -1942,6 +1942,31 @@ func (r *GetUserProfilePhotosRequest) writeMultipart(w *multipart.Writer) {
 	}
 }
 
+// see Bot.GetUserProfileAudios(ctx, &GetUserProfileAudiosRequest{})
+type GetUserProfileAudiosRequest struct {
+	UserID int64 // Unique identifier of the target user
+	Offset int64 // Sequential number of the first audio to be returned. By default, all audios are returned.
+	Limit  int   // Limits the number of audios to be retrieved. Values between 1-100 are accepted. Defaults to 100.
+}
+
+func (r *GetUserProfileAudiosRequest) writeMultipart(w *multipart.Writer) {
+	{
+		b, _ := json.Marshal(r.UserID)
+		fw, _ := w.CreateFormField("user_id")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.Offset)
+		fw, _ := w.CreateFormField("offset")
+		fw.Write(b)
+	}
+	{
+		b, _ := json.Marshal(r.Limit)
+		fw, _ := w.CreateFormField("limit")
+		fw.Write(b)
+	}
+}
+
 // see Bot.SetUserEmojiStatus(ctx, &SetUserEmojiStatusRequest{})
 type SetUserEmojiStatusRequest struct {
 	UserID                    int64  // Unique identifier of the target user
@@ -2075,6 +2100,7 @@ type PromoteChatMemberRequest struct {
 	CanPinMessages          bool   // Pass True if the administrator can pin messages; for supergroups only
 	CanManageTopics         bool   // Pass True if the user is allowed to create, rename, close, and reopen forum topics; for supergroups only
 	CanManageDirectMessages bool   // Pass True if the administrator can manage direct messages within the channel and decline suggested posts; for channels only
+	CanManageTags           bool   // Pass True if the administrator can edit the tags of regular members; for groups and supergroups only
 }
 
 func (r *PromoteChatMemberRequest) writeMultipart(w *multipart.Writer) {
@@ -2164,6 +2190,11 @@ func (r *PromoteChatMemberRequest) writeMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("can_manage_direct_messages")
 		fw.Write(b)
 	}
+	{
+		b, _ := json.Marshal(r.CanManageTags)
+		fw, _ := w.CreateFormField("can_manage_tags")
+		fw.Write(b)
+	}
 }
 
 // see Bot.SetChatAdministratorCustomTitle(ctx, &SetChatAdministratorCustomTitleRequest{})
@@ -2181,6 +2212,25 @@ func (r *SetChatAdministratorCustomTitleRequest) writeMultipart(w *multipart.Wri
 		fw.Write(b)
 	}
 	w.WriteField("custom_title", r.CustomTitle)
+}
+
+// see Bot.SetChatMemberTag(ctx, &SetChatMemberTagRequest{})
+type SetChatMemberTagRequest struct {
+	ChatID ChatID // Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
+	UserID int64  // Unique identifier of the target user
+	Tag    string // New tag for the member; 0-16 characters, emoji are not allowed
+}
+
+func (r *SetChatMemberTagRequest) writeMultipart(w *multipart.Writer) {
+	w.WriteField("chat_id", r.ChatID.String())
+	{
+		b, _ := json.Marshal(r.UserID)
+		fw, _ := w.CreateFormField("user_id")
+		fw.Write(b)
+	}
+	if r.Tag != "" {
+		w.WriteField("tag", r.Tag)
+	}
 }
 
 // see Bot.BanChatSenderChat(ctx, &BanChatSenderChatRequest{})
@@ -2906,6 +2956,19 @@ type GetMyShortDescriptionRequest struct {
 func (r *GetMyShortDescriptionRequest) writeMultipart(w *multipart.Writer) {
 	if r.LanguageCode != "" {
 		w.WriteField("language_code", r.LanguageCode)
+	}
+}
+
+// see Bot.SetMyProfilePhoto(ctx, &SetMyProfilePhotoRequest{})
+type SetMyProfilePhotoRequest struct {
+	Photo *InputProfilePhoto // The new profile photo to set
+}
+
+func (r *SetMyProfilePhotoRequest) writeMultipart(w *multipart.Writer) {
+	{
+		b, _ := json.Marshal(r.Photo)
+		fw, _ := w.CreateFormField("photo")
+		fw.Write(b)
 	}
 }
 

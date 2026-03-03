@@ -491,7 +491,7 @@ func (b *Bot) SendDiceVoid(ctx context.Context, request *SendDiceRequest) error 
 	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "sendDice", b.options.FloodHandler, request)
 }
 
-// Use this method to stream a partial message to a user while the message is being generated; supported only for bots with forum topic mode enabled. Returns True on success.
+// Use this method to stream a partial message to a user while the message is being generated. Returns True on success.
 //
 // https://core.telegram.org/bots/api#sendmessagedraft
 func (b *Bot) SendMessageDraft(ctx context.Context, request *SendMessageDraftRequest) (r bool, err error) {
@@ -555,6 +555,19 @@ func (b *Bot) SetMessageReactionVoid(ctx context.Context, request *SetMessageRea
 // https://core.telegram.org/bots/api#getuserprofilephotos
 func (b *Bot) GetUserProfilePhotos(ctx context.Context, request *GetUserProfilePhotosRequest) (r *UserProfilePhotos, err error) {
 	res, err := makeRequest[*UserProfilePhotos](ctx, b.options.Client, b.baseUrl, "getUserProfilePhotos", b.options.FloodHandler, request)
+
+	if err != nil {
+		return r, err
+	}
+
+	return res.Result, nil
+}
+
+// Use this method to get a list of profile audios for a user. Returns a UserProfileAudios object.
+//
+// https://core.telegram.org/bots/api#getuserprofileaudios
+func (b *Bot) GetUserProfileAudios(ctx context.Context, request *GetUserProfileAudiosRequest) (r *UserProfileAudios, err error) {
+	res, err := makeRequest[*UserProfileAudios](ctx, b.options.Client, b.baseUrl, "getUserProfileAudios", b.options.FloodHandler, request)
 
 	if err != nil {
 		return r, err
@@ -690,6 +703,25 @@ func (b *Bot) SetChatAdministratorCustomTitle(ctx context.Context, request *SetC
 // Therefore works faster if you dont need the response value.
 func (b *Bot) SetChatAdministratorCustomTitleVoid(ctx context.Context, request *SetChatAdministratorCustomTitleRequest) error {
 	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "setChatAdministratorCustomTitle", b.options.FloodHandler, request)
+}
+
+// Use this method to set a tag for a regular member in a group or a supergroup. The bot must be an administrator in the chat for this to work and must have the can_manage_tags administrator right. Returns True on success.
+//
+// https://core.telegram.org/bots/api#setchatmembertag
+func (b *Bot) SetChatMemberTag(ctx context.Context, request *SetChatMemberTagRequest) (r bool, err error) {
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "setChatMemberTag", b.options.FloodHandler, request)
+
+	if err != nil {
+		return r, err
+	}
+
+	return res.Result, nil
+}
+
+// Does the same as Bot.SetChatMemberTag, but parses response body only in case of an error.
+// Therefore works faster if you dont need the response value.
+func (b *Bot) SetChatMemberTagVoid(ctx context.Context, request *SetChatMemberTagRequest) error {
+	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "setChatMemberTag", b.options.FloodHandler, request)
 }
 
 // Use this method to ban a channel chat in a supergroup or a channel. Until the chat is unbanned, the owner of the banned chat won't be able to send messages on behalf of any of their channels. The bot must be an administrator in the supergroup or channel for this to work and must have the appropriate administrator rights. Returns True on success.
@@ -1156,7 +1188,7 @@ func (b *Bot) GetForumTopicIconStickers(ctx context.Context) (r []Sticker, err e
 	return res.Result, nil
 }
 
-// Use this method to create a topic in a forum supergroup chat. The bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator rights. Returns information about the created topic as a ForumTopic object.
+// Use this method to create a topic in a forum supergroup chat or a private chat with a user. In the case of a supergroup chat the bot must be an administrator in the chat for this to work and must have the can_manage_topics administrator right. Returns information about the created topic as a ForumTopic object.
 //
 // https://core.telegram.org/bots/api#createforumtopic
 func (b *Bot) CreateForumTopic(ctx context.Context, request *CreateForumTopicRequest) (r *ForumTopic, err error) {
@@ -1568,6 +1600,38 @@ func (b *Bot) SetMyShortDescriptionVoid(ctx context.Context, request *SetMyShort
 // https://core.telegram.org/bots/api#getmyshortdescription
 func (b *Bot) GetMyShortDescription(ctx context.Context, request *GetMyShortDescriptionRequest) (r *BotShortDescription, err error) {
 	res, err := makeRequest[*BotShortDescription](ctx, b.options.Client, b.baseUrl, "getMyShortDescription", b.options.FloodHandler, request)
+
+	if err != nil {
+		return r, err
+	}
+
+	return res.Result, nil
+}
+
+// Changes the profile photo of the bot. Returns True on success.
+//
+// https://core.telegram.org/bots/api#setmyprofilephoto
+func (b *Bot) SetMyProfilePhoto(ctx context.Context, request *SetMyProfilePhotoRequest) (r bool, err error) {
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "setMyProfilePhoto", b.options.FloodHandler, request)
+
+	if err != nil {
+		return r, err
+	}
+
+	return res.Result, nil
+}
+
+// Does the same as Bot.SetMyProfilePhoto, but parses response body only in case of an error.
+// Therefore works faster if you dont need the response value.
+func (b *Bot) SetMyProfilePhotoVoid(ctx context.Context, request *SetMyProfilePhotoRequest) error {
+	return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "setMyProfilePhoto", b.options.FloodHandler, request)
+}
+
+// Removes the profile photo of the bot. Requires no parameters. Returns True on success.
+//
+// https://core.telegram.org/bots/api#removemyprofilephoto
+func (b *Bot) RemoveMyProfilePhoto(ctx context.Context) (r bool, err error) {
+	res, err := makeRequest[bool](ctx, b.options.Client, b.baseUrl, "removeMyProfilePhoto", b.options.FloodHandler, nil)
 
 	if err != nil {
 		return r, err

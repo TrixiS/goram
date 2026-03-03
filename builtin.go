@@ -50,7 +50,7 @@ type NamedReader interface {
 //
 // You can use file id of existing file or any struct that implements NamedReader interface.
 // Also you can use a url in the file id field to send files from the internet.
-// If FileId and Reader are both set, file id will be used.
+// If FileID and Reader are both set, FileID will be used.
 //
 // See goram.NameReader also.
 type InputFile struct {
@@ -82,7 +82,7 @@ type InputMedia interface {
 
 // Use this if you need to pass an io.Reader that does not have .Name() method as InputFile.
 //
-// For example: you want to send a photo via Bot.SendPhoto() method but you have only a bytes.Buffer and a filename.
+// For example: you want to send a photo via Bot.SendPhoto() method but you only have a bytes.Buffer and a filename.
 // Or you have a file, but you want a different filename.
 type NameReader struct {
 	Reader   io.Reader
@@ -116,5 +116,3 @@ func (c *CallbackQuery) ChatID() ChatID {
 
 	return c.From.ChatID()
 }
-
-// TODO: add support for media groups (fix media group handling)

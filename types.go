@@ -51,20 +51,21 @@ type WebhookInfo struct {
 //
 // https://core.telegram.org/bots/api#user
 type User struct {
-	ID                      int64  `json:"id"`                                    // Unique identifier for this user or bot. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a 64-bit integer or double-precision float type are safe for storing this identifier.
-	IsBot                   bool   `json:"is_bot"`                                // True, if this user is a bot
-	FirstName               string `json:"first_name"`                            // User's or bot's first name
-	LastName                string `json:"last_name,omitempty"`                   // Optional. User's or bot's last name
-	Username                string `json:"username,omitempty"`                    // Optional. User's or bot's username
-	LanguageCode            string `json:"language_code,omitempty"`               // Optional. IETF language tag of the user's language
-	IsPremium               bool   `json:"is_premium,omitempty"`                  // Optional. True, if this user is a Telegram Premium user
-	AddedToAttachmentMenu   bool   `json:"added_to_attachment_menu,omitempty"`    // Optional. True, if this user added the bot to the attachment menu
-	CanJoinGroups           bool   `json:"can_join_groups,omitempty"`             // Optional. True, if the bot can be invited to groups. Returned only in getMe.
-	CanReadAllGroupMessages bool   `json:"can_read_all_group_messages,omitempty"` // Optional. True, if privacy mode is disabled for the bot. Returned only in getMe.
-	SupportsInlineQueries   bool   `json:"supports_inline_queries,omitempty"`     // Optional. True, if the bot supports inline queries. Returned only in getMe.
-	CanConnectToBusiness    bool   `json:"can_connect_to_business,omitempty"`     // Optional. True, if the bot can be connected to a Telegram Business account to receive its messages. Returned only in getMe.
-	HasMainWebApp           bool   `json:"has_main_web_app,omitempty"`            // Optional. True, if the bot has a main Web App. Returned only in getMe.
-	HasTopicsEnabled        bool   `json:"has_topics_enabled,omitempty"`          // Optional. True, if the bot has forum topic mode enabled in private chats. Returned only in getMe.
+	ID                        int64  `json:"id"`                                      // Unique identifier for this user or bot. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a 64-bit integer or double-precision float type are safe for storing this identifier.
+	IsBot                     bool   `json:"is_bot"`                                  // True, if this user is a bot
+	FirstName                 string `json:"first_name"`                              // User's or bot's first name
+	LastName                  string `json:"last_name,omitempty"`                     // Optional. User's or bot's last name
+	Username                  string `json:"username,omitempty"`                      // Optional. User's or bot's username
+	LanguageCode              string `json:"language_code,omitempty"`                 // Optional. IETF language tag of the user's language
+	IsPremium                 bool   `json:"is_premium,omitempty"`                    // Optional. True, if this user is a Telegram Premium user
+	AddedToAttachmentMenu     bool   `json:"added_to_attachment_menu,omitempty"`      // Optional. True, if this user added the bot to the attachment menu
+	CanJoinGroups             bool   `json:"can_join_groups,omitempty"`               // Optional. True, if the bot can be invited to groups. Returned only in getMe.
+	CanReadAllGroupMessages   bool   `json:"can_read_all_group_messages,omitempty"`   // Optional. True, if privacy mode is disabled for the bot. Returned only in getMe.
+	SupportsInlineQueries     bool   `json:"supports_inline_queries,omitempty"`       // Optional. True, if the bot supports inline queries. Returned only in getMe.
+	CanConnectToBusiness      bool   `json:"can_connect_to_business,omitempty"`       // Optional. True, if the bot can be connected to a Telegram Business account to receive its messages. Returned only in getMe.
+	HasMainWebApp             bool   `json:"has_main_web_app,omitempty"`              // Optional. True, if the bot has a main Web App. Returned only in getMe.
+	HasTopicsEnabled          bool   `json:"has_topics_enabled,omitempty"`            // Optional. True, if the bot has forum topic mode enabled in private chats. Returned only in getMe.
+	AllowsUsersToCreateTopics bool   `json:"allows_users_to_create_topics,omitempty"` // Optional. True, if the bot allows users to create and delete topics in private chats. Returned only in getMe.
 }
 
 // This object represents a chat.
@@ -133,6 +134,7 @@ type ChatFullInfo struct {
 	LinkedChatID                       int64                 `json:"linked_chat_id,omitempty"`                          // Optional. Unique identifier for the linked chat, i.e. the discussion group identifier for a channel and vice versa; for supergroups and channel chats. This identifier may be greater than 32 bits and some programming languages may have difficulty/silent defects in interpreting it. But it is smaller than 52 bits, so a signed 64 bit integer or double-precision float type are safe for storing this identifier.
 	Location                           *ChatLocation         `json:"location,omitempty"`                                // Optional. For supergroups, the location to which the supergroup is connected
 	Rating                             *UserRating           `json:"rating,omitempty"`                                  // Optional. For private chats, the rating of the user if any
+	FirstProfileAudio                  *Audio                `json:"first_profile_audio,omitempty"`                     // Optional. For private chats, the first audio added to the profile of the user
 	UniqueGiftColors                   *UniqueGiftColors     `json:"unique_gift_colors,omitempty"`                      // Optional. The color scheme based on a unique gift that must be used for the chat's name, message replies and link previews
 	PaidMessageStarCount               int                   `json:"paid_message_star_count,omitempty"`                 // Optional. The number of Telegram Stars a general user have to pay to send a message to the chat
 }
@@ -148,6 +150,7 @@ type Message struct {
 	SenderChat                    *Chat                          `json:"sender_chat,omitempty"`                       // Optional. Sender of the message when sent on behalf of a chat. For example, the supergroup itself for messages sent by its anonymous administrators or a linked channel for messages automatically forwarded to the channel's discussion group. For backward compatibility, if the message was sent on behalf of a chat, the field from contains a fake sender user in non-channel chats.
 	SenderBoostCount              int                            `json:"sender_boost_count,omitempty"`                // Optional. If the sender of the message boosted the chat, the number of boosts added by the user
 	SenderBusinessBot             *User                          `json:"sender_business_bot,omitempty"`               // Optional. The bot that actually sent the message on behalf of the business account. Available only for outgoing messages sent on behalf of the connected business account.
+	SenderTag                     string                         `json:"sender_tag,omitempty"`                        // Optional. Tag or custom title of the sender of the message; for supergroups only
 	Date                          int                            `json:"date"`                                        // Date the message was sent in Unix time. It is always a positive number, representing a valid date.
 	BusinessConnectionID          string                         `json:"business_connection_id,omitempty"`            // Optional. Unique identifier of the business connection from which the message was received. If non-empty, the message belongs to a chat of the corresponding business account that is independent from any potential bot chat which might share the same identifier.
 	Chat                          *Chat                          `json:"chat"`                                        // Chat the message belongs to
@@ -164,7 +167,7 @@ type Message struct {
 	HasProtectedContent           bool                           `json:"has_protected_content,omitempty"`             // Optional. True, if the message can't be forwarded
 	IsFromOffline                 bool                           `json:"is_from_offline,omitempty"`                   // Optional. True, if the message was sent by an implicit action, for example, as an away or a greeting business message, or as a scheduled message
 	IsPaidPost                    bool                           `json:"is_paid_post,omitempty"`                      // Optional. True, if the message is a paid post. Note that such posts must not be deleted for 24 hours to receive the payment and can't be edited.
-	MediaGroupID                  string                         `json:"media_group_id,omitempty"`                    // Optional. The unique identifier of a media message group this message belongs to
+	MediaGroupID                  string                         `json:"media_group_id,omitempty"`                    // Optional. The unique identifier inside this chat of a media message group this message belongs to
 	AuthorSignature               string                         `json:"author_signature,omitempty"`                  // Optional. Signature of the post author for messages in channels, or the custom title of an anonymous group administrator
 	PaidStarCount                 int                            `json:"paid_star_count,omitempty"`                   // Optional. The number of Telegram Stars that were paid by the sender of the message to send it
 	Text                          string                         `json:"text,omitempty"`                              // Optional. For text messages, the actual UTF-8 text of the message
@@ -195,6 +198,8 @@ type Message struct {
 	Location                      *Location                      `json:"location,omitempty"`                          // Optional. Message is a shared location, information about the location
 	NewChatMembers                []User                         `json:"new_chat_members,omitempty"`                  // Optional. New members that were added to the group or supergroup and information about them (the bot itself may be one of these members)
 	LeftChatMember                *User                          `json:"left_chat_member,omitempty"`                  // Optional. A member was removed from the group, information about them (this member may be the bot itself)
+	ChatOwnerLeft                 *ChatOwnerLeft                 `json:"chat_owner_left,omitempty"`                   // Optional. Service message: chat owner has left
+	ChatOwnerChanged              *ChatOwnerChanged              `json:"chat_owner_changed,omitempty"`                // Optional. Service message: chat owner has changed
 	NewChatTitle                  string                         `json:"new_chat_title,omitempty"`                    // Optional. A chat title was changed to this value
 	NewChatPhoto                  []PhotoSize                    `json:"new_chat_photo,omitempty"`                    // Optional. A chat photo was change to this value
 	DeleteChatPhoto               bool                           `json:"delete_chat_photo,omitempty"`                 // Optional. Service message: the chat photo was deleted
@@ -257,13 +262,15 @@ type MessageId struct {
 //
 // https://core.telegram.org/bots/api#messageentity
 type MessageEntity struct {
-	Type          MessageEntityType `json:"type"`                      // Type of the entity. Currently, can be "mention" (@username), "hashtag" (#hashtag or #hashtag@chatusername), "cashtag" ($USD or $USD@chatusername), "bot_command" (/start@jobs_bot), "url" (https://telegram.org), "email" (do-not-reply@telegram.org), "phone_number" (+1-212-555-0123), "bold" (bold text), "italic" (italic text), "underline" (underlined text), "strikethrough" (strikethrough text), "spoiler" (spoiler message), "blockquote" (block quotation), "expandable_blockquote" (collapsed-by-default block quotation), "code" (monowidth string), "pre" (monowidth block), "text_link" (for clickable text URLs), "text_mention" (for users without usernames), "custom_emoji" (for inline custom emoji stickers)
-	Offset        int64             `json:"offset"`                    // Offset in UTF-16 code units to the start of the entity
-	Length        int               `json:"length"`                    // Length of the entity in UTF-16 code units
-	Url           string            `json:"url,omitempty"`             // Optional. For "text_link" only, URL that will be opened after user taps on the text
-	User          *User             `json:"user,omitempty"`            // Optional. For "text_mention" only, the mentioned user
-	Language      string            `json:"language,omitempty"`        // Optional. For "pre" only, the programming language of the entity text
-	CustomEmojiID string            `json:"custom_emoji_id,omitempty"` // Optional. For "custom_emoji" only, unique identifier of the custom emoji. Use getCustomEmojiStickers to get full information about the sticker
+	Type           MessageEntityType `json:"type"`                       // Type of the entity. Currently, can be "mention" (@username), "hashtag" (#hashtag or #hashtag@chatusername), "cashtag" ($USD or $USD@chatusername), "bot_command" (/start@jobs_bot), "url" (https://telegram.org), "email" (do-not-reply@telegram.org), "phone_number" (+1-212-555-0123), "bold" (bold text), "italic" (italic text), "underline" (underlined text), "strikethrough" (strikethrough text), "spoiler" (spoiler message), "blockquote" (block quotation), "expandable_blockquote" (collapsed-by-default block quotation), "code" (monowidth string), "pre" (monowidth block), "text_link" (for clickable text URLs), "text_mention" (for users without usernames), "custom_emoji" (for inline custom emoji stickers), or "date_time" (for formatted date and time)
+	Offset         int64             `json:"offset"`                     // Offset in UTF-16 code units to the start of the entity
+	Length         int               `json:"length"`                     // Length of the entity in UTF-16 code units
+	Url            string            `json:"url,omitempty"`              // Optional. For "text_link" only, URL that will be opened after user taps on the text
+	User           *User             `json:"user,omitempty"`             // Optional. For "text_mention" only, the mentioned user
+	Language       string            `json:"language,omitempty"`         // Optional. For "pre" only, the programming language of the entity text
+	CustomEmojiID  string            `json:"custom_emoji_id,omitempty"`  // Optional. For "custom_emoji" only, unique identifier of the custom emoji. Use getCustomEmojiStickers to get full information about the sticker
+	UnixTime       int               `json:"unix_time,omitempty"`        // Optional. For "date_time" only, the Unix time associated with the entity
+	DateTimeFormat string            `json:"date_time_format,omitempty"` // Optional. For "date_time" only, the string that defines the formatting of the date and time. See date-time entity formatting for more details.
 }
 
 // This object contains information about the quoted part of a message that is replied to by the given message.
@@ -404,21 +411,34 @@ type Story struct {
 	ID   int64 `json:"id"`   // Unique identifier for the story in the chat
 }
 
+// This object represents a video file of a specific quality.
+//
+// https://core.telegram.org/bots/api#videoquality
+type VideoQuality struct {
+	FileID       string `json:"file_id"`             // Identifier for this file, which can be used to download or reuse the file
+	FileUniqueID string `json:"file_unique_id"`      // Unique identifier for this file, which is supposed to be the same over time and for different bots. Can't be used to download or reuse the file.
+	Width        int    `json:"width"`               // Video width
+	Height       int    `json:"height"`              // Video height
+	Codec        string `json:"codec"`               // Codec that was used to encode the video, for example, "h264", "h265", or "av01"
+	FileSize     int    `json:"file_size,omitempty"` // Optional. File size in bytes. It can be bigger than 2^31 and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a signed 64-bit integer or double-precision float type are safe for storing this value.
+}
+
 // This object represents a video file.
 //
 // https://core.telegram.org/bots/api#video
 type Video struct {
-	FileID         string      `json:"file_id"`                   // Identifier for this file, which can be used to download or reuse the file
-	FileUniqueID   string      `json:"file_unique_id"`            // Unique identifier for this file, which is supposed to be the same over time and for different bots. Can't be used to download or reuse the file.
-	Width          int         `json:"width"`                     // Video width as defined by the sender
-	Height         int         `json:"height"`                    // Video height as defined by the sender
-	Duration       int         `json:"duration"`                  // Duration of the video in seconds as defined by the sender
-	Thumbnail      *PhotoSize  `json:"thumbnail,omitempty"`       // Optional. Video thumbnail
-	Cover          []PhotoSize `json:"cover,omitempty"`           // Optional. Available sizes of the cover of the video in the message
-	StartTimestamp int         `json:"start_timestamp,omitempty"` // Optional. Timestamp in seconds from which the video will play in the message
-	FileName       string      `json:"file_name,omitempty"`       // Optional. Original filename as defined by the sender
-	MimeType       string      `json:"mime_type,omitempty"`       // Optional. MIME type of the file as defined by the sender
-	FileSize       int         `json:"file_size,omitempty"`       // Optional. File size in bytes. It can be bigger than 2^31 and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a signed 64-bit integer or double-precision float type are safe for storing this value.
+	FileID         string         `json:"file_id"`                   // Identifier for this file, which can be used to download or reuse the file
+	FileUniqueID   string         `json:"file_unique_id"`            // Unique identifier for this file, which is supposed to be the same over time and for different bots. Can't be used to download or reuse the file.
+	Width          int            `json:"width"`                     // Video width as defined by the sender
+	Height         int            `json:"height"`                    // Video height as defined by the sender
+	Duration       int            `json:"duration"`                  // Duration of the video in seconds as defined by the sender
+	Thumbnail      *PhotoSize     `json:"thumbnail,omitempty"`       // Optional. Video thumbnail
+	Cover          []PhotoSize    `json:"cover,omitempty"`           // Optional. Available sizes of the cover of the video in the message
+	StartTimestamp int            `json:"start_timestamp,omitempty"` // Optional. Timestamp in seconds from which the video will play in the message
+	Qualities      []VideoQuality `json:"qualities,omitempty"`       // Optional. List of available qualities of the video
+	FileName       string         `json:"file_name,omitempty"`       // Optional. Original filename as defined by the sender
+	MimeType       string         `json:"mime_type,omitempty"`       // Optional. MIME type of the file as defined by the sender
+	FileSize       int            `json:"file_size,omitempty"`       // Optional. File size in bytes. It can be bigger than 2^31 and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a signed 64-bit integer or double-precision float type are safe for storing this value.
 }
 
 // This object represents a video message (available in Telegram apps as of v.4.0).
@@ -966,6 +986,14 @@ type UserProfilePhotos struct {
 	Photos     [][]PhotoSize `json:"photos"`      // Requested profile pictures (in up to 4 sizes each)
 }
 
+// This object represents the audios displayed on a user's profile.
+//
+// https://core.telegram.org/bots/api#userprofileaudios
+type UserProfileAudios struct {
+	TotalCount int     `json:"total_count"` // Total number of profile audios for the target user
+	Audios     []Audio `json:"audios"`      // Requested profile audios
+}
+
 // This object represents a file ready to be downloaded. The file can be downloaded via the link https://api.telegram.org/file/bot<token>/<file_path>. It is guaranteed that the link will be valid for at least 1 hour. When the link expires, a new one can be requested by calling getFile.
 //
 // https://core.telegram.org/bots/api#file
@@ -995,19 +1023,19 @@ type ReplyKeyboardMarkup struct {
 	Selective             bool               `json:"selective,omitempty"`               // Optional. Use this parameter if you want to show the keyboard to specific users only. Targets: 1) users that are @mentioned in the text of the Message object; 2) if the bot's message is a reply to a message in the same chat and forum topic, sender of the original message. Example: A user requests to change the bot's language, bot replies to the request with a keyboard to select the new language. Other users in the group don't see the keyboard.
 }
 
-// This object represents one button of the reply keyboard. At most one of the optional fields must be used to specify type of the button. For simple text buttons, String can be used instead of this object to specify the button text.
-//
-// Note: request_users and request_chat options will only work in Telegram versions released after 3 February, 2023. Older clients will display unsupported message.
+// This object represents one button of the reply keyboard. At most one of the fields other than text, icon_custom_emoji_id, and style must be used to specify the type of the button. For simple text buttons, String can be used instead of this object to specify the button text.
 //
 // https://core.telegram.org/bots/api#keyboardbutton
 type KeyboardButton struct {
-	Text            string                      `json:"text"`                       // Text of the button. If none of the optional fields are used, it will be sent as a message when the button is pressed
-	RequestUsers    *KeyboardButtonRequestUsers `json:"request_users,omitempty"`    // Optional. If specified, pressing the button will open a list of suitable users. Identifiers of selected users will be sent to the bot in a "users_shared" service message. Available in private chats only.
-	RequestChat     *KeyboardButtonRequestChat  `json:"request_chat,omitempty"`     // Optional. If specified, pressing the button will open a list of suitable chats. Tapping on a chat will send its identifier to the bot in a "chat_shared" service message. Available in private chats only.
-	RequestContact  bool                        `json:"request_contact,omitempty"`  // Optional. If True, the user's phone number will be sent as a contact when the button is pressed. Available in private chats only.
-	RequestLocation bool                        `json:"request_location,omitempty"` // Optional. If True, the user's current location will be sent when the button is pressed. Available in private chats only.
-	RequestPoll     *KeyboardButtonPollType     `json:"request_poll,omitempty"`     // Optional. If specified, the user will be asked to create a poll and send it to the bot when the button is pressed. Available in private chats only.
-	WebApp          *WebAppInfo                 `json:"web_app,omitempty"`          // Optional. If specified, the described Web App will be launched when the button is pressed. The Web App will be able to send a "web_app_data" service message. Available in private chats only.
+	Text              string                      `json:"text"`                           // Text of the button. If none of the fields other than text, icon_custom_emoji_id, and style are used, it will be sent as a message when the button is pressed
+	IconCustomEmojiID string                      `json:"icon_custom_emoji_id,omitempty"` // Optional. Unique identifier of the custom emoji shown before the text of the button. Can only be used by bots that purchased additional usernames on Fragment or in the messages directly sent by the bot to private, group and supergroup chats if the owner of the bot has a Telegram Premium subscription.
+	Style             string                      `json:"style,omitempty"`                // Optional. Style of the button. Must be one of "danger" (red), "success" (green) or "primary" (blue). If omitted, then an app-specific style is used.
+	RequestUsers      *KeyboardButtonRequestUsers `json:"request_users,omitempty"`        // Optional. If specified, pressing the button will open a list of suitable users. Identifiers of selected users will be sent to the bot in a "users_shared" service message. Available in private chats only.
+	RequestChat       *KeyboardButtonRequestChat  `json:"request_chat,omitempty"`         // Optional. If specified, pressing the button will open a list of suitable chats. Tapping on a chat will send its identifier to the bot in a "chat_shared" service message. Available in private chats only.
+	RequestContact    bool                        `json:"request_contact,omitempty"`      // Optional. If True, the user's phone number will be sent as a contact when the button is pressed. Available in private chats only.
+	RequestLocation   bool                        `json:"request_location,omitempty"`     // Optional. If True, the user's current location will be sent when the button is pressed. Available in private chats only.
+	RequestPoll       *KeyboardButtonPollType     `json:"request_poll,omitempty"`         // Optional. If specified, the user will be asked to create a poll and send it to the bot when the button is pressed. Available in private chats only.
+	WebApp            *WebAppInfo                 `json:"web_app,omitempty"`              // Optional. If specified, the described Web App will be launched when the button is pressed. The Web App will be able to send a "web_app_data" service message. Available in private chats only.
 }
 
 // This object defines the criteria used to request suitable users. Information about the selected users will be shared with the bot when the corresponding button is pressed. More about requesting users: https://core.telegram.org/bots/features#chat-and-user-selection
@@ -1062,11 +1090,13 @@ type InlineKeyboardMarkup struct {
 	InlineKeyboard [][]InlineKeyboardButton `json:"inline_keyboard"` // Array of button rows, each represented by an Array of InlineKeyboardButton objects
 }
 
-// This object represents one button of an inline keyboard. Exactly one of the optional fields must be used to specify type of the button.
+// This object represents one button of an inline keyboard. Exactly one of the fields other than text, icon_custom_emoji_id, and style must be used to specify the type of the button.
 //
 // https://core.telegram.org/bots/api#inlinekeyboardbutton
 type InlineKeyboardButton struct {
 	Text                         string                       `json:"text"`                                       // Label text on the button
+	IconCustomEmojiID            string                       `json:"icon_custom_emoji_id,omitempty"`             // Optional. Unique identifier of the custom emoji shown before the text of the button. Can only be used by bots that purchased additional usernames on Fragment or in the messages directly sent by the bot to private, group and supergroup chats if the owner of the bot has a Telegram Premium subscription.
+	Style                        string                       `json:"style,omitempty"`                            // Optional. Style of the button. Must be one of "danger" (red), "success" (green) or "primary" (blue). If omitted, then an app-specific style is used.
 	Url                          string                       `json:"url,omitempty"`                              // Optional. HTTP or tg:// URL to be opened when the button is pressed. Links tg://user?id=<user_id> can be used to mention a user by their identifier without using a username, if this is allowed by their privacy settings.
 	CallbackData                 string                       `json:"callback_data,omitempty"`                    // Optional. Data to be sent in a callback query to the bot when the button is pressed, 1-64 bytes
 	WebApp                       *WebAppInfo                  `json:"web_app,omitempty"`                          // Optional. Description of the Web App that will be launched when the user presses the button. The Web App will be able to send an arbitrary message on behalf of the user using the method answerWebAppQuery. Available only in private chats between a user and the bot. Not supported for messages sent on behalf of a Telegram Business account.
@@ -1178,6 +1208,7 @@ type ChatAdministratorRights struct {
 	CanPinMessages          bool `json:"can_pin_messages,omitempty"`           // Optional. True, if the user is allowed to pin messages; for groups and supergroups only
 	CanManageTopics         bool `json:"can_manage_topics,omitempty"`          // Optional. True, if the user is allowed to create, rename, close, and reopen forum topics; for supergroups only
 	CanManageDirectMessages bool `json:"can_manage_direct_messages,omitempty"` // Optional. True, if the administrator can manage direct messages of the channel and decline suggested posts; for channels only
+	CanManageTags           bool `json:"can_manage_tags,omitempty"`            // Optional. True, if the administrator can edit the tags of regular members; for groups and supergroups only. If omitted defaults to the value of can_pin_messages.
 }
 
 // This object represents changes in the status of a chat member.
@@ -1230,6 +1261,8 @@ type ChatMember struct {
 	CanPinMessages          bool   `json:"can_pin_messages,omitempty"`           // Optional. True, if the user is allowed to pin messages; for groups and supergroups only
 	CanManageTopics         bool   `json:"can_manage_topics,omitempty"`          // Optional. True, if the user is allowed to create, rename, close, and reopen forum topics; for supergroups only
 	CanManageDirectMessages bool   `json:"can_manage_direct_messages,omitempty"` // Optional. True, if the administrator can manage direct messages of the channel and decline suggested posts; for channels only
+	CanManageTags           bool   `json:"can_manage_tags,omitempty"`            // Optional. True, if the administrator can edit the tags of regular members; for groups and supergroups only. If omitted defaults to the value of can_pin_messages.
+	Tag                     string `json:"tag,omitempty"`                        // Optional. Tag of the member
 	UntilDate               int    `json:"until_date,omitempty"`                 // Optional. Date when the user's subscription will expire; Unix time
 	IsMember                bool   `json:"is_member"`                            // True, if the user is a member of the chat at the moment of the request
 	CanSendMessages         bool   `json:"can_send_messages"`                    // True, if the user is allowed to send text messages, contacts, giveaways, giveaway winners, invoices, locations and venues
@@ -1242,6 +1275,7 @@ type ChatMember struct {
 	CanSendPolls            bool   `json:"can_send_polls"`                       // True, if the user is allowed to send polls and checklists
 	CanSendOtherMessages    bool   `json:"can_send_other_messages"`              // True, if the user is allowed to send animations, games, stickers and use inline bots
 	CanAddWebPagePreviews   bool   `json:"can_add_web_page_previews"`            // True, if the user is allowed to add web page previews to their messages
+	CanEditTag              bool   `json:"can_edit_tag"`                         // True, if the user is allowed to edit their own tag
 }
 
 // Represents a join request sent to a chat.
@@ -1270,6 +1304,7 @@ type ChatPermissions struct {
 	CanSendPolls          bool `json:"can_send_polls,omitempty"`            // Optional. True, if the user is allowed to send polls and checklists
 	CanSendOtherMessages  bool `json:"can_send_other_messages,omitempty"`   // Optional. True, if the user is allowed to send animations, games, stickers and use inline bots
 	CanAddWebPagePreviews bool `json:"can_add_web_page_previews,omitempty"` // Optional. True, if the user is allowed to add web page previews to their messages
+	CanEditTag            bool `json:"can_edit_tag,omitempty"`              // Optional. True, if the user is allowed to edit their own tag
 	CanChangeInfo         bool `json:"can_change_info,omitempty"`           // Optional. True, if the user is allowed to change the chat title, photo and other settings. Ignored in public supergroups
 	CanInviteUsers        bool `json:"can_invite_users,omitempty"`          // Optional. True, if the user is allowed to invite new users to the chat
 	CanPinMessages        bool `json:"can_pin_messages,omitempty"`          // Optional. True, if the user is allowed to pin messages. Ignored in public supergroups
@@ -1492,7 +1527,8 @@ type Gifts struct {
 type UniqueGiftModel struct {
 	Name           string   `json:"name"`             // Name of the model
 	Sticker        *Sticker `json:"sticker"`          // The sticker that represents the unique gift
-	RarityPerMille int      `json:"rarity_per_mille"` // The number of unique gifts that receive this model for every 1000 gifts upgraded
+	RarityPerMille int      `json:"rarity_per_mille"` // The number of unique gifts that receive this model for every 1000 gift upgrades. Always 0 for crafted gifts.
+	Rarity         string   `json:"rarity,omitempty"` // Optional. Rarity of the model if it is a crafted model. Currently, can be "uncommon", "rare", "epic", or "legendary".
 }
 
 // This object describes the symbol shown on the pattern of a unique gift.
@@ -1547,6 +1583,7 @@ type UniqueGift struct {
 	Symbol           *UniqueGiftSymbol   `json:"symbol"`                       // Symbol of the gift
 	Backdrop         *UniqueGiftBackdrop `json:"backdrop"`                     // Backdrop of the gift
 	IsPremium        bool                `json:"is_premium,omitempty"`         // Optional. True, if the original regular gift was exclusively purchaseable by Telegram Premium subscribers
+	IsBurned         bool                `json:"is_burned,omitempty"`          // Optional. True, if the gift was used to craft another gift and isn't available anymore
 	IsFromBlockchain bool                `json:"is_from_blockchain,omitempty"` // Optional. True, if the gift is assigned from the TON blockchain and can't be resold or transferred in Telegram
 	Colors           *UniqueGiftColors   `json:"colors,omitempty"`             // Optional. The color scheme that can be used by the gift's owner for the chat's name, replies to messages and link previews; for business account gifts and gifts that are currently on sale only
 	PublisherChat    *Chat               `json:"publisher_chat,omitempty"`     // Optional. Information about the chat that published the gift
@@ -1749,6 +1786,20 @@ type ChatBoostRemoved struct {
 	BoostID    string           `json:"boost_id"`    // Unique identifier of the boost
 	RemoveDate int              `json:"remove_date"` // Point in time (Unix timestamp) when the boost was removed
 	Source     *ChatBoostSource `json:"source"`      // Source of the removed boost
+}
+
+// Describes a service message about the chat owner leaving the chat.
+//
+// https://core.telegram.org/bots/api#chatownerleft
+type ChatOwnerLeft struct {
+	NewOwner *User `json:"new_owner,omitempty"` // Optional. The user which will be the new owner of the chat if the previous owner does not return to the chat
+}
+
+// Describes a service message about an ownership change in the chat.
+//
+// https://core.telegram.org/bots/api#chatownerchanged
+type ChatOwnerChanged struct {
+	NewOwner *User `json:"new_owner"` // The new owner of the chat
 }
 
 // This object represents a list of boosts added to a chat by a user.
