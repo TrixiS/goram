@@ -56,44 +56,37 @@ func (b *Builder[B]) Break() *Builder[B] {
 
 // Resizes each row in the keyboard to fit at most rowSize buttons.
 func (b *Builder[B]) Adjust(rowSize int) *Builder[B] {
+	if rowSize <= 0 || len(b.rows) == 0 {
+		return b
+	}
+
 	newRows := make([][]B, 0, len(b.rows))
-	currentRow := make([]B, 0, rowSize)
+	currentRow := []B{}
 
-	lastIdx := len(b.rows) - 1
-
-rowsLoop:
 	for i, row := range b.rows {
-		added := 0
-		shouldBreak := i < len(b.rows)-1 && b.rows[i+1] == nil
+		shouldFlush := i < len(b.rows)-1 && b.rows[i+1] == nil
 
-		for added < len(row) {
-			toAdd := min(rowSize-len(currentRow), len(row)-added)
-
-			currentRow = append(currentRow, row[added:added+toAdd]...)
-
-			added += toAdd
-			isLastAdd := i == lastIdx && added == len(row)
-
-			if len(currentRow) == rowSize || isLastAdd {
-				newRows = append(newRows, currentRow)
-
-				if isLastAdd {
-					break rowsLoop
-				}
-
+		for _, v := range row {
+			if currentRow == nil {
 				currentRow = make([]B, 0, rowSize)
-				continue
 			}
 
-			if shouldBreak {
-				if len(currentRow) > 0 {
-					newRows = append(newRows, currentRow)
-					currentRow = []B{}
-				}
+			currentRow = append(currentRow, v)
 
-				shouldBreak = false
+			if len(currentRow) == rowSize {
+				newRows = append(newRows, currentRow)
+				currentRow = nil
 			}
 		}
+
+		if shouldFlush && len(currentRow) > 0 {
+			newRows = append(newRows, currentRow)
+			currentRow = nil
+		}
+	}
+
+	if len(currentRow) > 0 {
+		newRows = append(newRows, currentRow)
 	}
 
 	b.rows = newRows
