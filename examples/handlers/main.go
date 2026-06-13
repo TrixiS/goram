@@ -7,15 +7,13 @@ import (
 	"time"
 
 	"github.com/TrixiS/goram"
-	"github.com/TrixiS/goram/cbdata"
-	"github.com/TrixiS/goram/examples/handlers/markups"
-	"github.com/TrixiS/goram/examples/handlers/routes"
+	"github.com/TrixiS/goram/examples/routes"
 	"github.com/TrixiS/goram/handlers"
 )
 
 var (
 	token       = flag.String("token", "", "")
-	adminUserId = flag.Int64("admin-id", 0, "")
+	adminUserID = flag.Int64("admin-id", 0, "")
 )
 
 func main() {
@@ -35,7 +33,7 @@ func main() {
 		MaxErrors:     3,
 	})
 
-	router := createRouter()
+	router := routes.CreateRouter(*adminUserID)
 
 	for updates := range updatesChan {
 		go func(updates []goram.Update) {
@@ -45,41 +43,5 @@ func main() {
 				fmt.Println("handler error", err)
 			}
 		}(updates)
-	}
-}
-
-func createRouter() *handlers.Router {
-	return handlers.
-		NewRouter(handlers.RouterOptions{Name: "root"}).
-		FilterMessage(
-			func(ctx context.Context, bot *goram.Bot, message *goram.Message, data handlers.Data) (bool, error) {
-				return message.From.ID == *adminUserId, nil
-			},
-		).
-		FilterCallbackQuery(
-			func(ctx context.Context, bot *goram.Bot, query *goram.CallbackQuery, data handlers.Data) (bool, error) {
-				return query.From.ID == *adminUserId, nil
-			},
-		).
-		Message(routes.Start, text("/start")).
-		CallbackQuery(
-			routes.HelloQuery,
-			cbdata.FilterFunc(
-				markups.Prefix,
-				func(data markups.CbData) bool { return data.Type == markups.Hello },
-			),
-		).
-		CallbackQuery(
-			routes.WorldQuery,
-			cbdata.FilterFunc(
-				markups.Prefix,
-				func(data markups.CbData) bool { return data.Type == markups.World },
-			),
-		)
-}
-
-func text(t string) handlers.Filter[*goram.Message] {
-	return func(ctx context.Context, bot *goram.Bot, message *goram.Message, data handlers.Data) (bool, error) {
-		return message.Text == t, nil
 	}
 }

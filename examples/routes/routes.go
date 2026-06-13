@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/TrixiS/goram"
-	"github.com/TrixiS/goram/examples/handlers/markups"
+	"github.com/TrixiS/goram/examples/markups"
 	"github.com/TrixiS/goram/handlers"
 )
 
@@ -14,13 +14,11 @@ func Start(
 	message *goram.Message,
 	data handlers.Data,
 ) error {
-	_, err := bot.SendMessage(ctx, &goram.SendMessageRequest{
+	return bot.SendMessageVoid(ctx, &goram.SendMessageRequest{
 		ChatID:      message.ChatID(),
 		Text:        "Hello world!",
 		ReplyMarkup: markups.Start,
 	})
-
-	return err
 }
 
 func HelloQuery(
@@ -29,13 +27,11 @@ func HelloQuery(
 	query *goram.CallbackQuery,
 	data handlers.Data,
 ) error {
-	_, err := bot.AnswerCallbackQuery(ctx, &goram.AnswerCallbackQueryRequest{
+	return bot.AnswerCallbackQueryVoid(ctx, &goram.AnswerCallbackQueryRequest{
 		CallbackQueryID: query.ID,
 		Text:            "Hello",
 		ShowAlert:       true,
 	})
-
-	return err
 }
 
 func WorldQuery(
@@ -44,11 +40,9 @@ func WorldQuery(
 	query *goram.CallbackQuery,
 	data handlers.Data,
 ) error {
-	_, err := bot.AnswerCallbackQuery(ctx, &goram.AnswerCallbackQueryRequest{
+	return bot.AnswerCallbackQueryVoid(ctx, &goram.AnswerCallbackQueryRequest{
 		CallbackQueryID: query.ID,
 		Text:            "World",
 		ShowAlert:       true,
 	})
-
-	return err
 }
