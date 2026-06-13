@@ -55,7 +55,7 @@ func Unpack[T any](prefix string, callbackData string) (T, error) {
 		return value, ErrInvalidPrefix
 	}
 
-	decoder := base64.NewDecoder(base64.RawStdEncoding, bytes.NewReader(b[metaLen:]))
+	decoder := base64.NewDecoder(base64.RawURLEncoding, bytes.NewReader(b[metaLen:]))
 	err := binary.Read(decoder, binary.LittleEndian, &value)
 	return value, err
 }
