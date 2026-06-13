@@ -29,7 +29,7 @@ func Pack[T any](prefix string, value T) string {
 	buf.WriteString(prefix)
 	buf.WriteByte(delim)
 
-	encoder := base64.NewEncoder(base64.RawStdEncoding, buf)
+	encoder := base64.NewEncoder(base64.RawURLEncoding, buf)
 
 	if err := binary.Write(encoder, binary.LittleEndian, value); err != nil {
 		panic(err)
