@@ -36,7 +36,7 @@ type Update struct {
 //
 // https://core.telegram.org/bots/api#webhookinfo
 type WebhookInfo struct {
-	Url                          string       `json:"url"`                                       // Webhook URL, may be empty if webhook is not set up
+	URL                          string       `json:"url"`                                       // Webhook URL, may be empty if webhook is not set up
 	HasCustomCertificate         bool         `json:"has_custom_certificate"`                    // True, if a custom certificate was provided for webhook certificate checks
 	PendingUpdateCount           int          `json:"pending_update_count"`                      // Number of updates awaiting delivery
 	IpAddress                    string       `json:"ip_address,omitempty"`                      // Optional. Currently used webhook IP address
@@ -265,7 +265,7 @@ type MessageEntity struct {
 	Type           MessageEntityType `json:"type"`                       // Type of the entity. Currently, can be "mention" (@username), "hashtag" (#hashtag or #hashtag@chatusername), "cashtag" ($USD or $USD@chatusername), "bot_command" (/start@jobs_bot), "url" (https://telegram.org), "email" (do-not-reply@telegram.org), "phone_number" (+1-212-555-0123), "bold" (bold text), "italic" (italic text), "underline" (underlined text), "strikethrough" (strikethrough text), "spoiler" (spoiler message), "blockquote" (block quotation), "expandable_blockquote" (collapsed-by-default block quotation), "code" (monowidth string), "pre" (monowidth block), "text_link" (for clickable text URLs), "text_mention" (for users without usernames), "custom_emoji" (for inline custom emoji stickers), or "date_time" (for formatted date and time)
 	Offset         int64             `json:"offset"`                     // Offset in UTF-16 code units to the start of the entity
 	Length         int               `json:"length"`                     // Length of the entity in UTF-16 code units
-	Url            string            `json:"url,omitempty"`              // Optional. For "text_link" only, URL that will be opened after user taps on the text
+	URL            string            `json:"url,omitempty"`              // Optional. For "text_link" only, URL that will be opened after user taps on the text
 	User           *User             `json:"user,omitempty"`             // Optional. For "text_mention" only, the mentioned user
 	Language       string            `json:"language,omitempty"`         // Optional. For "pre" only, the programming language of the entity text
 	CustomEmojiID  string            `json:"custom_emoji_id,omitempty"`  // Optional. For "custom_emoji" only, unique identifier of the custom emoji. Use getCustomEmojiStickers to get full information about the sticker
@@ -939,7 +939,7 @@ type GiveawayCompleted struct {
 // https://core.telegram.org/bots/api#linkpreviewoptions
 type LinkPreviewOptions struct {
 	IsDisabled       bool   `json:"is_disabled,omitempty"`        // Optional. True, if the link preview is disabled
-	Url              string `json:"url,omitempty"`                // Optional. URL to use for the link preview. If empty, then the first URL found in the message text will be used
+	URL              string `json:"url,omitempty"`                // Optional. URL to use for the link preview. If empty, then the first URL found in the message text will be used
 	PreferSmallMedia bool   `json:"prefer_small_media,omitempty"` // Optional. True, if the media in the link preview is supposed to be shrunk; ignored if the URL isn't explicitly specified or media size change isn't supported for the preview
 	PreferLargeMedia bool   `json:"prefer_large_media,omitempty"` // Optional. True, if the media in the link preview is supposed to be enlarged; ignored if the URL isn't explicitly specified or media size change isn't supported for the preview
 	ShowAboveText    bool   `json:"show_above_text,omitempty"`    // Optional. True, if the link preview must be shown above the message text; otherwise, the link preview will be shown below the message text
@@ -1008,7 +1008,7 @@ type File struct {
 //
 // https://core.telegram.org/bots/api#webappinfo
 type WebAppInfo struct {
-	Url string `json:"url"` // An HTTPS URL of a Web App to be opened with additional data as specified in Initializing Web Apps
+	URL string `json:"url"` // An HTTPS URL of a Web App to be opened with additional data as specified in Initializing Web Apps
 }
 
 // This object represents a custom keyboard with reply options (see Introduction to bots for details and examples). Not supported in channels and for messages sent on behalf of a Telegram Business account.
@@ -1097,10 +1097,10 @@ type InlineKeyboardButton struct {
 	Text                         string                       `json:"text"`                                       // Label text on the button
 	IconCustomEmojiID            string                       `json:"icon_custom_emoji_id,omitempty"`             // Optional. Unique identifier of the custom emoji shown before the text of the button. Can only be used by bots that purchased additional usernames on Fragment or in the messages directly sent by the bot to private, group and supergroup chats if the owner of the bot has a Telegram Premium subscription.
 	Style                        string                       `json:"style,omitempty"`                            // Optional. Style of the button. Must be one of "danger" (red), "success" (green) or "primary" (blue). If omitted, then an app-specific style is used.
-	Url                          string                       `json:"url,omitempty"`                              // Optional. HTTP or tg:// URL to be opened when the button is pressed. Links tg://user?id=<user_id> can be used to mention a user by their identifier without using a username, if this is allowed by their privacy settings.
+	URL                          string                       `json:"url,omitempty"`                              // Optional. HTTP or tg:// URL to be opened when the button is pressed. Links tg://user?id=<user_id> can be used to mention a user by their identifier without using a username, if this is allowed by their privacy settings.
 	CallbackData                 string                       `json:"callback_data,omitempty"`                    // Optional. Data to be sent in a callback query to the bot when the button is pressed, 1-64 bytes
 	WebApp                       *WebAppInfo                  `json:"web_app,omitempty"`                          // Optional. Description of the Web App that will be launched when the user presses the button. The Web App will be able to send an arbitrary message on behalf of the user using the method answerWebAppQuery. Available only in private chats between a user and the bot. Not supported for messages sent on behalf of a Telegram Business account.
-	LoginUrl                     *LoginUrl                    `json:"login_url,omitempty"`                        // Optional. An HTTPS URL used to automatically authorize the user. Can be used as a replacement for the Telegram Login Widget.
+	LoginURL                     *LoginUrl                    `json:"login_url,omitempty"`                        // Optional. An HTTPS URL used to automatically authorize the user. Can be used as a replacement for the Telegram Login Widget.
 	SwitchInlineQuery            string                       `json:"switch_inline_query,omitempty"`              // Optional. If set, pressing the button will prompt the user to select one of their chats, open that chat and insert the bot's username and the specified inline query in the input field. May be empty, in which case just the bot's username will be inserted. Not supported for messages sent in channel direct messages chats and on behalf of a Telegram Business account.
 	SwitchInlineQueryCurrentChat string                       `json:"switch_inline_query_current_chat,omitempty"` // Optional. If set, pressing the button will insert the bot's username and the specified inline query in the current chat's input field. May be empty, in which case only the bot's username will be inserted. This offers a quick way for the user to open your bot in inline mode in the same chat - good for selecting something from multiple options. Not supported in channels and for messages sent in channel direct messages chats and on behalf of a Telegram Business account.
 	SwitchInlineQueryChosenChat  *SwitchInlineQueryChosenChat `json:"switch_inline_query_chosen_chat,omitempty"`  // Optional. If set, pressing the button will prompt the user to select one of their chats of the specified type, open that chat and insert the bot's username and the specified inline query in the input field. Not supported for messages sent in channel direct messages chats and on behalf of a Telegram Business account.
@@ -1115,7 +1115,7 @@ type InlineKeyboardButton struct {
 //
 // https://core.telegram.org/bots/api#loginurl
 type LoginUrl struct {
-	Url                string `json:"url"`                            // An HTTPS URL to be opened with user authorization data added to the query string when the button is pressed. If the user refuses to provide authorization data, the original URL without information about the user will be opened. The data added is the same as described in Receiving authorization data. NOTE: You must always check the hash of the received data to verify the authentication and the integrity of the data as described in Checking authorization.
+	URL                string `json:"url"`                            // An HTTPS URL to be opened with user authorization data added to the query string when the button is pressed. If the user refuses to provide authorization data, the original URL without information about the user will be opened. The data added is the same as described in Receiving authorization data. NOTE: You must always check the hash of the received data to verify the authentication and the integrity of the data as described in Checking authorization.
 	ForwardText        string `json:"forward_text,omitempty"`         // Optional. New text of the button in forwarded messages.
 	BotUsername        string `json:"bot_username,omitempty"`         // Optional. Username of a bot, which will be used for user authorization. See Setting up a bot for more details. If not specified, the current bot's username will be assumed. The url's domain must be the same as the domain linked with the bot. See Linking your domain to the bot for more details.
 	RequestWriteAccess bool   `json:"request_write_access,omitempty"` // Optional. Pass True to request the permission for your bot to send messages to the user.
@@ -1406,7 +1406,7 @@ type StoryAreaType struct {
 	ReactionType    *ReactionType    `json:"reaction_type"`        // Type of the reaction
 	IsDark          bool             `json:"is_dark,omitempty"`    // Optional. Pass True if the reaction area has a dark background
 	IsFlipped       bool             `json:"is_flipped,omitempty"` // Optional. Pass True if reaction area corner is flipped
-	Url             string           `json:"url"`                  // HTTP or tg:// URL to be opened when the area is clicked
+	URL             string           `json:"url"`                  // HTTP or tg:// URL to be opened when the area is clicked
 	Temperature     float64          `json:"temperature"`          // Temperature, in degree Celsius
 	Emoji           string           `json:"emoji"`                // Emoji representing the weather
 	BackgroundColor int              `json:"background_color"`     // A color of the area background in the ARGB format
@@ -2184,9 +2184,9 @@ type InlineQueryResultArticle struct {
 	Title               string                `json:"title"`                      // Title of the result
 	InputMessageContent InputMessageContent   `json:"input_message_content"`      // Content of the message to be sent
 	ReplyMarkup         *InlineKeyboardMarkup `json:"reply_markup,omitempty"`     // Optional. Inline keyboard attached to the message
-	Url                 string                `json:"url,omitempty"`              // Optional. URL of the result
+	URL                 string                `json:"url,omitempty"`              // Optional. URL of the result
 	Description         string                `json:"description,omitempty"`      // Optional. Short description of the result
-	ThumbnailUrl        string                `json:"thumbnail_url,omitempty"`    // Optional. Url of the thumbnail for the result
+	ThumbnailURL        string                `json:"thumbnail_url,omitempty"`    // Optional. Url of the thumbnail for the result
 	ThumbnailWidth      int                   `json:"thumbnail_width,omitempty"`  // Optional. Thumbnail width
 	ThumbnailHeight     int                   `json:"thumbnail_height,omitempty"` // Optional. Thumbnail height
 }
@@ -2197,8 +2197,8 @@ type InlineQueryResultArticle struct {
 type InlineQueryResultPhoto struct {
 	Type                  string                `json:"type"`                               // Type of the result, must be photo
 	ID                    string                `json:"id"`                                 // Unique identifier for this result, 1-64 bytes
-	PhotoUrl              string                `json:"photo_url"`                          // A valid URL of the photo. Photo must be in JPEG format. Photo size must not exceed 5MB
-	ThumbnailUrl          string                `json:"thumbnail_url"`                      // URL of the thumbnail for the photo
+	PhotoURL              string                `json:"photo_url"`                          // A valid URL of the photo. Photo must be in JPEG format. Photo size must not exceed 5MB
+	ThumbnailURL          string                `json:"thumbnail_url"`                      // URL of the thumbnail for the photo
 	PhotoWidth            int                   `json:"photo_width,omitempty"`              // Optional. Width of the photo
 	PhotoHeight           int                   `json:"photo_height,omitempty"`             // Optional. Height of the photo
 	Title                 string                `json:"title,omitempty"`                    // Optional. Title for the result
@@ -2217,11 +2217,11 @@ type InlineQueryResultPhoto struct {
 type InlineQueryResultGif struct {
 	Type                  string                `json:"type"`                               // Type of the result, must be gif
 	ID                    string                `json:"id"`                                 // Unique identifier for this result, 1-64 bytes
-	GifUrl                string                `json:"gif_url"`                            // A valid URL for the GIF file
+	GifURL                string                `json:"gif_url"`                            // A valid URL for the GIF file
 	GifWidth              int                   `json:"gif_width,omitempty"`                // Optional. Width of the GIF
 	GifHeight             int                   `json:"gif_height,omitempty"`               // Optional. Height of the GIF
 	GifDuration           int                   `json:"gif_duration,omitempty"`             // Optional. Duration of the GIF in seconds
-	ThumbnailUrl          string                `json:"thumbnail_url"`                      // URL of the static (JPEG or GIF) or animated (MPEG4) thumbnail for the result
+	ThumbnailURL          string                `json:"thumbnail_url"`                      // URL of the static (JPEG or GIF) or animated (MPEG4) thumbnail for the result
 	ThumbnailMimeType     string                `json:"thumbnail_mime_type,omitempty"`      // Optional. MIME type of the thumbnail, must be one of "image/jpeg", "image/gif", or "video/mp4". Defaults to "image/jpeg"
 	Title                 string                `json:"title,omitempty"`                    // Optional. Title for the result
 	Caption               string                `json:"caption,omitempty"`                  // Optional. Caption of the GIF file to be sent, 0-1024 characters after entities parsing
@@ -2238,11 +2238,11 @@ type InlineQueryResultGif struct {
 type InlineQueryResultMpeg4Gif struct {
 	Type                  string                `json:"type"`                               // Type of the result, must be mpeg4_gif
 	ID                    string                `json:"id"`                                 // Unique identifier for this result, 1-64 bytes
-	Mpeg4Url              string                `json:"mpeg4_url"`                          // A valid URL for the MPEG4 file
+	Mpeg4URL              string                `json:"mpeg4_url"`                          // A valid URL for the MPEG4 file
 	Mpeg4Width            int                   `json:"mpeg4_width,omitempty"`              // Optional. Video width
 	Mpeg4Height           int                   `json:"mpeg4_height,omitempty"`             // Optional. Video height
 	Mpeg4Duration         int                   `json:"mpeg4_duration,omitempty"`           // Optional. Video duration in seconds
-	ThumbnailUrl          string                `json:"thumbnail_url"`                      // URL of the static (JPEG or GIF) or animated (MPEG4) thumbnail for the result
+	ThumbnailURL          string                `json:"thumbnail_url"`                      // URL of the static (JPEG or GIF) or animated (MPEG4) thumbnail for the result
 	ThumbnailMimeType     string                `json:"thumbnail_mime_type,omitempty"`      // Optional. MIME type of the thumbnail, must be one of "image/jpeg", "image/gif", or "video/mp4". Defaults to "image/jpeg"
 	Title                 string                `json:"title,omitempty"`                    // Optional. Title for the result
 	Caption               string                `json:"caption,omitempty"`                  // Optional. Caption of the MPEG-4 file to be sent, 0-1024 characters after entities parsing
@@ -2259,9 +2259,9 @@ type InlineQueryResultMpeg4Gif struct {
 type InlineQueryResultVideo struct {
 	Type                  string                `json:"type"`                               // Type of the result, must be video
 	ID                    string                `json:"id"`                                 // Unique identifier for this result, 1-64 bytes
-	VideoUrl              string                `json:"video_url"`                          // A valid URL for the embedded video player or video file
+	VideoURL              string                `json:"video_url"`                          // A valid URL for the embedded video player or video file
 	MimeType              string                `json:"mime_type"`                          // MIME type of the content of the video URL, "text/html" or "video/mp4"
-	ThumbnailUrl          string                `json:"thumbnail_url"`                      // URL of the thumbnail (JPEG only) for the video
+	ThumbnailURL          string                `json:"thumbnail_url"`                      // URL of the thumbnail (JPEG only) for the video
 	Title                 string                `json:"title"`                              // Title for the result
 	Caption               string                `json:"caption,omitempty"`                  // Optional. Caption of the video to be sent, 0-1024 characters after entities parsing
 	ParseMode             ParseMode             `json:"parse_mode,omitempty"`               // Optional. Mode for parsing entities in the video caption. See formatting options for more details.
@@ -2281,7 +2281,7 @@ type InlineQueryResultVideo struct {
 type InlineQueryResultAudio struct {
 	Type                string                `json:"type"`                            // Type of the result, must be audio
 	ID                  string                `json:"id"`                              // Unique identifier for this result, 1-64 bytes
-	AudioUrl            string                `json:"audio_url"`                       // A valid URL for the audio file
+	AudioURL            string                `json:"audio_url"`                       // A valid URL for the audio file
 	Title               string                `json:"title"`                           // Title
 	Caption             string                `json:"caption,omitempty"`               // Optional. Caption, 0-1024 characters after entities parsing
 	ParseMode           ParseMode             `json:"parse_mode,omitempty"`            // Optional. Mode for parsing entities in the audio caption. See formatting options for more details.
@@ -2298,7 +2298,7 @@ type InlineQueryResultAudio struct {
 type InlineQueryResultVoice struct {
 	Type                string                `json:"type"`                            // Type of the result, must be voice
 	ID                  string                `json:"id"`                              // Unique identifier for this result, 1-64 bytes
-	VoiceUrl            string                `json:"voice_url"`                       // A valid URL for the voice recording
+	VoiceURL            string                `json:"voice_url"`                       // A valid URL for the voice recording
 	Title               string                `json:"title"`                           // Recording title
 	Caption             string                `json:"caption,omitempty"`               // Optional. Caption, 0-1024 characters after entities parsing
 	ParseMode           ParseMode             `json:"parse_mode,omitempty"`            // Optional. Mode for parsing entities in the voice message caption. See formatting options for more details.
@@ -2318,12 +2318,12 @@ type InlineQueryResultDocument struct {
 	Caption             string                `json:"caption,omitempty"`               // Optional. Caption of the document to be sent, 0-1024 characters after entities parsing
 	ParseMode           ParseMode             `json:"parse_mode,omitempty"`            // Optional. Mode for parsing entities in the document caption. See formatting options for more details.
 	CaptionEntities     []MessageEntity       `json:"caption_entities,omitempty"`      // Optional. List of special entities that appear in the caption, which can be specified instead of parse_mode
-	DocumentUrl         string                `json:"document_url"`                    // A valid URL for the file
+	DocumentURL         string                `json:"document_url"`                    // A valid URL for the file
 	MimeType            string                `json:"mime_type"`                       // MIME type of the content of the file, either "application/pdf" or "application/zip"
 	Description         string                `json:"description,omitempty"`           // Optional. Short description of the result
 	ReplyMarkup         *InlineKeyboardMarkup `json:"reply_markup,omitempty"`          // Optional. Inline keyboard attached to the message
 	InputMessageContent InputMessageContent   `json:"input_message_content,omitempty"` // Optional. Content of the message to be sent instead of the file
-	ThumbnailUrl        string                `json:"thumbnail_url,omitempty"`         // Optional. URL of the thumbnail (JPEG only) for the file
+	ThumbnailURL        string                `json:"thumbnail_url,omitempty"`         // Optional. URL of the thumbnail (JPEG only) for the file
 	ThumbnailWidth      int                   `json:"thumbnail_width,omitempty"`       // Optional. Thumbnail width
 	ThumbnailHeight     int                   `json:"thumbnail_height,omitempty"`      // Optional. Thumbnail height
 }
@@ -2343,7 +2343,7 @@ type InlineQueryResultLocation struct {
 	ProximityAlertRadius int                   `json:"proximity_alert_radius,omitempty"` // Optional. For live locations, a maximum distance for proximity alerts about approaching another chat member, in meters. Must be between 1 and 100000 if specified.
 	ReplyMarkup          *InlineKeyboardMarkup `json:"reply_markup,omitempty"`           // Optional. Inline keyboard attached to the message
 	InputMessageContent  InputMessageContent   `json:"input_message_content,omitempty"`  // Optional. Content of the message to be sent instead of the location
-	ThumbnailUrl         string                `json:"thumbnail_url,omitempty"`          // Optional. Url of the thumbnail for the result
+	ThumbnailURL         string                `json:"thumbnail_url,omitempty"`          // Optional. Url of the thumbnail for the result
 	ThumbnailWidth       int                   `json:"thumbnail_width,omitempty"`        // Optional. Thumbnail width
 	ThumbnailHeight      int                   `json:"thumbnail_height,omitempty"`       // Optional. Thumbnail height
 }
@@ -2364,7 +2364,7 @@ type InlineQueryResultVenue struct {
 	GooglePlaceType     string                `json:"google_place_type,omitempty"`     // Optional. Google Places type of the venue. (See supported types.)
 	ReplyMarkup         *InlineKeyboardMarkup `json:"reply_markup,omitempty"`          // Optional. Inline keyboard attached to the message
 	InputMessageContent InputMessageContent   `json:"input_message_content,omitempty"` // Optional. Content of the message to be sent instead of the venue
-	ThumbnailUrl        string                `json:"thumbnail_url,omitempty"`         // Optional. Url of the thumbnail for the result
+	ThumbnailURL        string                `json:"thumbnail_url,omitempty"`         // Optional. Url of the thumbnail for the result
 	ThumbnailWidth      int                   `json:"thumbnail_width,omitempty"`       // Optional. Thumbnail width
 	ThumbnailHeight     int                   `json:"thumbnail_height,omitempty"`      // Optional. Thumbnail height
 }
@@ -2381,7 +2381,7 @@ type InlineQueryResultContact struct {
 	Vcard               string                `json:"vcard,omitempty"`                 // Optional. Additional data about the contact in the form of a vCard, 0-2048 bytes
 	ReplyMarkup         *InlineKeyboardMarkup `json:"reply_markup,omitempty"`          // Optional. Inline keyboard attached to the message
 	InputMessageContent InputMessageContent   `json:"input_message_content,omitempty"` // Optional. Content of the message to be sent instead of the contact
-	ThumbnailUrl        string                `json:"thumbnail_url,omitempty"`         // Optional. Url of the thumbnail for the result
+	ThumbnailURL        string                `json:"thumbnail_url,omitempty"`         // Optional. Url of the thumbnail for the result
 	ThumbnailWidth      int                   `json:"thumbnail_width,omitempty"`       // Optional. Thumbnail width
 	ThumbnailHeight     int                   `json:"thumbnail_height,omitempty"`      // Optional. Thumbnail height
 }
@@ -2592,7 +2592,7 @@ type InputInvoiceMessageContent struct {
 	MaxTipAmount              int            `json:"max_tip_amount,omitempty"`                // Optional. The maximum accepted amount for tips in the smallest units of the currency (integer, not float/double). For example, for a maximum tip of US$ 1.45 pass max_tip_amount = 145. See the exp parameter in currencies.json, it shows the number of digits past the decimal point for each currency (2 for the majority of currencies). Defaults to 0. Not supported for payments in Telegram Stars.
 	SuggestedTipAmounts       []int          `json:"suggested_tip_amounts,omitempty"`         // Optional. A JSON-serialized array of suggested amounts of tip in the smallest units of the currency (integer, not float/double). At most 4 suggested tip amounts can be specified. The suggested tip amounts must be positive, passed in a strictly increased order and must not exceed max_tip_amount.
 	ProviderData              string         `json:"provider_data,omitempty"`                 // Optional. A JSON-serialized object for data about the invoice, which will be shared with the payment provider. A detailed description of the required fields should be provided by the payment provider.
-	PhotoUrl                  string         `json:"photo_url,omitempty"`                     // Optional. URL of the product photo for the invoice. Can be a photo of the goods or a marketing image for a service.
+	PhotoURL                  string         `json:"photo_url,omitempty"`                     // Optional. URL of the product photo for the invoice. Can be a photo of the goods or a marketing image for a service.
 	PhotoSize                 int            `json:"photo_size,omitempty"`                    // Optional. Photo size in bytes
 	PhotoWidth                int            `json:"photo_width,omitempty"`                   // Optional. Photo width
 	PhotoHeight               int            `json:"photo_height,omitempty"`                  // Optional. Photo height
@@ -2753,7 +2753,7 @@ type PaidMediaPurchased struct {
 type RevenueWithdrawalState struct {
 	Type string `json:"type"`
 	Date int    `json:"date"` // Date the withdrawal was completed in Unix time
-	Url  string `json:"url"`  // An HTTPS URL that can be used to see transaction details
+	URL  string `json:"url"`  // An HTTPS URL that can be used to see transaction details
 }
 
 // Contains information about the affiliate that received a commission via this transaction.

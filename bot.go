@@ -9,11 +9,13 @@ import (
 	"github.com/TrixiS/goram/flood"
 )
 
+const DefaultAPIBaseURL = "https://api.telegram.org"
+
 type BotOptions struct {
 	Token        string        // Required
 	Client       *http.Client  // Optional. If Client is nil, http.DefaultClient will be used
 	FloodHandler flood.Handler // Optional. If FloodHandler is nil, 429 flood error will be propagated to the caller of a flooded method
-	BaseUrl      string        // Optional. If BaseUrl is empty, https://api.telegram.org will be used
+	BaseURL      string        // Optional. If BaseUrl is empty, goram.DefaultAPIBaseURL will be used
 }
 
 // Holds all methods of Telegram Bot API.
@@ -25,15 +27,15 @@ type BotOptions struct {
 // apiError, ok := err.(*goram.APIError)
 type Bot struct {
 	options BotOptions
-	baseUrl string
+	baseURL string
 }
 
 func NewBot(options BotOptions) *Bot {
-	if options.BaseUrl == "" {
-		options.BaseUrl = "https://api.telegram.org"
+	if options.BaseURL == "" {
+		options.BaseURL = DefaultAPIBaseURL
 	}
 
-	baseUrl := options.BaseUrl + "/bot" + options.Token + "/"
+	baseURL := options.BaseURL + "/bot" + options.Token + "/"
 
 	if options.Client == nil {
 		options.Client = http.DefaultClient
@@ -41,7 +43,7 @@ func NewBot(options BotOptions) *Bot {
 
 	return &Bot{
 		options: options,
-		baseUrl: baseUrl,
+		baseURL: baseURL,
 	}
 }
 
@@ -67,7 +69,7 @@ func (b *Bot) DownloadFile(ctx context.Context, fileID string, dst io.Writer) (i
 	}
 
 	urlBuilder := strings.Builder{}
-	urlBuilder.WriteString(b.options.BaseUrl)
+	urlBuilder.WriteString(b.options.BaseURL)
 	urlBuilder.WriteString("/file/bot")
 	urlBuilder.WriteString(b.options.Token)
 	urlBuilder.WriteRune('/')

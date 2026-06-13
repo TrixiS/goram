@@ -49,12 +49,12 @@ type apiRequest interface {
 func makeRequest[R any](
 	ctx context.Context,
 	client *http.Client,
-	baseUrl string,
+	baseURL string,
 	apiMethod string,
 	floodHandler flood.Handler,
 	data apiRequest,
 ) (*apiResponse[R], error) {
-	url := baseUrl + apiMethod
+	url := baseURL + apiMethod
 	contentType := "multipart/form-data"
 	body := io.ReadSeeker(nil)
 
@@ -117,12 +117,12 @@ func makeRequest[R any](
 func makeVoidRequest(
 	ctx context.Context,
 	client *http.Client,
-	baseUrl string,
+	baseURL string,
 	apiMethod string,
 	floodHandler flood.Handler,
 	data apiRequest,
 ) error {
-	url := baseUrl + apiMethod
+	url := baseURL + apiMethod
 
 	buf := &bytes.Buffer{}
 	w := multipart.NewWriter(buf)

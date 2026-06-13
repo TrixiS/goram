@@ -110,15 +110,15 @@ func generateHandlers(updateType Type) {
 	f.WriteString("\n\ntype handlers struct {\n")
 
 	for _, update := range updateType.Fields[1:] {
-		fieldName := camelCase(update.Name, false)
+		fieldName := snakeToCamel(update.Name, false)
 		f.WriteString(fmt.Sprintf("%s routerHandlers[*goram.%s]\n", fieldName, update.Types[0]))
 	}
 
 	f.WriteString("}\n")
 
 	for _, update := range updateType.Fields[1:] {
-		updatePascalName := camelCase(update.Name, true)
-		structFieldName := camelCase(update.Name, false)
+		updatePascalName := snakeToCamel(update.Name, true)
+		structFieldName := snakeToCamel(update.Name, false)
 		typeVar := "goram." + update.Types[0]
 
 		fmt.Fprintf(f, `
@@ -144,8 +144,8 @@ func generateHandlers(updateType Type) {
 	}
 
 	for _, u := range updateType.Fields[1:] {
-		handlersFieldName := camelCase(u.Name, false)
-		updatePascalName := camelCase(u.Name, true)
+		handlersFieldName := snakeToCamel(u.Name, false)
+		updatePascalName := snakeToCamel(u.Name, true)
 
 		fmt.Fprintf(f, `
 			// Add router-level filter(s) to %s update
@@ -165,8 +165,8 @@ func generateHandlers(updateType Type) {
 	f.WriteString("\n")
 
 	for _, u := range updateType.Fields[1:] {
-		pascalName := camelCase(u.Name, true)
-		handlersFieldName := camelCase(u.Name, false)
+		pascalName := snakeToCamel(u.Name, true)
+		handlersFieldName := snakeToCamel(u.Name, false)
 
 		fmt.Fprintf(f, `
 			func (r *Router) call%sHandlers(ctx context.Context, bot *goram.Bot, update *goram.%s, data Data) (bool, error) {
@@ -216,7 +216,7 @@ func generateHandlers(updateType Type) {
 	)
 
 	for _, u := range updateType.Fields[1:] {
-		fieldName := camelCase(u.Name, true)
+		fieldName := snakeToCamel(u.Name, true)
 		fmt.Fprintf(f, "if update.%s != nil {\n", fieldName)
 		fmt.Fprintf(f, "return r.call%sHandlers(ctx, bot, update.%s, data)\n", fieldName, fieldName)
 		f.WriteString("}\n")
@@ -243,7 +243,7 @@ func generateEnums(updateType Type, enums []Enum) {
 		f.WriteString("const (\n")
 
 		for _, v := range e.Values {
-			name := e.Name + camelCase(v, true)
+			name := e.Name + snakeToCamel(v, true)
 			assig := fmt.Sprintf("%s %s = \"%s\"\n", name, e.Name, v)
 			f.WriteString(assig)
 		}
@@ -255,7 +255,7 @@ func generateEnums(updateType Type, enums []Enum) {
 	f.WriteString("const (\n")
 
 	for _, field := range updateType.Fields[1:] { // skip update_id
-		name := "Update" + camelCase(field.Name, true)
+		name := "Update" + snakeToCamel(field.Name, true)
 		fmt.Fprintf(f, "// %s\n", field.Description[len("Optional. "):])
 		fmt.Fprintf(f, `%s UpdateType = "%s"`, name, field.Name)
 		f.WriteString("\n\n")
@@ -282,7 +282,7 @@ func generateMethods(parser *Parser, methods []Method) {
 	`)
 
 	for _, m := range methods {
-		pascalName := camelCase(m.Name, true)
+		pascalName := snakeToCamel(m.Name, true)
 		structName := pascalName
 
 		if !strings.HasSuffix(structName, "Request") {
@@ -311,7 +311,7 @@ func generateMethods(parser *Parser, methods []Method) {
 		fmt.Fprintf(f, "func (b *Bot) %s%s %s {\n", pascalName, args, returnType)
 		fmt.Fprintf(
 			f,
-			`res, err := makeRequest[%s](ctx, b.options.Client, b.baseUrl, "%s", b.options.FloodHandler, %s)
+			`res, err := makeRequest[%s](ctx, b.options.Client, b.baseURL, "%s", b.options.FloodHandler, %s)
 
 				if err != nil {
 					return r, err
@@ -335,7 +335,7 @@ func generateMethods(parser *Parser, methods []Method) {
 			// Does the same as Bot.%s, but parses response body only in case of an error. 
 			// Therefore works faster if you dont need the response value.
 			func (b *Bot) %sVoid%s error {
-				return makeVoidRequest(ctx, b.options.Client, b.baseUrl, "%s", b.options.FloodHandler, %s)
+				return makeVoidRequest(ctx, b.options.Client, b.baseURL, "%s", b.options.FloodHandler, %s)
 			}
 			`,
 			pascalName,
@@ -371,7 +371,7 @@ func generateRequests(parser *Parser, methods []Method) {
 			continue
 		}
 
-		pascalName := camelCase(m.Type.Name, true)
+		pascalName := snakeToCamel(m.Type.Name, true)
 		structName := pascalName
 		suffix := ""
 
@@ -653,7 +653,7 @@ func generateTypeStruct(
 		w.WriteString(fmt.Sprintf("// %s\n", t.Type.Href))
 	}
 
-	camelName := camelCase(t.Type.Name, true)
+	camelName := snakeToCamel(t.Type.Name, true)
 
 	if suffix != "" {
 		camelName += suffix
@@ -759,7 +759,7 @@ type Parser struct {
 func (p *Parser) ParseTypeField(t *TypeField) *ParsedTypeField {
 	ptf := &ParsedTypeField{
 		Field:  t,
-		GoName: camelCase(t.Name, true),
+		GoName: snakeToCamel(t.Name, true),
 	}
 
 	if t.Name == "reply_markup" && len(t.Types) == 4 {
@@ -879,36 +879,58 @@ func (g *Parser) parseSpecType(p *ParsedSpecType, fieldType string) {
 		p.ParsedType = ParsedTypeStruct
 	}
 
-	p.GoType = camelCase(fieldType, true)
+	p.GoType = snakeToCamel(fieldType, true)
 }
 
-func camelCase(v string, title bool) string {
-	if v == "id" {
+func snakeToCamel(s string, upper bool) string {
+	if s == "id" {
 		return "ID"
 	}
 
-	runes := []rune(v)
+	if s == "url" {
+		return "URL"
+	}
+
 	builder := strings.Builder{}
-	upper := false
+	builder.Grow(len(s))
 
-	for i, r := range runes {
-		if i == len(runes)-3 && r == '_' && runes[i+1] == 'i' && runes[i+2] == 'd' {
-			builder.WriteString("ID")
-			break
-		}
+	for i := 0; i < len(s); i++ {
+		char := s[i]
 
-		if r == '_' {
+		if char == '_' {
+			const (
+				idSuffix  = "_id"
+				urlSuffix = "_url"
+			)
+
+			if checkSuffix(s, i, idSuffix) {
+				builder.WriteString("ID")
+				break
+			}
+
+			if checkSuffix(s, i, urlSuffix) {
+				builder.WriteString("URL")
+				break
+			}
+
 			upper = true
 			continue
 		}
 
-		if upper || (title && i == 0 && r > 'Z') {
+		if upper {
+			if char >= 'a' && char <= 'z' {
+				char -= 32
+			}
+
 			upper = false
-			builder.WriteRune(r - 32)
-		} else {
-			builder.WriteRune(r)
 		}
+
+		builder.WriteByte(char)
 	}
 
 	return builder.String()
+}
+
+func checkSuffix(s string, i int, suffix string) bool {
+	return len(s)-i == len(suffix) && s[i:] == suffix
 }

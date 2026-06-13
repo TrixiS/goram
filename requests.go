@@ -40,7 +40,7 @@ func (r *GetUpdatesRequest) writeMultipart(w *multipart.Writer) {
 
 // see Bot.SetWebhook(ctx, &SetWebhookRequest{})
 type SetWebhookRequest struct {
-	Url                string       // HTTPS URL to send updates to. Use an empty string to remove webhook integration
+	URL                string       // HTTPS URL to send updates to. Use an empty string to remove webhook integration
 	Certificate        InputFile    // Upload your public key certificate so that the root certificate in use can be checked. See our self-signed guide for details.
 	IpAddress          string       // The fixed IP address which will be used to send webhook requests instead of the IP address resolved through DNS
 	MaxConnections     int          // The maximum allowed number of simultaneous HTTPS connections to the webhook for update delivery, 1-100. Defaults to 40. Use lower values to limit the load on your bot's server, and higher values to increase your bot's throughput.
@@ -50,7 +50,7 @@ type SetWebhookRequest struct {
 }
 
 func (r *SetWebhookRequest) writeMultipart(w *multipart.Writer) {
-	w.WriteField("url", r.Url)
+	w.WriteField("url", r.URL)
 	if r.Certificate.FileID != "" {
 		w.WriteField("certificate", r.Certificate.FileID)
 	} else if r.Certificate.Reader != nil {
@@ -2776,7 +2776,7 @@ type AnswerCallbackQueryRequest struct {
 	CallbackQueryID string // Unique identifier for the query to be answered
 	Text            string // Text of the notification. If not specified, nothing will be shown to the user, 0-200 characters
 	ShowAlert       bool   // If True, an alert will be shown by the client instead of a notification at the top of the chat screen. Defaults to false.
-	Url             string // URL that will be opened by the user's client. If you have created a Game and accepted the conditions via @BotFather, specify the URL that opens your game - note that this will only work if the query comes from a callback_game button. Otherwise, you may use links like t.me/your_bot?start=XXXX that open your bot with a parameter.
+	URL             string // URL that will be opened by the user's client. If you have created a Game and accepted the conditions via @BotFather, specify the URL that opens your game - note that this will only work if the query comes from a callback_game button. Otherwise, you may use links like t.me/your_bot?start=XXXX that open your bot with a parameter.
 	CacheTime       int    // The maximum amount of time in seconds that the result of the callback query may be cached client-side. Telegram apps will support caching starting in version 3.14. Defaults to 0.
 }
 
@@ -2790,8 +2790,8 @@ func (r *AnswerCallbackQueryRequest) writeMultipart(w *multipart.Writer) {
 		fw, _ := w.CreateFormField("show_alert")
 		fw.Write(b)
 	}
-	if r.Url != "" {
-		w.WriteField("url", r.Url)
+	if r.URL != "" {
+		w.WriteField("url", r.URL)
 	}
 	{
 		b, _ := json.Marshal(r.CacheTime)
@@ -4543,7 +4543,7 @@ type SendInvoiceRequest struct {
 	SuggestedTipAmounts       []int                    // A JSON-serialized array of suggested amounts of tips in the smallest units of the currency (integer, not float/double). At most 4 suggested tip amounts can be specified. The suggested tip amounts must be positive, passed in a strictly increased order and must not exceed max_tip_amount.
 	StartParameter            string                   // Unique deep-linking parameter. If left empty, forwarded copies of the sent message will have a Pay button, allowing multiple users to pay directly from the forwarded message, using the same invoice. If non-empty, forwarded copies of the sent message will have a URL button with a deep link to the bot (instead of a Pay button), with the value used as the start parameter
 	ProviderData              string                   // JSON-serialized data about the invoice, which will be shared with the payment provider. A detailed description of required fields should be provided by the payment provider.
-	PhotoUrl                  string                   // URL of the product photo for the invoice. Can be a photo of the goods or a marketing image for a service. People like it better when they see what they are paying for.
+	PhotoURL                  string                   // URL of the product photo for the invoice. Can be a photo of the goods or a marketing image for a service. People like it better when they see what they are paying for.
 	PhotoSize                 int                      // Photo size in bytes
 	PhotoWidth                int                      // Photo width
 	PhotoHeight               int                      // Photo height
@@ -4603,8 +4603,8 @@ func (r *SendInvoiceRequest) writeMultipart(w *multipart.Writer) {
 	if r.ProviderData != "" {
 		w.WriteField("provider_data", r.ProviderData)
 	}
-	if r.PhotoUrl != "" {
-		w.WriteField("photo_url", r.PhotoUrl)
+	if r.PhotoURL != "" {
+		w.WriteField("photo_url", r.PhotoURL)
 	}
 	{
 		b, _ := json.Marshal(r.PhotoSize)
@@ -4704,7 +4704,7 @@ type CreateInvoiceLinkRequest struct {
 	MaxTipAmount              int            // The maximum accepted amount for tips in the smallest units of the currency (integer, not float/double). For example, for a maximum tip of US$ 1.45 pass max_tip_amount = 145. See the exp parameter in currencies.json, it shows the number of digits past the decimal point for each currency (2 for the majority of currencies). Defaults to 0. Not supported for payments in Telegram Stars.
 	SuggestedTipAmounts       []int          // A JSON-serialized array of suggested amounts of tips in the smallest units of the currency (integer, not float/double). At most 4 suggested tip amounts can be specified. The suggested tip amounts must be positive, passed in a strictly increased order and must not exceed max_tip_amount.
 	ProviderData              string         // JSON-serialized data about the invoice, which will be shared with the payment provider. A detailed description of required fields should be provided by the payment provider.
-	PhotoUrl                  string         // URL of the product photo for the invoice. Can be a photo of the goods or a marketing image for a service.
+	PhotoURL                  string         // URL of the product photo for the invoice. Can be a photo of the goods or a marketing image for a service.
 	PhotoSize                 int            // Photo size in bytes
 	PhotoWidth                int            // Photo width
 	PhotoHeight               int            // Photo height
@@ -4751,8 +4751,8 @@ func (r *CreateInvoiceLinkRequest) writeMultipart(w *multipart.Writer) {
 	if r.ProviderData != "" {
 		w.WriteField("provider_data", r.ProviderData)
 	}
-	if r.PhotoUrl != "" {
-		w.WriteField("photo_url", r.PhotoUrl)
+	if r.PhotoURL != "" {
+		w.WriteField("photo_url", r.PhotoURL)
 	}
 	{
 		b, _ := json.Marshal(r.PhotoSize)
