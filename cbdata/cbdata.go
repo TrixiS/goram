@@ -11,9 +11,14 @@ import (
 	"github.com/TrixiS/goram/handlers"
 )
 
-const delim byte = ':'
+const Delim = ':'
 
 var ErrInvalidPrefix = errors.New("invalid prefix")
+
+var (
+	encoding = base64.RawURLEncoding
+	order    = binary.LittleEndian
+)
 
 // Packs callback data string.
 //
@@ -27,11 +32,11 @@ var ErrInvalidPrefix = errors.New("invalid prefix")
 func Pack[T any](prefix string, value T) string {
 	buf := &bytes.Buffer{}
 	buf.WriteString(prefix)
-	buf.WriteByte(delim)
+	buf.WriteByte(Delim)
 
-	encoder := base64.NewEncoder(base64.RawURLEncoding, buf)
+	encoder := base64.NewEncoder(encoding, buf)
 
-	if err := binary.Write(encoder, binary.LittleEndian, value); err != nil {
+	if err := binary.Write(encoder, order, value); err != nil {
 		panic(err)
 	}
 
@@ -51,16 +56,16 @@ func Unpack[T any](prefix string, callbackData string) (T, error) {
 
 	b := []byte(callbackData)
 
-	if len(b) <= metaLen || b[prefixOffset] != delim || string(b[:prefixOffset]) != prefix {
+	if len(b) <= metaLen || b[prefixOffset] != Delim || string(b[:prefixOffset]) != prefix {
 		return value, ErrInvalidPrefix
 	}
 
-	decoder := base64.NewDecoder(base64.RawURLEncoding, bytes.NewReader(b[metaLen:]))
-	err := binary.Read(decoder, binary.LittleEndian, &value)
+	decoder := base64.NewDecoder(encoding, bytes.NewReader(b[metaLen:]))
+	err := binary.Read(decoder, order, &value)
 	return value, err
 }
 
-// handlers.Data key for unpacked callback data
+// handlers.Data key for cached unpacked callback data
 const Key = "callbackData"
 
 // Creates callback query filter for callback data. Unpacks callback data and check the prefix.
