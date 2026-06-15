@@ -26,7 +26,7 @@ type BotOptions struct {
 //
 // apiError, ok := err.(*goram.APIError)
 type Bot struct {
-	options BotOptions
+	Options BotOptions
 	baseURL string
 }
 
@@ -42,7 +42,7 @@ func NewBot(options BotOptions) *Bot {
 	}
 
 	return &Bot{
-		options: options,
+		Options: options,
 		baseURL: baseURL,
 	}
 }
@@ -56,11 +56,23 @@ func (e ErrDownloadFile) Error() string {
 	return "downloadFile: " + e.Response.Status
 }
 
+// Creates this url https://api.telegram.org/file/bot<token>/<file_path>
+// See bot.GetFile()
+func MakeFileDownloadURL(baseURL string, token string, filePath string) string {
+	urlBuilder := strings.Builder{}
+	urlBuilder.WriteString(baseURL)
+	urlBuilder.WriteString("/file/bot")
+	urlBuilder.WriteString(token)
+	urlBuilder.WriteByte('/')
+	urlBuilder.WriteString(filePath)
+	return urlBuilder.String()
+}
+
 // Downloads a file by file id using provided or default http client.
 // Writes response to dst and returns amount of bytes written and an error.
 // This function does not close or seek the provided writer.
 //
-// If download http response status != 200, returns ErrDownloadFile
+// If download http response status != 200, returns goram.ErrDownloadFile
 func (b *Bot) DownloadFile(ctx context.Context, fileID string, dst io.Writer) (int64, error) {
 	file, err := b.GetFile(ctx, &GetFileRequest{FileID: fileID})
 
@@ -68,30 +80,38 @@ func (b *Bot) DownloadFile(ctx context.Context, fileID string, dst io.Writer) (i
 		return 0, err
 	}
 
-	urlBuilder := strings.Builder{}
-	urlBuilder.WriteString(b.options.BaseURL)
-	urlBuilder.WriteString("/file/bot")
-	urlBuilder.WriteString(b.options.Token)
-	urlBuilder.WriteRune('/')
-	urlBuilder.WriteString(file.FilePath)
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, urlBuilder.String(), nil)
+	r, err := b.OpenFile(ctx, file)
 
 	if err != nil {
 		return 0, err
 	}
 
-	res, err := b.options.Client.Do(req)
+	defer r.Close()
+	return io.Copy(dst, r)
+}
+
+// Opens a file got from bot.GetFile() for downloading.
+// The caller is responsible for closing the returned io.ReaderCloser
+//
+// If download http response status != 200, returns goram.ErrDownloadFile
+func (b *Bot) OpenFile(ctx context.Context, file *File) (io.ReadCloser, error) {
+	downloadURL := MakeFileDownloadURL(b.Options.BaseURL, b.Options.Token, file.FilePath)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, downloadURL, nil)
 
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
-	defer res.Body.Close()
+	res, err := b.Options.Client.Do(req)
+
+	if err != nil {
+		return nil, err
+	}
 
 	if res.StatusCode != http.StatusOK {
-		return 0, ErrDownloadFile{Response: res, File: file}
+		res.Body.Close()
+		return nil, ErrDownloadFile{Response: res, File: file}
 	}
 
-	return io.Copy(dst, res.Body)
+	return res.Body, nil
 }

@@ -311,7 +311,7 @@ func generateMethods(parser *Parser, methods []Method) {
 		fmt.Fprintf(f, "func (b *Bot) %s%s %s {\n", pascalName, args, returnType)
 		fmt.Fprintf(
 			f,
-			`res, err := makeRequest[%s](ctx, b.options.Client, b.baseURL, "%s", b.options.FloodHandler, %s)
+			`res, err := makeRequest[%s](ctx, b.Options.Client, b.baseURL, "%s", b.Options.FloodHandler, %s)
 
 				if err != nil {
 					return r, err
@@ -335,7 +335,7 @@ func generateMethods(parser *Parser, methods []Method) {
 			// Does the same as Bot.%s, but parses response body only in case of an error. 
 			// Therefore works faster if you dont need the response value.
 			func (b *Bot) %sVoid%s error {
-				return makeVoidRequest(ctx, b.options.Client, b.baseURL, "%s", b.options.FloodHandler, %s)
+				return makeVoidRequest(ctx, b.Options.Client, b.baseURL, "%s", b.Options.FloodHandler, %s)
 			}
 			`,
 			pascalName,
