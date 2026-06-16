@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"os"
 
@@ -36,15 +35,24 @@ func main() {
 	router := routes.CreateRouter(0)
 
 	http.HandleFunc("/updates", func(w http.ResponseWriter, r *http.Request) {
-		update := goram.Update{}
+		const secretHeaderKey = "X-Telegram-Bot-Api-Secret-Token"
 
-		if err := json.NewDecoder(r.Body).Decode(&update); err != nil {
-			fmt.Println(err)
-		} else {
-			go router.FeedUpdates(ctx, bot, []goram.Update{update}, handlers.Data{})
+		if secret != r.Header.Get(secretHeaderKey) {
+			w.WriteHeader(http.StatusForbidden)
+			return
 		}
 
-		r.Body.Close()
+		update := goram.Update{}
+
+		defer r.Body.Close()
+
+		if err := json.NewDecoder(r.Body).Decode(&update); err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		go router.FeedUpdates(ctx, bot, []goram.Update{update}, handlers.Data{})
+
 		w.WriteHeader(http.StatusOK)
 	})
 
