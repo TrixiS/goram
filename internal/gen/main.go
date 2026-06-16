@@ -416,6 +416,55 @@ func generateRequestWriteMultipart(
 				parsedTypeField.GoName,
 				parsedTypeField.GoName,
 			)
+		} else if parsedTypeField.ParsedSpecType.GoType == "InputSticker" && parsedTypeField.ParsedSpecType.ParsedType == ParsedTypeArray { // []InputSticker
+			fmt.Fprintf(w, `if len (r.%s) > 0 {
+				stickers := make([]InputSticker, len(r.%s))
+
+				for i, inputSticker := range r.%s {
+					if inputSticker.Sticker.Reader != nil {
+						fieldName := "%s" + strconv.Itoa(i)
+						fw, _ := w.CreateFormFile(fieldName, inputSticker.Sticker.Reader.Name())
+						io.Copy(fw, inputSticker.Sticker.Reader)
+						inputSticker.Sticker.FileID = "attach://" + fieldName
+					}
+
+					stickers[i] = inputSticker
+				}
+
+				b, _ := json.Marshal(stickers)
+				fw, _ := w.CreateFormField("%s")
+				fw.Write(b)
+			}
+			`,
+				parsedTypeField.GoName,
+				parsedTypeField.GoName,
+				parsedTypeField.GoName,
+				field.Name,
+				field.Name,
+			)
+		} else if parsedTypeField.ParsedSpecType.GoType == "InputSticker" {
+			fmt.Fprintf(w, `{
+				inputFile := r.%s.Sticker
+
+				if inputFile.Reader != nil {
+					fw, _ := w.CreateFormFile("attach_%s", inputFile.Reader.Name()) 
+					io.Copy(fw, inputFile.Reader)
+					inputFile.FileID = "attach://" + "attach_%s"
+				}
+
+				r.%s.Sticker = inputFile
+				b, _ := json.Marshal(r.%s)
+				fw, _ := w.CreateFormField("%s")
+				fw.Write(b)
+			}
+			`,
+				parsedTypeField.GoName,
+				field.Name,
+				field.Name,
+				parsedTypeField.GoName,
+				parsedTypeField.GoName,
+				field.Name,
+			)
 		} else if parsedTypeField.ParsedSpecType.GoType == "InputMedia" &&
 			parsedTypeField.ParsedSpecType.ParsedType != ParsedTypeArray {
 
@@ -769,6 +818,9 @@ func (p *Parser) ParseTypeField(t *TypeField) *ParsedTypeField {
 		ptf.ParsedSpecType.GoType = "InputMedia"
 		ptf.ParsedSpecType.ParsedType = ParsedTypeArray
 		ptf.ParsedSpecType.Levels = 1
+	} else if len(t.Types) == 1 && t.Types[0] == "String" && t.Name == "sticker" && !strings.HasPrefix(t.Description, "File identifier") {
+		ptf.ParsedSpecType.GoType = "InputFile"
+		ptf.ParsedSpecType.ParsedType = ParsedTypeInterface
 	} else if len(t.Types) == 2 && (t.Name == "id" || t.Name == "chat_id" || t.Name == "from_chat_id") {
 		ptf.ParsedSpecType.GoType = "ChatID"
 	} else if t.Types[0] == "Integer" &&

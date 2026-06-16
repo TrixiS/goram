@@ -69,7 +69,7 @@ func MakeFileDownloadURL(baseURL string, token string, filePath string) string {
 }
 
 // Downloads a file by file id using provided or default http client.
-// Writes response to dst and returns amount of bytes written and an error.
+// Copies response to dst and returns amount of bytes written and an error.
 // This function does not close or seek the provided writer.
 //
 // If download http response status != 200, returns goram.ErrDownloadFile

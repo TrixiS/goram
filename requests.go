@@ -4248,8 +4248,21 @@ func (r *CreateNewStickerSetRequest) writeMultipart(w *multipart.Writer) {
 	}
 	w.WriteField("name", r.Name)
 	w.WriteField("title", r.Title)
-	{
-		b, _ := json.Marshal(r.Stickers)
+	if len(r.Stickers) > 0 {
+		stickers := make([]InputSticker, len(r.Stickers))
+
+		for i, inputSticker := range r.Stickers {
+			if inputSticker.Sticker.Reader != nil {
+				fieldName := "stickers" + strconv.Itoa(i)
+				fw, _ := w.CreateFormFile(fieldName, inputSticker.Sticker.Reader.Name())
+				io.Copy(fw, inputSticker.Sticker.Reader)
+				inputSticker.Sticker.FileID = "attach://" + fieldName
+			}
+
+			stickers[i] = inputSticker
+		}
+
+		b, _ := json.Marshal(stickers)
 		fw, _ := w.CreateFormField("stickers")
 		fw.Write(b)
 	}
@@ -4278,6 +4291,15 @@ func (r *AddStickerToSetRequest) writeMultipart(w *multipart.Writer) {
 	}
 	w.WriteField("name", r.Name)
 	{
+		inputFile := r.Sticker.Sticker
+
+		if inputFile.Reader != nil {
+			fw, _ := w.CreateFormFile("attach_sticker", inputFile.Reader.Name())
+			io.Copy(fw, inputFile.Reader)
+			inputFile.FileID = "attach://" + "attach_sticker"
+		}
+
+		r.Sticker.Sticker = inputFile
 		b, _ := json.Marshal(r.Sticker)
 		fw, _ := w.CreateFormField("sticker")
 		fw.Write(b)
@@ -4325,6 +4347,15 @@ func (r *ReplaceStickerInSetRequest) writeMultipart(w *multipart.Writer) {
 	w.WriteField("name", r.Name)
 	w.WriteField("old_sticker", r.OldSticker)
 	{
+		inputFile := r.Sticker.Sticker
+
+		if inputFile.Reader != nil {
+			fw, _ := w.CreateFormFile("attach_sticker", inputFile.Reader.Name())
+			io.Copy(fw, inputFile.Reader)
+			inputFile.FileID = "attach://" + "attach_sticker"
+		}
+
+		r.Sticker.Sticker = inputFile
 		b, _ := json.Marshal(r.Sticker)
 		fw, _ := w.CreateFormField("sticker")
 		fw.Write(b)
