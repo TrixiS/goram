@@ -56,7 +56,7 @@ func (r *Router) Group(options RouterOptions) *Router {
 // It is expected that you pass updates from goram.LongPollUpdates (for example) to the root router
 // using .FeedUpdates() method.
 // Updates fed to a router get passed through top-level filters first,
-// then to router handlers and then to every child top-level filters and handlers (recoursively).
+// then to router handlers and then to every child top-level filters and handlers (iteratively).
 //
 // If top-level filter returns false, then the update gets passed to the next router (if any).
 // If handler filter returns false, then the update gets passed to the next handler (if any).
