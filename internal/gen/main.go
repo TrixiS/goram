@@ -1,14 +1,35 @@
 package main
 
 import (
+	"bytes"
+	"embed"
 	"encoding/json"
 	"fmt"
-	"io"
+	"go/format"
 	"os"
-	"os/exec"
 	"slices"
 	"strings"
+	"text/template"
 )
+
+var (
+	sumTypes = []string{
+		"InputMedia",
+		"InputPaidMedia",
+		"InlineQueryResult",
+		"MaybeInaccessibleMessage",
+		"InputMessageContent",
+	}
+
+	builtinTypes = []string{
+		"InputMedia",
+		"InputFile",
+		"InaccessibleMessage",
+		"MaybeInaccessibleMessage",
+	}
+)
+
+const genFilePerm = 0o660
 
 type Enum struct {
 	Name   string   `json:"name"`
@@ -42,7 +63,30 @@ type Spec struct {
 	Methods []Method `json:"methods"`
 }
 
+//go:embed templates/*.tmpl
+var templateFS embed.FS
+
+var tmpls *template.Template
+
 func main() {
+	funcMap := template.FuncMap{
+		"pascal": func(s string) string { return snakeToCamel(s, true) },
+		"camel":  func(s string) string { return snakeToCamel(s, false) },
+		"trimOptional": func(s string) string {
+			return strings.TrimPrefix(s, "Optional. ")
+		},
+	}
+
+	baseTmpl := template.New("").Funcs(funcMap)
+
+	var err error
+
+	tmpls, err = baseTmpl.ParseFS(templateFS, "templates/*.tmpl")
+
+	if err != nil {
+		panic(err)
+	}
+
 	f, err := os.Open("./spec.json")
 
 	if err != nil {
@@ -71,215 +115,104 @@ func main() {
 
 	parser := NewParser(&spec)
 
+	// TODO: generate enums for sum types
 	updateType := spec.Types[0]
-
-	// TODO: also generate enums for sum types
 	generateEnums(updateType, spec.Enums)
 	generateHandlers(updateType)
 
 	generateTypes(parser, spec.Types)
 	generateRequests(parser, spec.Methods)
 	generateMethods(parser, spec.Methods)
-
-	exec.Command("gofmt", "-s", "-w", ".").Run()
 }
 
-const genFileMode = os.O_WRONLY | os.O_TRUNC | os.O_CREATE
-const genFilePerm = 0o660
-
 func generateHandlers(updateType Type) {
-	f, err := os.OpenFile("./handlers/handlers.go", genFileMode, genFilePerm)
+	var templateData struct {
+		Fields []TypeField
+	}
+
+	if len(updateType.Fields) > 1 {
+		templateData.Fields = updateType.Fields[1:]
+	}
+
+	buf := bytes.Buffer{}
+
+	if err := tmpls.ExecuteTemplate(&buf, "handlers.tmpl", templateData); err != nil {
+		panic(err)
+	}
+
+	formattedCode, err := format.Source(buf.Bytes())
+
+	if err != nil {
+		panic("gofmt error: " + err.Error())
+	}
+
+	err = os.WriteFile("./handlers/handlers.go", formattedCode, genFilePerm)
 
 	if err != nil {
 		panic(err)
 	}
-
-	f.WriteString("package handlers\n\n")
-	f.WriteString(`
-		import "github.com/TrixiS/goram"
-		import "context"
-	`)
-
-	f.WriteString(`
-		type routerHandlers[T any] struct {
-			filters []Filter[T] // router-level filters for this update
-			handlers []handler[T]
-		}`,
-	)
-
-	f.WriteString("\n\ntype handlers struct {\n")
-
-	for _, update := range updateType.Fields[1:] {
-		fieldName := snakeToCamel(update.Name, false)
-		f.WriteString(fmt.Sprintf("%s routerHandlers[*goram.%s]\n", fieldName, update.Types[0]))
-	}
-
-	f.WriteString("}\n")
-
-	for _, update := range updateType.Fields[1:] {
-		updatePascalName := snakeToCamel(update.Name, true)
-		structFieldName := snakeToCamel(update.Name, false)
-		typeVar := "goram." + update.Types[0]
-
-		fmt.Fprintf(f, `
-			// Add %s handler with provided filters
-			func (r *Router) %s(handlerFunc Func[*%s], filters... Filter[*%s]) *Router {
-				h := handler[*%s]{
-				cb: handlerFunc,
-				filters: filters,
-				}
-
-				r.handlers.%s.handlers = append(r.handlers.%s.handlers, h)
-				return r
-			}
-		`,
-			updatePascalName,
-			updatePascalName,
-			typeVar,
-			typeVar,
-			typeVar,
-			structFieldName,
-			structFieldName,
-		)
-	}
-
-	for _, u := range updateType.Fields[1:] {
-		handlersFieldName := snakeToCamel(u.Name, false)
-		updatePascalName := snakeToCamel(u.Name, true)
-
-		fmt.Fprintf(f, `
-			// Add router-level filter(s) to %s update
-			func (r *Router) Filter%s(filters... Filter[*goram.%s]) *Router {
-				r.handlers.%s.filters = append(r.handlers.%s.filters, filters...)
-				return r
-			}
-		`,
-			updatePascalName,
-			updatePascalName,
-			u.Types[0],
-			handlersFieldName,
-			handlersFieldName,
-		)
-	}
-
-	f.WriteString("\n")
-
-	for _, u := range updateType.Fields[1:] {
-		pascalName := snakeToCamel(u.Name, true)
-		handlersFieldName := snakeToCamel(u.Name, false)
-
-		fmt.Fprintf(f, `
-			func (r *Router) call%sHandlers(ctx context.Context, bot *goram.Bot, update *goram.%s, data Data) (bool, error) {
-				queue := make([]*Router, 0, len(r.children) + 1)			
-				queue = append(queue, r)
-
-			queueLoop:
-				for len(queue) > 0 {
-					current := queue[0]
-					queue = queue[1:]
-
-					for _, filter := range current.handlers.%s.filters {
-						ok, err := filter(ctx, bot, update, data)
-
-						if err != nil {
-							return ok, err
-						}
-
-						if !ok {
-							continue queueLoop
-						}
-					}
-
-					found, err := callHandlers(ctx, bot, current.handlers.%s.handlers, update, data)
-
-					if err != nil || found {
-						return found, err
-					}
-
-					if len(current.children) > 0 {
-						queue = append(queue, current.children...)
-					}
-				}
-
-				return false, nil
-			}
-		`,
-			pascalName,
-			u.Types[0],
-			handlersFieldName,
-			handlersFieldName,
-		)
-	}
-
-	f.WriteString(
-		"func (r *Router) feedUpdate(ctx context.Context, bot *goram.Bot, update *goram.Update, data Data) (bool, error) {\n",
-	)
-
-	for _, u := range updateType.Fields[1:] {
-		fieldName := snakeToCamel(u.Name, true)
-		fmt.Fprintf(f, "if update.%s != nil {\n", fieldName)
-		fmt.Fprintf(f, "return r.call%sHandlers(ctx, bot, update.%s, data)\n", fieldName, fieldName)
-		f.WriteString("}\n")
-	}
-
-	f.WriteString("return false, nil\n")
-	f.WriteString("}\n")
-	f.Close()
 }
 
 func generateEnums(updateType Type, enums []Enum) {
-	f, err := os.OpenFile("./enums.go", genFileMode, genFilePerm)
+	type singleEnum struct {
+		Name   string
+		Values []string
+	}
 
-	if err != nil {
+	preparedEnums := []singleEnum{}
+
+	for _, e := range enums {
+		preparedEnums = append(preparedEnums, singleEnum{
+			Name:   e.Name,
+			Values: e.Values,
+		})
+	}
+
+	updateFields := []TypeField{}
+
+	if len(updateType.Fields) > 1 {
+		updateFields = updateType.Fields[1:]
+	}
+
+	data := struct {
+		Enums        []singleEnum
+		UpdateFields []TypeField
+	}{
+		Enums:        preparedEnums,
+		UpdateFields: updateFields,
+	}
+
+	buf := bytes.Buffer{}
+
+	if err := tmpls.ExecuteTemplate(&buf, "enums.tmpl", data); err != nil {
 		panic(err)
 	}
 
-	f.WriteString("package goram\n\n")
+	formattedCode, err := format.Source(buf.Bytes())
 
-	for _, e := range enums {
-		decl := fmt.Sprintf("type %s string\n", e.Name)
-		f.WriteString(decl)
-
-		f.WriteString("const (\n")
-
-		for _, v := range e.Values {
-			name := e.Name + snakeToCamel(v, true)
-			assig := fmt.Sprintf("%s %s = \"%s\"\n", name, e.Name, v)
-			f.WriteString(assig)
-		}
-
-		f.WriteString("\n)\n")
+	if err != nil {
+		panic("gofmt error: " + err.Error())
 	}
 
-	f.WriteString("type UpdateType string\n\n")
-	f.WriteString("const (\n")
-
-	for _, field := range updateType.Fields[1:] { // skip update_id
-		name := "Update" + snakeToCamel(field.Name, true)
-		fmt.Fprintf(f, "// %s\n", field.Description[len("Optional. "):])
-		fmt.Fprintf(f, `%s UpdateType = "%s"`, name, field.Name)
-		f.WriteString("\n\n")
+	if err := os.WriteFile("./enums.go", formattedCode, genFilePerm); err != nil {
+		panic(err)
 	}
-
-	f.WriteString(")\n")
-
-	f.Close()
 }
 
 func generateMethods(parser *Parser, methods []Method) {
-	f, err := os.OpenFile("./methods.go", genFileMode, genFilePerm)
-
-	if err != nil {
-		panic(err)
+	type methodTemplateData struct {
+		Name        string
+		PascalName  string
+		Href        string
+		Description []string
+		Args        string
+		ReturnType  string
+		TypeString  string
+		Data        string
+		GenVoid     bool
 	}
 
-	f.WriteString("package goram")
-
-	f.WriteString(`
-		import (
-			"context"
-		)
-	`)
+	preparedMethods := []methodTemplateData{}
 
 	for _, m := range methods {
 		pascalName := snakeToCamel(m.Name, true)
@@ -292,6 +225,7 @@ func generateMethods(parser *Parser, methods []Method) {
 		parsedSpecType := parser.ParseSpecTypes(m.Returns)
 		typeString := parsedSpecType.TypeString()
 		returnType := fmt.Sprintf("(r %s, err error)", typeString)
+
 		args := ""
 		data := "nil"
 
@@ -302,69 +236,71 @@ func generateMethods(parser *Parser, methods []Method) {
 			data = "request"
 		}
 
-		for _, d := range m.Description {
-			comment := fmt.Sprintf("// %s\n//\n", d)
-			f.WriteString(comment)
-		}
+		genVoid := len(m.Fields) > 0 && !strings.HasPrefix(pascalName, "Get")
 
-		fmt.Fprintf(f, "// %s\n", m.Href)
-		fmt.Fprintf(f, "func (b *Bot) %s%s %s {\n", pascalName, args, returnType)
-		fmt.Fprintf(
-			f,
-			`res, err := makeRequest[%s](ctx, b.Options.Client, b.baseURL, "%s", b.Options.FloodHandler, %s)
-
-				if err != nil {
-					return r, err
-				}
-
-				return res.Result, nil
-			}
-				`,
-			typeString,
-			m.Name,
-			data,
-		)
-
-		if len(m.Fields) == 0 || strings.HasPrefix(pascalName, "Get") {
-			continue
-		}
-
-		fmt.Fprintf(
-			f,
-			`
-			// Does the same as Bot.%s, but parses response body only in case of an error. 
-			// Therefore works faster if you dont need the response value.
-			func (b *Bot) %sVoid%s error {
-				return makeVoidRequest(ctx, b.Options.Client, b.baseURL, "%s", b.Options.FloodHandler, %s)
-			}
-			`,
-			pascalName,
-			pascalName,
-			args,
-			m.Name,
-			data,
-		)
+		preparedMethods = append(preparedMethods, methodTemplateData{
+			Name:        m.Name,
+			PascalName:  pascalName,
+			Href:        m.Href,
+			Description: m.Description,
+			Args:        args,
+			ReturnType:  returnType,
+			TypeString:  typeString,
+			Data:        data,
+			GenVoid:     genVoid,
+		})
 	}
 
-	f.Close()
-}
+	buf := bytes.Buffer{}
 
-func generateRequests(parser *Parser, methods []Method) {
-	f, err := os.OpenFile("./requests.go", genFileMode, genFilePerm)
-
-	if err != nil {
+	if err := tmpls.ExecuteTemplate(&buf, "methods.tmpl", preparedMethods); err != nil {
 		panic(err)
 	}
 
-	f.WriteString("package goram\n\n")
-	f.WriteString(`
-		import (
-			"mime/multipart"
-			"encoding/json"
-			"io"
-			"strconv"
-		)
-	`)
+	formattedCode, err := format.Source(buf.Bytes())
+
+	if err != nil {
+		panic("gofmt error: " + err.Error())
+	}
+
+	if err := os.WriteFile("./methods.go", formattedCode, genFilePerm); err != nil {
+		panic(err)
+	}
+}
+
+type (
+	fieldData struct {
+		Name        string
+		GoName      string
+		Case        string
+		Required    bool
+		CheckForNil bool
+	}
+
+	structMultipartData struct {
+		StructName string
+		Fields     []fieldData
+	}
+
+	typeStructData struct {
+		Doc         bool
+		Description []string
+		Href        string
+		CamelName   string
+		IsInterface bool
+		Fields      []string
+	}
+)
+
+func generateRequests(parser *Parser, methods []Method) {
+	type requestTemplateData struct {
+		PascalName    string
+		StructName    string
+		StructData    typeStructData
+		MultipartData structMultipartData
+	}
+
+	preparedRequests := []requestTemplateData{}
 
 	for _, m := range methods {
 		if len(m.Fields) == 0 {
@@ -380,201 +316,128 @@ func generateRequests(parser *Parser, methods []Method) {
 			suffix = "Request"
 		}
 
-		fmt.Fprintf(f, "// see Bot.%s(ctx, &%s{})\n", pascalName, structName)
-		generateTypeStruct(f, parser.ParseType(&m.Type), suffix, false, false)
-		f.WriteString("\n")
-		generateRequestWriteMultipart(f, parser, &m, structName)
-	}
+		t := parser.ParseType(&m.Type)
+		camelName := snakeToCamel(t.Type.Name, true)
 
-	f.Close()
-}
-
-func generateRequestWriteMultipart(
-	w io.Writer,
-	parser *Parser,
-	m *Method,
-	structName string,
-) {
-	fmt.Fprintf(w, "func (r *%s) writeMultipart(w *multipart.Writer) {", structName)
-
-	for _, field := range m.Fields {
-		parsedTypeField := parser.ParseTypeField(&field)
-
-		if parsedTypeField.ParsedSpecType.GoType == "InputFile" {
-			fmt.Fprintf(w, `if r.%s.FileID != "" {
-					w.WriteField("%s", r.%s.FileID)
-				} else if r.%s.Reader != nil {
-					fw, _ := w.CreateFormFile("%s", r.%s.Reader.Name()) 
-					io.Copy(fw, r.%s.Reader)
-				}
-			`,
-				parsedTypeField.GoName,
-				field.Name,
-				parsedTypeField.GoName,
-				parsedTypeField.GoName,
-				field.Name,
-				parsedTypeField.GoName,
-				parsedTypeField.GoName,
-			)
-		} else if parsedTypeField.ParsedSpecType.GoType == "InputSticker" && parsedTypeField.ParsedSpecType.ParsedType == ParsedTypeArray { // []InputSticker
-			fmt.Fprintf(w, `if len (r.%s) > 0 {
-				stickers := make([]InputSticker, len(r.%s))
-
-				for i, inputSticker := range r.%s {
-					if inputSticker.Sticker.Reader != nil {
-						fieldName := "%s" + strconv.Itoa(i)
-						fw, _ := w.CreateFormFile(fieldName, inputSticker.Sticker.Reader.Name())
-						io.Copy(fw, inputSticker.Sticker.Reader)
-						inputSticker.Sticker.FileID = "attach://" + fieldName
-					}
-
-					stickers[i] = inputSticker
-				}
-
-				b, _ := json.Marshal(stickers)
-				fw, _ := w.CreateFormField("%s")
-				fw.Write(b)
-			}
-			`,
-				parsedTypeField.GoName,
-				parsedTypeField.GoName,
-				parsedTypeField.GoName,
-				field.Name,
-				field.Name,
-			)
-		} else if parsedTypeField.ParsedSpecType.GoType == "InputSticker" {
-			fmt.Fprintf(w, `{
-				inputFile := r.%s.Sticker
-
-				if inputFile.Reader != nil {
-					fw, _ := w.CreateFormFile("attach_%s", inputFile.Reader.Name()) 
-					io.Copy(fw, inputFile.Reader)
-					inputFile.FileID = "attach://" + "attach_%s"
-				}
-
-				r.%s.Sticker = inputFile
-				b, _ := json.Marshal(r.%s)
-				fw, _ := w.CreateFormField("%s")
-				fw.Write(b)
-			}
-			`,
-				parsedTypeField.GoName,
-				field.Name,
-				field.Name,
-				parsedTypeField.GoName,
-				parsedTypeField.GoName,
-				field.Name,
-			)
-		} else if parsedTypeField.ParsedSpecType.GoType == "InputMedia" &&
-			parsedTypeField.ParsedSpecType.ParsedType != ParsedTypeArray {
-
-			fmt.Fprintf(w, `{
-				inputFile := r.%s.getMedia()
-
-				if inputFile.Reader != nil {
-					fw, _ := w.CreateFormFile("%s", inputFile.Reader.Name())
-					io.Copy(fw, inputFile.Reader)
-					r.%s.setMedia("attach://%s")	
-				}
-
-				b, _ := json.Marshal(r.%s)
-				fw, _ := w.CreateFormField("%s")
-				fw.Write(b)
-			}
-			`,
-				parsedTypeField.GoName,
-				field.Name,
-				parsedTypeField.GoName,
-				field.Name,
-				parsedTypeField.GoName,
-				field.Name,
-			)
-		} else if parsedTypeField.ParsedSpecType.GoType == "InputMedia" &&
-			parsedTypeField.ParsedSpecType.ParsedType == ParsedTypeArray &&
-			parsedTypeField.ParsedSpecType.Levels == 1 {
-
-			fmt.Fprintf(w, `for i := 0; i < len(r.%s); i++ {
-				inputMedia := r.%s[i]
-				fieldName := "%s" + strconv.Itoa(i)
-				inputFile := inputMedia.getMedia()
-				if inputFile.Reader != nil {
-					fw, _ := w.CreateFormFile(fieldName, inputFile.Reader.Name())
-					io.Copy(fw, inputFile.Reader)
-					inputMedia.setMedia("attach://" + fieldName)
-				}					
-			}
-			{
-				b, _ := json.Marshal(r.%s)
-				fw, _ := w.CreateFormField("%s")
-				fw.Write(b)
-			}
-			`,
-				parsedTypeField.GoName,
-				parsedTypeField.GoName,
-				field.Name,
-				parsedTypeField.GoName,
-				field.Name,
-			)
-		} else if parsedTypeField.ParsedSpecType.GoType == "ChatID" {
-			fmt.Fprintf(w,
-				"w.WriteField(\"%s\", r.%s.String())\n",
-				field.Name,
-				parsedTypeField.GoName,
-			)
-		} else if parsedTypeField.ParsedSpecType.GoType == "string" &&
-			parsedTypeField.ParsedSpecType.ParsedType == ParsedTypePrimitive {
-
-			if !parsedTypeField.Field.Required {
-				fmt.Fprintf(w, "if r.%s != \"\" {", parsedTypeField.GoName)
-			}
-
-			fmt.Fprintf(w, "w.WriteField(\"%s\", r.%s)\n", field.Name, parsedTypeField.GoName)
-
-			if !parsedTypeField.Field.Required {
-				w.Write([]byte("}\n"))
-			}
-		} else if parsedTypeField.ParsedSpecType.ParsedType == ParsedTypeEnum {
-			fmt.Fprintf(w, "w.WriteField(\"%s\", string(r.%s))\n", field.Name, parsedTypeField.GoName)
-		} else {
-			checkForNil := !parsedTypeField.Field.Required &&
-				(parsedTypeField.ParsedSpecType.ParsedType == ParsedTypeStruct ||
-					parsedTypeField.ParsedSpecType.Levels > 0 ||
-					parsedTypeField.ParsedSpecType.ParsedType == ParsedTypeInterface)
-
-			if checkForNil {
-				fmt.Fprintf(w, "if r.%s != nil ", parsedTypeField.GoName)
-			}
-
-			fmt.Fprintf(w, `{
-					b, _ := json.Marshal(r.%s)
-					fw, _ := w.CreateFormField("%s")
-					fw.Write(b)
-				}
-				`,
-				parsedTypeField.GoName,
-				field.Name,
-			)
+		if suffix != "" {
+			camelName += suffix
 		}
+
+		structFields := make([]string, len(t.Fields))
+
+		for _, field := range t.Fields {
+			structFields = append(structFields, field.StructField(false, true))
+		}
+
+		sData := typeStructData{
+			Doc:         false,
+			Description: t.Type.Description,
+			Href:        t.Type.Href,
+			CamelName:   camelName,
+			IsInterface: len(t.Fields) == 0,
+			Fields:      structFields,
+		}
+
+		multipartFields := make([]fieldData, 0, len(m.Fields))
+
+		for _, field := range m.Fields {
+			parsedTypeField := parser.ParseTypeField(&field)
+			spec := parsedTypeField.ParsedSpecType
+
+			currentCase := ""
+			checkForNil := false
+
+			if spec.GoType == "InputFile" {
+				currentCase = "InputFile"
+			} else if spec.GoType == "InputSticker" && spec.ParsedType == ParsedTypeArray {
+				currentCase = "InputStickerArray"
+			} else if spec.GoType == "InputSticker" {
+				currentCase = "InputSticker"
+			} else if spec.GoType == "InputMedia" && spec.ParsedType != ParsedTypeArray {
+				currentCase = "InputMedia"
+			} else if spec.GoType == "InputMedia" && spec.ParsedType == ParsedTypeArray && spec.Levels == 1 {
+				currentCase = "InputMediaArray"
+			} else if spec.GoType == "ChatID" {
+				currentCase = "ChatID"
+			} else if spec.GoType == "string" && spec.ParsedType == ParsedTypePrimitive {
+				currentCase = "StringPrimitive"
+			} else if spec.ParsedType == ParsedTypeEnum {
+				currentCase = "Enum"
+			} else {
+				currentCase = "Default"
+				checkForNil = !parsedTypeField.Field.Required &&
+					(spec.ParsedType == ParsedTypeStruct ||
+						spec.Levels > 0 ||
+						spec.ParsedType == ParsedTypeInterface)
+			}
+
+			multipartFields = append(multipartFields, fieldData{
+				Name:        field.Name,
+				GoName:      parsedTypeField.GoName,
+				Case:        currentCase,
+				Required:    parsedTypeField.Field.Required,
+				CheckForNil: checkForNil,
+			})
+		}
+
+		mData := structMultipartData{
+			StructName: structName,
+			Fields:     multipartFields,
+		}
+
+		preparedRequests = append(preparedRequests, requestTemplateData{
+			PascalName:    pascalName,
+			StructName:    structName,
+			StructData:    sData,
+			MultipartData: mData,
+		})
 	}
 
-	w.Write([]byte("}\n"))
-}
+	buf := bytes.Buffer{}
 
-var builtinTypes = []string{
-	"InputMedia",
-	"InputFile",
-	"InaccessibleMessage",
-	"MaybeInaccessibleMessage",
-}
-
-func generateTypes(parser *Parser, types []Type) {
-	f, err := os.OpenFile("./types.go", genFileMode, genFilePerm)
-
-	if err != nil {
+	if err := tmpls.ExecuteTemplate(&buf, "requests.tmpl", preparedRequests); err != nil {
 		panic(err)
 	}
 
-	f.WriteString("package goram\n\n")
+	formattedCode, err := format.Source(buf.Bytes())
+
+	if err != nil {
+		panic("gofmt error: " + err.Error())
+	}
+
+	if err := os.WriteFile("./requests.go", formattedCode, genFilePerm); err != nil {
+		panic(err)
+	}
+}
+
+func generateTypes(parser *Parser, types []Type) {
+	type (
+		typeStructData struct {
+			Doc         bool
+			Description []string
+			Href        string
+			CamelName   string
+			IsInterface bool
+			Fields      []string
+		}
+
+		sumTypeStructData struct {
+			Description []string
+			Href        string
+			Name        string
+			Fields      []string
+		}
+
+		typeTemplateItem struct {
+			IsSumType       bool
+			GenMediaMethods bool
+			TypeRaw         *Type
+			StructData      typeStructData
+			SumTypeData     sumTypeStructData
+		}
+	)
+
+	preparedTypes := []typeTemplateItem{}
 
 	for _, t := range types {
 		if slices.Contains(builtinTypes, t.Name) {
@@ -595,137 +458,97 @@ func generateTypes(parser *Parser, types []Type) {
 			}
 		}
 
+		const (
+			inputMediaPrefix     = "InputMedia"
+			inputPaidMediaPrefix = "InputPaidMedia"
+		)
+
+		genMediaMethods := strings.HasPrefix(t.Name, inputMediaPrefix) ||
+			(strings.HasPrefix(t.Name, inputPaidMediaPrefix) && len(t.Fields) > 0)
+
 		if checkSumType(&t) {
-			generateSumTypeStruct(f, parser.ParsedTypes, parseResult)
-			continue
-		}
+			uniqueFields := []*ParsedTypeField{}
 
-		generateTypeStruct(f, parseResult, "", true, true)
+			for _, s := range t.SubTypes {
+				parsedSub := parser.ParsedTypes[s]
 
-		const inputMediaPrefix = "InputMedia"
-		const inputPaidMediaPrefix = "InputPaidMedia"
+			parsedFieldsLoop:
+				for _, parsedField := range parsedSub.Fields {
+					for _, field := range uniqueFields {
+						if field.Field.Name == parsedField.Field.Name {
+							continue parsedFieldsLoop
+						}
+					}
 
-		if strings.HasPrefix(t.Name, inputMediaPrefix) ||
-			(strings.HasPrefix(t.Name, inputPaidMediaPrefix) && len(t.Fields) > 0) {
-			generateInputMediaMethods(f, &t)
-		}
-	}
-
-	f.Close()
-}
-
-var ignoredSumTypes = []string{
-	"InputMedia",
-	"InputPaidMedia",
-	"InlineQueryResult",
-	"MaybeInaccessibleMessage",
-	"InputMessageContent",
-}
-
-func checkSumType(t *Type) bool {
-	return len(t.SubTypes) > 0 && !slices.Contains(ignoredSumTypes, t.Name)
-}
-
-func generateSumTypeStruct(
-	w io.StringWriter,
-	parsedTypes map[string]TypeParseResult,
-	t TypeParseResult,
-) {
-	fields := []*ParsedTypeField{}
-
-	for _, s := range t.Type.SubTypes {
-		parsedType := parsedTypes[s]
-
-	parsedFieldsLoop:
-		for _, parsedField := range parsedType.Fields {
-			for _, field := range fields {
-				if field.Field.Name == parsedField.Field.Name {
-					continue parsedFieldsLoop
+					uniqueFields = append(uniqueFields, parsedField)
 				}
 			}
 
-			fields = append(fields, parsedField)
+			fieldLines := make([]string, 0, len(uniqueFields))
+
+			for i, field := range uniqueFields {
+				fieldLines = append(fieldLines, field.StructField(true, i > 0))
+			}
+
+			sumData := sumTypeStructData{
+				Description: parseResult.Type.Description,
+				Href:        parseResult.Type.Href,
+				Name:        parseResult.Type.Name,
+				Fields:      fieldLines,
+			}
+
+			preparedTypes = append(preparedTypes, typeTemplateItem{
+				IsSumType:   true,
+				SumTypeData: sumData,
+			})
+
+			continue
 		}
+
+		structFields := make([]string, 0, len(parseResult.Fields))
+
+		for _, field := range parseResult.Fields {
+			structFields = append(structFields, field.StructField(true, true))
+		}
+
+		sData := typeStructData{
+			Doc:         true,
+			Description: parseResult.Type.Description,
+			Href:        parseResult.Type.Href,
+			CamelName:   snakeToCamel(parseResult.Type.Name, true),
+			IsInterface: len(parseResult.Fields) == 0,
+			Fields:      structFields,
+		}
+
+		typeCopy := t
+
+		preparedTypes = append(preparedTypes, typeTemplateItem{
+			IsSumType:       false,
+			GenMediaMethods: genMediaMethods,
+			TypeRaw:         &typeCopy,
+			StructData:      sData,
+		})
 	}
 
-	w.WriteString("\n")
+	buf := bytes.Buffer{}
 
-	for _, d := range t.Type.Description {
-		w.WriteString("//\n//")
-		w.WriteString(d)
-		w.WriteString("\n")
+	if err := tmpls.ExecuteTemplate(&buf, "types.tmpl", preparedTypes); err != nil {
+		panic(err)
 	}
 
-	w.WriteString("//\n// ")
-	w.WriteString(t.Type.Href)
-	w.WriteString("\n")
+	formattedCode, err := format.Source(buf.Bytes())
 
-	w.WriteString("type ")
-	w.WriteString(t.Type.Name)
-	w.WriteString(" struct {")
-
-	for i, field := range fields {
-		w.WriteString("\n")
-		w.WriteString(field.StructField(true, i > 0))
+	if err != nil {
+		panic("gofmt error: " + err.Error())
 	}
 
-	w.WriteString("\n}\n\n")
+	if err := os.WriteFile("./types.go", formattedCode, genFilePerm); err != nil {
+		panic(err)
+	}
 }
 
-func generateInputMediaMethods(w io.StringWriter, t *Type) {
-	w.WriteString(fmt.Sprintf(`
-		func (i *%s) setMedia(fileID string) {
-			i.Media.FileID = fileID
-		}
-	`, t.Name))
-
-	w.WriteString(fmt.Sprintf(`
-		func (i *%s) getMedia() InputFile {
-			return i.Media
-		}
-	`, t.Name))
-}
-
-func generateTypeStruct(
-	w io.StringWriter,
-	t TypeParseResult,
-	suffix string,
-	doc bool,
-	tagJSON bool,
-) {
-	if doc {
-		for _, d := range t.Type.Description {
-			comment := fmt.Sprintf("// %s\n//\n", d)
-			w.WriteString(comment)
-		}
-
-		w.WriteString(fmt.Sprintf("// %s\n", t.Type.Href))
-	}
-
-	camelName := snakeToCamel(t.Type.Name, true)
-
-	if suffix != "" {
-		camelName += suffix
-	}
-
-	if len(t.Fields) == 0 {
-		decl := fmt.Sprintf("type %s interface{}\n", camelName)
-		w.WriteString(decl)
-		return
-	}
-
-	decl := fmt.Sprintf("type %s struct {\n", camelName)
-	w.WriteString(decl)
-
-	for i, field := range t.Fields {
-		w.WriteString(field.StructField(tagJSON, true))
-
-		if i < len(t.Fields)-1 {
-			w.WriteString("\n")
-		}
-	}
-
-	w.WriteString("\n}\n")
+func checkSumType(t *Type) bool {
+	return len(t.SubTypes) > 0 && !slices.Contains(sumTypes, t.Name)
 }
 
 type TypeParseResult struct {
@@ -772,31 +595,31 @@ type ParsedTypeField struct {
 }
 
 func (p *ParsedTypeField) StructField(tagJSON bool, doc bool) string {
-	builder := strings.Builder{}
-
-	builder.WriteString(p.GoName)
-	builder.WriteRune(' ')
-	builder.WriteString(p.ParsedSpecType.TypeString())
-
-	if tagJSON {
-		builder.WriteRune(' ')
-		builder.WriteString("`json:\"")
-		builder.WriteString(p.Field.Name)
-
-		if !p.Field.Required {
-			builder.WriteRune(',')
-			builder.WriteString("omitempty")
-		}
-
-		builder.WriteString("\"`")
+	data := struct {
+		GoName      string
+		TypeString  string
+		TagJSON     bool
+		FieldName   string
+		Required    bool
+		Doc         bool
+		Description string
+	}{
+		GoName:      p.GoName,
+		TypeString:  p.ParsedSpecType.TypeString(),
+		TagJSON:     tagJSON,
+		FieldName:   p.Field.Name,
+		Required:    p.Field.Required,
+		Doc:         doc,
+		Description: p.Field.Description,
 	}
 
-	if doc {
-		builder.WriteString(" // ")
-		builder.WriteString(p.Field.Description)
+	buf := bytes.Buffer{}
+
+	if err := tmpls.ExecuteTemplate(&buf, "structField.tmpl", data); err != nil {
+		panic(err)
 	}
 
-	return builder.String()
+	return buf.String()
 }
 
 type Parser struct {

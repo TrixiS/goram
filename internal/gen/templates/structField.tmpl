@@ -1,0 +1,3 @@
+{{.GoName}} {{.TypeString}}
+{{- if .TagJSON}}{{printf " \x60json:\"%s" .FieldName}}{{if not .Required}},omitempty{{end}}{{printf "\"\x60"}}{{end}}
+{{- if .Doc}} // {{.Description}}{{end}}

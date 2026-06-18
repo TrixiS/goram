@@ -21,6 +21,11 @@ type handler[U any] struct {
 	filters []Filter[U]
 }
 
+type routerHandlers[T any] struct {
+	filters  []Filter[T] // router-level filters for this update
+	handlers []handler[T]
+}
+
 type RouterOptions struct {
 	Name string // Name of the router. Useful for debugging.
 }

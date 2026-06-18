@@ -1,0 +1,16 @@
+{{- if .Doc}}
+{{- range .Description -}}
+	// {{.}}
+	//
+{{end -}}
+// {{.Href}}
+{{- end}}
+{{- if .IsInterface}}
+	type {{.CamelName}} interface{}
+{{- else}}
+	type {{.CamelName}} struct {
+	{{- range .Fields}}
+		{{.}}
+	{{- end}}
+	}
+{{- end}}

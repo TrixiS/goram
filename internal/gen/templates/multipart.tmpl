@@ -1,0 +1,110 @@
+func (r *{{.StructName}}) writeMultipart(w *multipart.Writer) {
+{{- range .Fields -}}
+	{{- if eq .Case "InputFile"}}{{template "InputFile" .}}
+	{{- else if eq .Case "InputStickerArray"}}{{template "InputStickerArray" .}}
+	{{- else if eq .Case "InputSticker"}}{{template "InputSticker" .}}
+	{{- else if eq .Case "InputMedia"}}{{template "InputMedia" .}}
+	{{- else if eq .Case "InputMediaArray"}}{{template "InputMediaArray" .}}
+	{{- else if eq .Case "ChatID"}}{{template "ChatID" .}}
+	{{- else if eq .Case "StringPrimitive"}}{{template "StringPrimitive" .}}
+	{{- else if eq .Case "Enum"}}{{template "Enum" .}}
+	{{- else}}{{template "Default" .}}{{end}}
+{{- end}}
+}
+
+{{define "InputFile"}}
+	if r.{{.GoName}}.FileID != "" {
+		w.WriteField("{{.Name}}", r.{{.GoName}}.FileID)
+	} else if r.{{.GoName}}.Reader != nil {
+		fw, _ := w.CreateFormFile("{{.Name}}", r.{{.GoName}}.Reader.Name()) 
+		io.Copy(fw, r.{{.GoName}}.Reader)
+	}
+{{end}}
+
+{{define "InputStickerArray"}}
+	if len(r.{{.GoName}}) > 0 {
+		stickers := make([]InputSticker, len(r.{{.GoName}}))
+		for i, inputSticker := range r.{{.GoName}} {
+			if inputSticker.Sticker.Reader != nil {
+				fieldName := "{{.Name}}" + strconv.Itoa(i)
+				fw, _ := w.CreateFormFile(fieldName, inputSticker.Sticker.Reader.Name())
+				io.Copy(fw, inputSticker.Sticker.Reader)
+				inputSticker.Sticker.FileID = "attach://" + fieldName
+			}
+			stickers[i] = inputSticker
+		}
+		b, _ := json.Marshal(stickers)
+		fw, _ := w.CreateFormField("{{.Name}}")
+		fw.Write(b)
+	}
+{{end}}
+
+{{define "InputSticker"}}
+	{
+		inputFile := r.{{.GoName}}.Sticker
+		if inputFile.Reader != nil {
+			fw, _ := w.CreateFormFile("attach_{{.Name}}", inputFile.Reader.Name()) 
+			io.Copy(fw, inputFile.Reader)
+			inputFile.FileID = "attach://" + "attach_{{.Name}}"
+		}
+		r.{{.GoName}}.Sticker = inputFile
+		b, _ := json.Marshal(r.{{.GoName}})
+		fw, _ := w.CreateFormField("{{.Name}}")
+		fw.Write(b)
+	}
+{{end}}
+
+{{define "InputMedia"}}
+	{
+		inputFile := r.{{.GoName}}.getMedia()
+		if inputFile.Reader != nil {
+			fw, _ := w.CreateFormFile("{{.Name}}", inputFile.Reader.Name())
+			io.Copy(fw, inputFile.Reader)
+			r.{{.GoName}}.setMedia("attach://{{.Name}}")	
+		}
+		b, _ := json.Marshal(r.{{.GoName}})
+		fw, _ := w.CreateFormField("{{.Name}}")
+		fw.Write(b)
+	}
+{{end}}
+
+{{define "InputMediaArray"}}
+	for i := 0; i < len(r.{{.GoName}}); i++ {
+		inputMedia := r.{{.GoName}}[i]
+		fieldName := "{{.Name}}" + strconv.Itoa(i)
+		inputFile := inputMedia.getMedia()
+		if inputFile.Reader != nil {
+			fw, _ := w.CreateFormFile(fieldName, inputFile.Reader.Name())
+			io.Copy(fw, inputFile.Reader)
+			inputMedia.setMedia("attach://" + fieldName)
+		}					
+	}
+	{
+		b, _ := json.Marshal(r.{{.GoName}})
+		fw, _ := w.CreateFormField("{{.Name}}")
+		fw.Write(b)
+	}
+{{end}}
+
+{{define "ChatID"}}
+w.WriteField("{{.Name}}", r.{{.GoName}}.String())
+{{end}}
+
+{{define "StringPrimitive"}}
+	{{if not .Required}}if r.{{.GoName}} != "" { {{end}}
+	w.WriteField("{{.Name}}", r.{{.GoName}})
+	{{if not .Required}} } {{end}}
+{{end}}
+
+{{define "Enum"}}
+	w.WriteField("{{.Name}}", string(r.{{.GoName}}))
+{{end}}
+
+{{define "Default"}}
+	{{if .CheckForNil}}
+	if r.{{.GoName}} != nil {{end}} {
+		b, _ := json.Marshal(r.{{.GoName}})
+		fw, _ := w.CreateFormField("{{.Name}}")
+		fw.Write(b)
+	}
+{{end}}

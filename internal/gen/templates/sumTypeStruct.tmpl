@@ -1,0 +1,11 @@
+{{range .Description -}}
+//
+//{{.}}
+{{end -}}
+//
+// {{.Href}}
+type {{.Name}} struct {
+{{- range .Fields}}
+	{{.}}
+{{- end}}
+}
