@@ -35,23 +35,21 @@ func main() {
 	router := routes.CreateRouter(0)
 
 	http.HandleFunc("/updates", func(w http.ResponseWriter, r *http.Request) {
-		const secretHeaderKey = "X-Telegram-Bot-Api-Secret-Token"
+		secretHeader := r.Header.Get(goram.WebhookSecretHeaderKey)
 
-		if secret != r.Header.Get(secretHeaderKey) {
+		if secretHeader != secret {
 			w.WriteHeader(http.StatusForbidden)
 			return
 		}
 
 		update := goram.Update{}
 
-		defer r.Body.Close()
-
 		if err := json.NewDecoder(r.Body).Decode(&update); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
-		go router.FeedUpdates(ctx, bot, []goram.Update{update}, handlers.Data{})
+		router.FeedUpdates(ctx, bot, []goram.Update{update}, handlers.Data{})
 
 		w.WriteHeader(http.StatusOK)
 	})

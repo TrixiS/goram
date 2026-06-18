@@ -5,6 +5,8 @@ import (
 	"strconv"
 )
 
+const WebhookSecretHeaderKey = "X-Telegram-Bot-Api-Secret-Token"
+
 // Use this struct to specify a chat id or username
 type ChatID struct {
 	ID       int64  // Negative int64 (-100...) for channel and some group ids, positive for user ids
