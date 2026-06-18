@@ -16,8 +16,8 @@ const (
 type UpdateType string
 
 const (
-{{- range $index, $field := .UpdateFields}}
-	{{- if $index}}
+{{ range $index, $field := .UpdateFields}}
+    {{- if $index}}
 
 	{{end -}}
 	// {{trimOptional $field.Description}}

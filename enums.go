@@ -71,7 +71,8 @@ const (
 
 type UpdateType string
 
-const ( // New incoming message of any kind - text, photo, sticker, etc.
+const (
+	// New incoming message of any kind - text, photo, sticker, etc.
 	UpdateMessage UpdateType = "message"
 
 	// New version of a message that is known to the bot and was edited. This update may at times be triggered by changes to message fields that are either unavailable or not actively used by your bot.
