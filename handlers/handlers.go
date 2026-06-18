@@ -1325,3 +1325,77 @@ func (r *Router) FeedUpdate(ctx context.Context, bot *goram.Bot, update *goram.U
 
 	return false, nil
 }
+
+func (r *Router) GetUsedUpdateTypes() []goram.UpdateType {
+	used := []goram.UpdateType{}
+	if len(r.handlers.message.handlers) > 0 {
+		used = append(used, goram.UpdateMessage)
+	}
+	if len(r.handlers.editedMessage.handlers) > 0 {
+		used = append(used, goram.UpdateEditedMessage)
+	}
+	if len(r.handlers.channelPost.handlers) > 0 {
+		used = append(used, goram.UpdateChannelPost)
+	}
+	if len(r.handlers.editedChannelPost.handlers) > 0 {
+		used = append(used, goram.UpdateEditedChannelPost)
+	}
+	if len(r.handlers.businessConnection.handlers) > 0 {
+		used = append(used, goram.UpdateBusinessConnection)
+	}
+	if len(r.handlers.businessMessage.handlers) > 0 {
+		used = append(used, goram.UpdateBusinessMessage)
+	}
+	if len(r.handlers.editedBusinessMessage.handlers) > 0 {
+		used = append(used, goram.UpdateEditedBusinessMessage)
+	}
+	if len(r.handlers.deletedBusinessMessages.handlers) > 0 {
+		used = append(used, goram.UpdateDeletedBusinessMessages)
+	}
+	if len(r.handlers.messageReaction.handlers) > 0 {
+		used = append(used, goram.UpdateMessageReaction)
+	}
+	if len(r.handlers.messageReactionCount.handlers) > 0 {
+		used = append(used, goram.UpdateMessageReactionCount)
+	}
+	if len(r.handlers.inlineQuery.handlers) > 0 {
+		used = append(used, goram.UpdateInlineQuery)
+	}
+	if len(r.handlers.chosenInlineResult.handlers) > 0 {
+		used = append(used, goram.UpdateChosenInlineResult)
+	}
+	if len(r.handlers.callbackQuery.handlers) > 0 {
+		used = append(used, goram.UpdateCallbackQuery)
+	}
+	if len(r.handlers.shippingQuery.handlers) > 0 {
+		used = append(used, goram.UpdateShippingQuery)
+	}
+	if len(r.handlers.preCheckoutQuery.handlers) > 0 {
+		used = append(used, goram.UpdatePreCheckoutQuery)
+	}
+	if len(r.handlers.purchasedPaidMedia.handlers) > 0 {
+		used = append(used, goram.UpdatePurchasedPaidMedia)
+	}
+	if len(r.handlers.poll.handlers) > 0 {
+		used = append(used, goram.UpdatePoll)
+	}
+	if len(r.handlers.pollAnswer.handlers) > 0 {
+		used = append(used, goram.UpdatePollAnswer)
+	}
+	if len(r.handlers.myChatMember.handlers) > 0 {
+		used = append(used, goram.UpdateMyChatMember)
+	}
+	if len(r.handlers.chatMember.handlers) > 0 {
+		used = append(used, goram.UpdateChatMember)
+	}
+	if len(r.handlers.chatJoinRequest.handlers) > 0 {
+		used = append(used, goram.UpdateChatJoinRequest)
+	}
+	if len(r.handlers.chatBoost.handlers) > 0 {
+		used = append(used, goram.UpdateChatBoost)
+	}
+	if len(r.handlers.removedChatBoost.handlers) > 0 {
+		used = append(used, goram.UpdateRemovedChatBoost)
+	}
+	return used
+}

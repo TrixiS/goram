@@ -94,3 +94,15 @@ func (r *Router) FeedUpdate(ctx context.Context, bot *goram.Bot, update *goram.U
 
 	return false, nil
 }
+
+func (r *Router) GetUsedUpdateTypes() []goram.UpdateType {
+	used := []goram.UpdateType{}
+{{- range .Fields}}
+	{{- $camel := camel .Name -}}
+	{{- $pascal := pascal .Name }}
+	if len(r.handlers.{{$camel}}.handlers) > 0 {
+		used = append(used, goram.Update{{$pascal}})
+	}
+{{- end}}
+	return used
+}

@@ -22,17 +22,18 @@ func main() {
 	ctx := context.Background()
 	bot := goram.NewBot(goram.BotOptions{Token: token})
 
+	router := routes.CreateRouter(0)
+
 	err := bot.SetWebhookVoid(ctx, &goram.SetWebhookRequest{
 		URL:                url,
 		SecretToken:        secret,
 		DropPendingUpdates: true,
+		AllowedUpdates:     router.GetUsedUpdateTypes(),
 	})
 
 	if err != nil {
 		panic(err)
 	}
-
-	router := routes.CreateRouter(0)
 
 	http.HandleFunc("/updates", func(w http.ResponseWriter, r *http.Request) {
 		secretHeader := r.Header.Get(goram.WebhookSecretHeaderKey)
