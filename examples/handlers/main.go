@@ -22,18 +22,18 @@ func main() {
 	bot := goram.NewBot(goram.BotOptions{Token: *token})
 	ctx := context.Background()
 
+	router := routes.CreateRouter(*adminUserID)
+
 	updatesChan := goram.LongPollUpdates(ctx, bot, &goram.LongPollUpdatesOptions{
 		RequestOptions: goram.GetUpdatesRequest{
 			Timeout:        10,
-			AllowedUpdates: []goram.UpdateType{goram.UpdateMessage, goram.UpdateCallbackQuery},
+			AllowedUpdates: router.GetUsedUpdateTypes(),
 			Limit:          100,
 		},
 		Cap:           100,
 		RetryInterval: time.Second * 1,
 		MaxErrors:     3,
 	})
-
-	router := routes.CreateRouter(*adminUserID)
 
 	for updates := range updatesChan {
 		go func(updates []goram.Update) {
