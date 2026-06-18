@@ -49,7 +49,7 @@ func main() {
 			return
 		}
 
-		router.FeedUpdates(ctx, bot, []goram.Update{update}, handlers.Data{})
+		router.FeedUpdate(ctx, bot, &update, handlers.Data{})
 
 		w.WriteHeader(http.StatusOK)
 	})

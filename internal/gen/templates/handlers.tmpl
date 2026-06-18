@@ -80,7 +80,8 @@ queueLoop:
 }
 {{end}}
 
-func (r *Router) feedUpdate(ctx context.Context, bot *goram.Bot, update *goram.Update, data Data) (bool, error) {
+// See Router.FeedUpdates()
+func (r *Router) FeedUpdate(ctx context.Context, bot *goram.Bot, update *goram.Update, data Data) (bool, error) {
 {{- range $index, $field := .Fields}}
 	{{- $pascal := pascal $field.Name -}}
 	{{- if $index}}

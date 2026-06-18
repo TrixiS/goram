@@ -74,7 +74,7 @@ func (r *Router) FeedUpdates(
 	// TODO: support for media group handlers
 
 	for _, u := range updates {
-		found, err := r.feedUpdate(ctx, bot, &u, data)
+		found, err := r.FeedUpdate(ctx, bot, &u, data)
 
 		if err != nil || found {
 			return found, err

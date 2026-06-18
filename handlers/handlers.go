@@ -1229,7 +1229,8 @@ queueLoop:
 	return false, nil
 }
 
-func (r *Router) feedUpdate(ctx context.Context, bot *goram.Bot, update *goram.Update, data Data) (bool, error) {
+// See Router.FeedUpdates()
+func (r *Router) FeedUpdate(ctx context.Context, bot *goram.Bot, update *goram.Update, data Data) (bool, error) {
 	if update.Message != nil {
 		return r.callMessageHandlers(ctx, bot, update.Message, data)
 	}
